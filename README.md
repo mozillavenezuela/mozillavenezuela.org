@@ -1,4 +1,4 @@
-# Entorno de desarrollo member_.org
+# Entorno de desarrollo mozillavenezuela.org
 
 ## Licencia
 
@@ -193,11 +193,11 @@ Configurarlo
 Listo, el apache debería estar accesible desde http://local.mozillavenezuela.
 Ahora hay que proceder a instalar y configurar la instancia de Wordpress.
 
-## Componentes de MozillavEnezuela
+## Componentes de Mozilla Venezuela
 
 ### Clonar el repositorio e instalar Wordpress
 
-    $ git clone https://github.com/mozillahispano/mozillavenezuela.org
+    $ git clone https://github.com/mozillavenezuela/mozillavenezuela.org
 
 ### Instalar PHPMyAdmin
 
