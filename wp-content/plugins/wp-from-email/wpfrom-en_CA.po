@@ -1,0 +1,46 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: WP Email From\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2008-06-26 09:29-0700\n"
+"Last-Translator: Marcus <info@shiftthis.net>\n"
+"Language-Team: Skullbit.com <info@skullbit.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: English\n"
+"X-Poedit-Country: CANADA\n"
+"X-Poedit-KeywordsList: __;_e\n"
+"X-Poedit-Basepath: .\n"
+"X-Poedit-SearchPath-0: C:\\Documents and Settings\\User\\My Documents\\WORDPRESS FILES\\WP 2.5.1\\wp-content\\plugins\\wp-from-email\n"
+
+# C:\Documents
+#: and Settings\User\My Documents\WORDPRESS FILES\WP
+#: 2.5.1\wp-content\plugins\wp-from-email/wp-from-email.php:71
+msgid "Settings Saved"
+msgstr ""
+
+# C:\Documents
+#: and Settings\User\My Documents\WORDPRESS FILES\WP
+#: 2.5.1\wp-content\plugins\wp-from-email/wp-from-email.php:80
+msgid "WP From Email Settings"
+msgstr ""
+
+# C:\Documents
+#: and Settings\User\My Documents\WORDPRESS FILES\WP
+#: 2.5.1\wp-content\plugins\wp-from-email/wp-from-email.php:86
+msgid "From Email"
+msgstr ""
+
+# C:\Documents
+#: and Settings\User\My Documents\WORDPRESS FILES\WP
+#: 2.5.1\wp-content\plugins\wp-from-email/wp-from-email.php:90
+msgid "From Name"
+msgstr ""
+
+# C:\Documents
+#: and Settings\User\My Documents\WORDPRESS FILES\WP
+#: 2.5.1\wp-content\plugins\wp-from-email/wp-from-email.php:97
+msgid "Save Changes"
+msgstr ""
+

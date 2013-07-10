@@ -1,0 +1,171 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: wp-jquery-lightbox v1.3.4.2\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-05-23 17:41-0500\n"
+"PO-Revision-Date: 2013-05-23 17:42-0500\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Poedit-SourceCharset: utf-8\n"
+"X-Poedit-KeywordsList: __;_e;__ngettext:1,2;_n:1,2;__ngettext_noop:1,2;"
+"_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2\n"
+"X-Textdomain-Support: yes\n"
+"X-Generator: Poedit 1.5.5\n"
+"X-Poedit-SearchPath-0: .\n"
+
+# @ jqlb
+#: wp-jquery-lightbox.php:42
+msgid "Settings"
+msgstr "Einstellungen"
+
+# @ jqlb
+#: wp-jquery-lightbox.php:112
+msgid "previous image"
+msgstr "Vorheriges Bild"
+
+# @ jqlb
+#: wp-jquery-lightbox.php:113
+msgid "next image"
+msgstr "Nächstes Bild"
+
+# @ jqlb
+#: wp-jquery-lightbox.php:114
+msgid "close image gallery"
+msgstr "Bildergalerie schließen"
+
+# @ jqlb
+#: wp-jquery-lightbox.php:115
+msgid "Image "
+msgstr "Bild "
+
+# @ jqlb
+#: wp-jquery-lightbox.php:116
+msgid " of "
+msgstr " von "
+
+# @ jqlb
+#: wp-jquery-lightbox.php:117
+msgid "Download"
+msgstr "Herunterladen"
+
+# @ jqlb
+#: wp-jquery-lightbox.php:118
+msgid "(pause slideshow)"
+msgstr "(Diashow anhalten)"
+
+# @ jqlb
+#: wp-jquery-lightbox.php:119
+msgid "(play slideshow)"
+msgstr "(Diashow starten)"
+
+# @ jqlb
+#: wp-jquery-lightbox.php:182
+msgid "Cheatin&#8217; uh?"
+msgstr "Tricksen&#8217; hm?"
+
+# @ jqlb
+#: wp-jquery-lightbox.php:197
+msgid "Let the plugin add necessary html to image links"
+msgstr "Plugin fügt selbst benötigtes HTML in Bild-Links ein"
+
+# @ jqlb
+#: wp-jquery-lightbox.php:197
+msgid "Auto-lightbox image links"
+msgstr "Auto-Lightbox Bild Verlinkung"
+
+# @ jqlb
+#: wp-jquery-lightbox.php:204
+msgid ""
+"Note: this will disable the nofollow-attribute of comment links, that "
+"otherwise interfere with the lightbox."
+msgstr ""
+"Hinweis: Hierdurch wird das nofollow-Attribut für Kommentare deaktiviert da "
+"dieses sonst die lightbox-Funktionsweise stören würde."
+
+# @ jqlb
+#: wp-jquery-lightbox.php:204
+msgid ""
+"Enable lightbox in comments (disables <a href=\"http://codex.wordpress.org/"
+"Nofollow\">the nofollow attribute!</a>)"
+msgstr ""
+"Aktiviere lightbox für Kommentare (deaktiivert <a href=\"http://codex."
+"wordpress.org/Nofollow\">das nofollow Attribut!</a>)"
+
+# @ jqlb
+#: wp-jquery-lightbox.php:211
+msgid "Show download link"
+msgstr "Zeige Link zum Herunterladen"
+
+# @ jqlb
+#: wp-jquery-lightbox.php:215
+msgid ""
+"_blank: open the image in a new window or tab\n"
+"_self: open the image in the same frame as it was clicked (default)\n"
+"_parent: open the image in the parent frameset\n"
+"_top: open the image in the full body of the window"
+msgstr ""
+"_blank: öffne das Bild in einem neuen Fenster oder Tab\n"
+"_self: Öffne das Bild im gleichen Frame in dem es angeklickt wurde "
+"(Voreinstellung)\n"
+"_parent: öffne das Bild im parent frameset\n"
+"_top: öffne das Bild im Hauptfenster"
+
+# @ jqlb
+#: wp-jquery-lightbox.php:218
+msgid "Target for download link:"
+msgstr "Ziel für Herunterladen-Link:"
+
+# @ jqlb
+#: wp-jquery-lightbox.php:232
+msgid "Show image info on top"
+msgstr "Zeige Bildinformationen oberhalb des Bildes"
+
+# @ jqlb
+#: wp-jquery-lightbox.php:240
+msgid "Shrink large images to fit smaller screens"
+msgstr "Große Bilder in Bildschirm einpassen"
+
+# @ jqlb
+#: wp-jquery-lightbox.php:245
+msgid "Keep a distance between the image and the screen edges."
+msgstr "Füge einen Abstand zwischen Bild und Rahmen ein."
+
+# @ jqlb
+#: wp-jquery-lightbox.php:245
+msgid "Minimum margin to screen edge (default: 0)"
+msgstr "Mindestabstand zum Rahmen des Bildschirms (Vorgabe: 0)"
+
+# @ jqlb
+#: wp-jquery-lightbox.php:252
+msgid "Animation duration (in milliseconds) "
+msgstr "Animationsdauer (in Millisekunden) "
+
+# @ jqlb
+#: wp-jquery-lightbox.php:258
+msgid "Slideshow speed (in milliseconds). 0 to disable."
+msgstr ""
+"Verweilzeit der Bilder während der Diashow (in Millisekunden). 0 schaltet "
+"Diashow ab."
+
+# @ jqlb
+#: wp-jquery-lightbox.php:264
+msgid "Help text (default: none) "
+msgstr "Hinweistext (Vorgabe: keiner) "
+
+# @ jqlb
+#: wp-jquery-lightbox.php:268
+msgid ""
+"Browse images with your keyboard: Arrows or P(revious)/N(ext) and X/C/ESC "
+"for close."
+msgstr ""
+"Tastaturkürzel zum Bildwechsel: Pfeiltasten oder P(revious für vorheriges)/N"
+"(ext für nächstes) und X/C/Esc zum schließen."
+
+# @ jqlb
+#: wp-jquery-lightbox.php:270
+msgid "Save Changes"
+msgstr "Änderungen speichern"

@@ -1,0 +1,53 @@
+#wpbody ul#adminmenu li#toplevel_page_wordpress-code-snippet-wcs a {
+    background:url(images/codesnipbtn.png) #000000 no-repeat;
+    color:#ffffff;
+    font-weight:bold;
+}
+
+
+#wsc-edit {
+
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border: 1px solid #000000;
+    padding: 10px;
+    width:600px;
+
+}
+#wsc-edit textarea,#wsc-edit input{
+    width:600px;
+}
+
+#wsc-edit input.submit-btn {
+background:orange;
+color:#ffffff;
+ -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border: 1px solid #000000;
+    padding: 5px;
+    width:80px;
+    text-shadow: 0.10em 0.10em 0.10em #000;
+    font-weight:bold;
+    text-transform:uppercase;
+    float:right;
+}
+.ui-resizable-se {
+    bottom: 17px;
+}
+
+#editArea{
+    width:600px;
+    height:200px;
+}
+
+#editArea iframe{
+    position:relative !important;
+    width:100% !important;
+    height:100% !important;
+}
+
+.opensnippet td {
+    background:#c0c0c0;
+    width:100%;
+    text-align: right;
+}

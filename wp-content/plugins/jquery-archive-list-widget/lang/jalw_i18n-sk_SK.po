@@ -1,0 +1,128 @@
+# PLEASE TRY TO TRANSLATE THIS PLUGIN TO OTHER LANGUAGES, ANY HELP IS WELCOMED.
+# Copyright (C) 2011
+# This file is distributed under the same license as the PACKAGE package.
+# Miguel Useche <migueluseche@skatox.com>, 2011.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: jQuery Archive List Widget 1.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2011-04-21 10:56-0430\n"
+"PO-Revision-Date: 2011-09-01 02:18+0100\n"
+"Last-Translator: Jakub Repický <j.repicky@gmail.com>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: \n"
+"X-Poedit-Language: Slovak\n"
+"X-Poedit-Country: SLOVAKIA\n"
+
+#: jquery-archive-list-widget.php:41
+msgid "Archive"
+msgstr "Archív"
+
+#: jquery-archive-list-widget.php:248
+msgid "Title"
+msgstr "Názov"
+
+#: jquery-archive-list-widget.php:252
+msgid "Trigger Symbol"
+msgstr "Symbol pre rozbalenie"
+
+#: jquery-archive-list-widget.php:255
+msgid "Empty Space"
+msgstr "Medzera"
+
+#: jquery-archive-list-widget.php:261
+msgid "Effect"
+msgstr "Efekt"
+
+#: jquery-archive-list-widget.php:174
+msgid "None"
+msgstr "žiadny"
+
+#: jquery-archive-list-widget.php:264
+msgid "Slide (Accordion)"
+msgstr "Vysúvací (harmonika)"
+
+#: jquery-archive-list-widget.php:265
+msgid "Fade"
+msgstr "Vytrácanie"
+
+#: jquery-archive-list-widget.php:268
+msgid "Month Format"
+msgstr "Zobrazenie mesiaca"
+
+#: jquery-archive-list-widget.php:271
+msgid "Full Name (January)"
+msgstr "Celý názov (Január)"
+
+#: jquery-archive-list-widget.php:272
+msgid "Short Name (Jan)"
+msgstr "Skrátený názov (Jan)"
+
+#: jquery-archive-list-widget.php:273
+msgid "Number (01)"
+msgstr "Číslo (01)"
+
+#: jquery-archive-list-widget.php:198
+msgid "Expand"
+msgstr "Rozšíriť"
+
+#: jquery-archive-list-widget.php:205
+msgid "All"
+msgstr "Všetko"
+
+#: jquery-archive-list-widget.php:208
+msgid "Current year"
+msgstr "Bežný rok"
+
+#: jquery-archive-list-widget.php:208
+msgid "Current month"
+msgstr "Tento mesiac"
+
+#: jquery-archive-list-widget.php:277
+msgid "Extra options"
+msgstr "Ďalšie nastavenia"
+
+#: jquery-archive-list-widget.php:280
+msgid "Show number of posts"
+msgstr "Zobraziť počet príspevkov"
+
+#: jquery-archive-list-widget.php:284
+msgid "Show posts under months"
+msgstr "Zobraziť príspevky v mesiacoch"
+
+#: jquery-archive-list-widget.php:410
+msgid "Exclude categories"
+msgstr "Kategórie pre vylúčenie"
+
+#. Plugin Name of the plugin/theme
+msgid "jQuery Archive List Widget"
+msgstr "jQuery Archív"
+
+#. Plugin URI of the plugin/theme
+msgid "http://skatox.com/blog/2009/12/26/jquery-archive-list-widget/"
+msgstr "http://skatox.com/blog/2009/12/26/jquery-archive-list-widget/"
+
+#: jquery-archive-list-widget.php:223
+msgid "Only expand/reduce by clicking the symbol"
+msgstr "Len rozbaliť / zníženie kliknutím na symbol"
+
+#: jquery-archive-list-widget.php:351
+msgid "There are no post to show."
+msgstr "Nie sú k dispozícii žiadne príspevok pre zobrazenie."
+
+#. Description of the plugin/theme
+msgid "A simple jQuery widget for displaying an archive list with some effects."
+msgstr "Jednoduchý jQuery widget pre zobrazenie archívu s efektmi."
+
+#. Author of the plugin/theme
+msgid "Miguel Useche"
+msgstr "Miguel Useche"
+
+#. Author URI of the plugin/theme
+msgid "http://skatox.com/"
+msgstr "http://skatox.com/"
+

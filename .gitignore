@@ -4,6 +4,9 @@
 !.gitignore
 !.htaccess
 !README.md
+*/cache/*
+.DS_Store
+
 !wp-content/
 
 wp-content/*
@@ -11,4 +14,4 @@ wp-content/*
 !wp-content/plugins/
 
 wp-content/themes/*
-!wp-content/themes/wp-mozillave /
+!wp-content/themes/mozve-yoko/
