@@ -1,0 +1,14 @@
+# Ignorar todo en el directorio inicial expecto las carpetas que nos interesan.
+
+/*
+!.gitignore
+!.htaccess
+!README.md
+!wp-content/
+
+wp-content/*
+!wp-content/themes/
+!wp-content/plugins/
+
+wp-content/themes/*
+!wp-content/themes/wp-mozillave /
