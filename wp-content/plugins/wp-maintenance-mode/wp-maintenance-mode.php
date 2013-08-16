@@ -8,8 +8,8 @@
  * Author:      Frank B&uuml;ltge
  * Author URI:  http://bueltge.de/
  * Donate URI:  http://bueltge.de/wunschliste/
- * Version:     1.8.9
- * Last change: 06/20/2013
+ * Version:     1.8.11
+ * Last change: 07/25/2013
  * License:     GPLv3
  * 
  * 
@@ -343,9 +343,10 @@ if ( ! class_exists('WPMaintenanceMode') ) {
 				'radio'      => 0, 
 				'time'       => 60, 
 				'link'       => 1, 
-				'support'    => 1,
+				'support'    => 0,
 				'admin_link' => 1,
 				'theme'      => 1, 
+				'index'      => 0,
 				'role'       => 'administrator', 
 				'unit'       => 1, 
 				'title'      => __( 'Maintenance mode', FB_WM_TEXTDOMAIN ), 
@@ -831,11 +832,14 @@ if ( ! class_exists('WPMaintenanceMode') ) {
 				 ) {
 				$rolestatus = 'norights';
 				
+				// helpful for header problems
+				// @see: http://www.arclab.com/products/webformbuilder/php-warning-cannot-modify-header-information-headers-already-sent.html 
+				
 				nocache_headers();
 				ob_start();
-				header( "Content-type: text/html; charset=$charset" );
-				header( "$protocol $status_code Service Unavailable", TRUE, $status_code );
-				header( "Retry-After: $backtime" );
+header( "Content-type: text/html; charset=$charset" );
+header( "$protocol $status_code Service Unavailable", TRUE, $status_code );
+header( "Retry-After: $backtime" );
 				// Allow alternative splash page
 				if ( file_exists( WP_CONTENT_DIR . '/wp-maintenance-mode.php' ) )
 					include( WP_CONTENT_DIR . '/wp-maintenance-mode.php' );

@@ -1,0 +1,17 @@
+<?php
+
+class A_NextGen_Basic_ImageBrowser_Form extends Mixin_Display_Type_Form
+{
+	function get_display_type_name()
+	{
+		return NEXTGEN_GALLERY_NEXTGEN_BASIC_IMAGEBROWSER;
+	}
+
+	/**
+     * Returns a list of fields to render on the settings page
+     */
+    function _get_field_names()
+    {
+        return array('nextgen_basic_templates_template');
+    }
+}

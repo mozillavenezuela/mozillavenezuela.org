@@ -1,6 +1,56 @@
 NextGEN Gallery
 by Photocrati Media
 
+= V2.0.7 - 08.09.2013 =
+* NEW:     New resource manager that fixes many plugin and theme incompatibilities
+* NEW:     Styles (custom stylesheets) should reside in wp-content/ngg_styles
+* NEW:     Added option to "Other Options -> Misc" to control maximum images returned
+* Secured: Removed default connector for jQuery FileTree library
+* Changed: Updated the simplehtmldom library to version 1.5
+* Changed: jQuery is now enqueued at the beginning of every request
+* Fixed:   Incompatibilities with BuddyPress
+* Fixed:   Incompatibilities with Events+, bbPress, Custom Permalinks, and many other plugins
+* Fixed:   Incompcatibilities with Member Access, AMember, Magic Fields, and More Fields
+* Fixed:   Incompatibilities with Elegant Themes, Oxygen, Responsive, and many other themes
+* Fixed:   Ensure that gallery images don't have a border by default
+* Fixed:   Conflict between imagebrowser and album urls
+* Fixed:   Reverted default gallerypath to wp-content/gallery/
+* Fixed:   Upgrade-safe way of overriding Styles
+* Fixed:   Generation of AJAX url is now based on slug
+* Fixed:   Restore nggShowGallery and nggShowSlideshow as wrappers to new API
+* Fixed:   Always use domain as specified by WordPress Site URL
+* Fixed:   Use WordPress Home URL over Site URL when appropriate
+* Fixed:   Numerous pagination issues
+* Fixed:   Adjusted our forms to comply with WordPress Firewalls
+* Fixed:   Correct use of select2 DOM selector for maximum compatibility
+* Fixed:   Path and URL calculations for Windows and UNIX environments
+* Fixed:   Ensure that pluggable.php is loaded at the start of every request
+* Fixed:   Fancybox: adjust CSS for further box-sizing protection from themes
+* Fixed:   Use PHP 5.2.1 compatible named pattern matching syntax
+* Fixed:   Remove usage of __DIR__ constant not supported by PHP 5.2.x
+* Fixed:   Removed dependency on mb_string PHP module
+* Fixed:   Allow "No Lightbox" as an option for Lightbox Effects
+* Fixed:   Warning: "Invalid CRT parameters detected" for Windows environments
+
+= V2.0 - 07.30.2013 =
+* NEW:	   Improved user experience throughout the plugin, settings and usage.
+* NEW:     Plupload queue uploader that allows for bulk and zip uploads within the same interface.
+* NEW:     Complete redesign of the NextGEN options panel
+* NEW:     Added new interface for adding galleries from pages and posts.
+* NEW:     Galleries are now mobile friendly and responsive, which is most noticeable with a responsive theme.
+* NEW:     Streamlined functionality for displaying galleries based on tags.
+* NEW:     Architecture based on Pope Framework (http://bitbucket.org/photocrati/pope-framework)
+* NEW:     New shortcode, “ngg_images”, and corresponding Attach to Post interface
+* NEW:     Galleries have now global and instance settings
+* NEW:     Support for FastCGI environments
+* Changed: Replaces shortcodes with placeholder images, however still supports legacy shortcodes.
+* Changed: Introduced new Growl-like notifications
+* Changed: The container and it’s images are centered for slideshows
+* Changed: NextGEN styles now override vs replace default styles
+* Changed: NextGEN legacy templates have been deprecated (but still function)
+* FIXED:   The ability to use NextGEN image as a Featured Image.
+* FIXED:   Many bugs and annoyances, such as PHP warnings, errors, etc.
+
 = V1.9.13 - 06.11.2013 =
 * NEW:     Slideshows are now centered to their content area     
 * Secured: Ensure that only logged in users can upload images
@@ -31,6 +81,7 @@ by Photocrati Media
 * Fixed:   Deleted galleries within an album are handed gracefully without warning messages
 * Fixed:   Correct use of register_uninstall_hook
 * Fixed:   CSS and usability issues with the TinyMCE window used to display galleries
+* Fixed:   Inability to generate new image slugs
 
 = V1.9.9 - 12.14.2012 =
 * NEW:	   JW ImageRotator v3.17 is now bundled with the plugin and used by default.

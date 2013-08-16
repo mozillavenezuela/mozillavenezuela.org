@@ -1,0 +1,98 @@
+/* ----------- Album Styles Extend -------------*/
+
+.ngg-albumoverview {
+    margin-top: 10px;
+    width: 100%;
+    clear: both;
+    display: block !important;
+}
+
+.ngg-album {
+    height: 100%;
+    overflow: hidden;
+    padding: 5px;
+    margin-bottom: 5px;
+    border: 1px solid #cccccc;
+}
+
+.ngg-albumtitle {
+    text-align: left;
+    font-weight: bold;
+    margin: 0px;
+    padding: 0px;
+    font-size: 1.4em;
+    margin-bottom: 10px;
+}
+
+.ngg-thumbnail {
+    float: left;
+    margin-right: 12px;
+}
+
+.ngg-thumbnail img {
+    background-color: #FFFFFF;
+    border: 1px solid #A9A9A9;
+    margin: 4px 0px 4px 5px;
+    padding: 4px;
+    position: relative;
+}
+
+.ngg-thumbnail img:hover {
+    background-color: #A9A9A9;
+}
+
+.ngg-description {
+    text-align: left;
+}
+
+/* ----------- Album Styles Compact -------------*/
+
+.ngg-album-compact {
+    float: left;
+    height: 180px;
+    padding: 0 6px 4px 0 !important;
+    margin: 0px !important;
+    text-align: left;
+    width: 120px;
+}
+
+.ngg-album-compactbox {
+    background: transparent url(albumset.gif) no-repeat scroll 0%;
+    height: 88px;
+    margin: 0pt 0pt 6px !important;
+    padding: 8px 0pt 0pt 8px !important;
+    width: 120px;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+}
+
+.ngg-album-compactbox .Thumb {
+    margin: 0px !important;
+    padding: 0px 0 0 0 !important;
+    width: 91px;
+    height: 68px;
+    border: none;
+}
+
+.ngg-album-compact h4 {
+    font-size: 15px;
+    font-weight: bold;
+    width: 110px;
+    margin: 0;
+}
+
+.ngg-album-compact h4 .ngg-album-desc {
+    overflow: hidden;
+    display: block;
+    height: 54px;
+}
+
+.ngg-album-compact p {
+    font-size: 11px;
+    margin: 0;
+}
+
+.ngg-clear {
+    clear: both;
+    float: none;
+}

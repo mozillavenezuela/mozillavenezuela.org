@@ -1,0 +1,279 @@
+html,body {
+	width: 100%;
+	min-height: 100%;
+	padding: 0px;
+	margin: 0px;
+	font-size: 13px;
+}
+
+body {
+	position: absolute;
+	visibility: hidden;
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+	filter: alpha(opacity=0);
+	opacity: 0.0;
+}
+
+.entity_errors {
+	color: red;
+}
+
+.entity_errors ul {
+	margin-left: 30px;
+}
+.entity_errors ul li{
+	list-style-type: disc;
+}
+
+.ui-helper-reset {
+	font-size: 13px;
+}
+
+#attach_to_post_tabs {
+	border: 0px;
+	background: none;
+	min-height: 100%;
+}
+
+.ui-tabs-panel {
+	min-height: 100%;
+}
+
+.ui-widget-header {
+	border: 0px;
+	border-bottom: 1px solid #dfdfdf;
+	background: none;
+}
+
+iframe {
+	width: 100%;
+	min-height: 100%;
+	border: none;
+	padding: 0px;
+	margin: 0px;
+	background: transparent;
+}
+
+#displayed_gallery_source {
+	width: 400px;
+}
+
+/** Would would you like to display tab? **/
+#source_configuration td {
+	vertical-align: top;
+}
+
+#source_configuration .chzn-choices input[type=text] {
+	height: auto !important;
+}
+
+#slug_configuration #slug_label {
+    width: 52px;
+}
+
+#slug_configuration #slug_column input[type=text] {
+    width: 498px;
+}
+
+/** Select a display type tab **/
+.display_type_preview {
+	float: left;
+	width: 25%;
+}
+.display_type_preview .image_container {
+	width: 100%;
+	vertical-align: middle;
+	text-align: center;
+	font-size: 12px;
+	font-weight: 600;
+}
+.display_type_preview .image_container p {
+	display: inline-block;
+}
+
+/** Display Tab **/
+#preview_tab_content .previewed_entity {
+	width: 100%;
+	border-bottom: solid 1px #E0E0D6;
+	background-color: #FAFAF0;
+}
+
+#preview_tab_content .previewed_entity .container {
+	padding-top: 15px;
+}
+
+#preview_tab_content .previewed_entity.header {
+	background-color: #F0F0E6;
+	padding-bottom: 5px;
+	padding-top: 5px;
+}
+
+#preview_tab_content .header label {
+	font-size: 12px;
+	color: rgb(100,150,100);
+	font-weight: 600;
+}
+
+#preview_tab_content .ui-sortable-helper {
+	background: none;
+}
+
+#preview_tab_content ul {
+	list-style-type: none;
+	display: block;
+	border: solid 2px #E0E0D6;
+	padding: 0px;
+	position: relative;
+}
+
+
+#preview_tab_content .inclusion_checkbox {
+	margin-right: 7px;
+	display: block;
+	float: left;
+}
+
+#preview_tab_content .image_container {
+	background-color: white;
+	background-repeat: no-repeat;
+	background-position: center center;
+	padding: 19px;
+	margin: 7px;
+	border: solid 1px black;
+	display: block;
+	vertical-align: middle;
+	text-align: center;
+	position: relative;
+}
+
+#preview_tab_content .image_container img {
+	border: 0px;
+}
+
+#preview_tab_content #entity_list  li{
+	float: left;
+}
+
+#preview_tab_content #entity_list .ui-state-default {
+	background: none;
+	border: none;
+}
+
+#preview_tab_content .placeholder{
+	background-color: #e0ddc1;
+	position: relative;
+}
+
+#preview_tab_content #entity_list .exclude_container {
+	display: block;
+	text-align: center;
+	margin: 0 auto;
+	color: black;
+	font-weight: normal;
+	position: absolute;
+	bottom: 2px;
+	left: 0px;
+	width: 100%;
+}
+
+#preview_tab_content .header_row {
+	margin-bottom: 5px;
+}
+#preview_tab_content .header_row strong {
+	width: 70px;
+	display: inline-block;
+}
+#preview_tab_content .header_row .separator {
+	display: inline-block;
+	margin: 0px 5px;
+}
+
+#preview_tab_content .header_row .selected {
+	font-weight: bold;
+}
+
+#preview_tab_content #entity_list li.clear {
+	float: none;
+	clear: both;
+}
+
+.clear {
+	clear: both;
+	float: none;
+}
+
+table {
+	font-size: 13px;
+}
+
+#display_settings_form table tr td:first-child {
+    vertical-align: top;
+    text-align: right;
+    padding-right: 7px;
+    width: 180px;
+}
+
+#display_settings_form table td {
+    text-align: left;
+}
+
+#display_settings_form table textarea {
+    height: 60px;
+}
+
+#display_settings_form textarea,
+#display_settings_form input[type=text],
+#display_settings_form input[type=number],
+#display_settings_form select {
+    width: 157px;
+}
+
+#display_settings_form .ngg_slideshow_gallery_width,
+#display_settings_form .ngg_slideshow_gallery_height,
+#display_settings_form .ngg_thumbnail_dimension_width,
+#display_settings_form .ngg_thumbnail_dimension_height {
+    width: 65px !important;
+}
+
+#display_settings_form .nextgen_settings_colorpicker {
+    width: 85px !important;
+    text-align: center;
+}
+
+/**
+ * Hacks used to ensure that Firefox can calculate the height of hidden content
+ * in iframes
+**/
+.ui-tabs {
+	visibility: visible;
+	position: relative;
+}
+.ui-tabs
+.ui-tabs-hide {
+	display: block !important;
+	visibility: hidden;
+	position: absolute;
+	top: -5000px;
+}
+.ui-tabs .main_menu_tab {
+	overflow: visible;
+}
+/**
+ * Make the active tab still clickable
+ **/
+.ui-tabs .ui-tabs-nav li.ui-tabs-active a, .ui-tabs .ui-tabs-nav li.ui-state-disabled a, .ui-tabs .ui-tabs-nav li.ui-tabs-loading a {
+	cursor: pointer;
+}
+
+.select2-result-label {
+	white-space: nowrap;
+}
+.select2-results {
+	font-family: 'segoe ui', Arial, sans-serif;
+	font-size: 13px;
+}
+
+/** Refresh button in the preview area **/
+.refresh_button {
+	float: right;
+}

@@ -1,0 +1,58 @@
+/* ----------- Image browser style -------------*/
+
+.ngg-imagebrowser {
+}
+
+.ngg-imagebrowser h3 {
+    text-align: center;
+}
+
+.ngg-imagebrowser-desc {
+    clear: both;
+}
+
+.ngg-imagebrowser .pic {
+	max-width: 100%;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #A9A9A9;
+}
+.ngg-imagebrowser .pic a {
+  display: block !important;
+  font-size: 0px;
+  margin: 5px;
+  text-align: center;
+}
+
+.ngg-imagebrowser img {
+	max-width: 100%;
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+.ngg-imagebrowser-nav {
+    padding: 5px;
+}
+
+.ngg-imagebrowser-nav .back {
+    float: left;
+    border: 1px solid #DDDDDD;
+    padding: 3px 7px;
+}
+
+.ngg-imagebrowser-nav .next {
+    float: right;
+    border: 1px solid #DDDDDD;
+    padding: 3px 7px;
+}
+
+.ngg-imagebrowser-nav .counter {
+    text-align: center;
+    font-size: 0.9em !important;
+}
+
+.exif-data {
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
