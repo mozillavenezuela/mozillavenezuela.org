@@ -75,7 +75,6 @@
 				}
                 clearTimeout(click_timer);
                 drag_in_progress = false;
-				return false;
 			});
 		},
 

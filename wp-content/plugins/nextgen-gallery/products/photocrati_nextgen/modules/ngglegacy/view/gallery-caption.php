@@ -14,7 +14,7 @@ Follow variables are useable :
 ?>
 <?php if (!defined ('ABSPATH')) die ('No direct access allowed'); ?><?php if (!empty ($gallery)) : ?>
 
-<div class="ngg-galleryoverview" id="<?php echo $gallery->anchor ?>">
+<div class="ngg-galleryoverview ngg-template-caption" id="<?php echo $gallery->anchor ?>">
 
 <?php if ($gallery->show_slideshow) { ?>
 	<!-- Slideshow link -->

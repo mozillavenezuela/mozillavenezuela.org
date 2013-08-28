@@ -6,7 +6,6 @@ class Mixin_NextGen_Basic_Album_Form extends Mixin_Display_Type_Form
 	{
 		return array(
             'nextgen_basic_album_gallery_display_type',
-//            'nextgen_basic_album_galleries_per_page',
             'nextgen_basic_templates_template',
         );
 	}

@@ -8,7 +8,12 @@ if (strpos($_SERVER['REQUEST_URI'], 'adminer') === FALSE) {
     if (!function_exists('h')) {
         function h($str)
         {
-            return str_replace("'", "&#39;", htmlentities($str));
+			if (defined('ENT_HTML401')) {
+				return str_replace("'", "&#39;", htmlentities($str, ENT_COMPAT | ENT_HTML401, 'UTF-8'));
+			}
+			else {
+				return str_replace("'", "&#39;", htmlentities($str, ENT_COMPAT, 'UTF-8'));
+			}
         }
     }
 

@@ -52,7 +52,7 @@ class P_Photocrati_NextGen extends C_Base_Product
 			'photocrati-nextgen',
 			'Photocrati NextGen',
 			'Photocrati NextGen',
-			'2.0.7',
+			'2.0.14',
 			'http://www.nextgen-gallery.com',
 			'Photocrati Media',
 			'http://www.photocrati.com'

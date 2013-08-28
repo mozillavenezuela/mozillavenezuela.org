@@ -28,22 +28,22 @@ $this->start_element('nextgen_gallery.gallery_container', 'container', $displaye
 
 	?>
 	<!-- Thumbnails -->
-	<?php for ($i=0; $i<count($images); $i++): ?>
-        <?php $image = $images[$i]; ?>
-        <?php $thumb_size = $storage->get_image_dimensions($image, $thumbnail_size_name); ?>
+	<?php for ($i=0; $i<count($images); $i++):
+       $image = $images[$i];
+       $thumb_size = $storage->get_image_dimensions($image, $thumbnail_size_name);
+       $style = isset($image->style) ? $image->style : null;
 
-        <?php if (isset($image->hidden) && $image->hidden): ?>
-            <?php $image->style = 'style="display: none;"'?>
-        <?php else: ?>
-            <?php $image->style = ''; ?>
-        <?php endif; ?>
+       if (isset($image->hidden) && $image->hidden) {
+          $style = 'style="display: none;"';
+       }
+       else {
+       		$style = null;
+       }
 
-			<?php
-
-			$this->start_element('nextgen_gallery.image_panel', 'item', $image);
+			 $this->start_element('nextgen_gallery.image_panel', 'item', $image);
 
 			?>
-			<div id="<?php echo_h('ngg-image-' . $i) ?>" class="ngg-gallery-thumbnail-box" <?php if (isset($image->style)) echo $image->style; ?>>
+			<div id="<?php echo_h('ngg-image-' . $i) ?>" class="ngg-gallery-thumbnail-box" <?php if ($style) echo $style; ?>>
 				<?php
 
 				$this->start_element('nextgen_gallery.image', 'item', $image);

@@ -18,7 +18,7 @@ class M_Lightbox extends C_Base_Module
             'photocrati-lightbox',
             'Lightbox',
             _("Provides integration with JQuery's lightbox plugin"),
-            '0.1',
+            '0.3',
             'http://leandrovieira.com/projects/jquery/lightbox/',
             'Photocrati Media',
             'http://www.photocrati.com'
@@ -31,7 +31,9 @@ class M_Lightbox extends C_Base_Module
     function initialize()
     {
         parent::initialize();
-        add_action('init', array(&$this, 'add_all_lightbox_forms'));
+        if (is_admin()) {
+			add_action('admin_init', array(&$this, 'add_all_lightbox_forms'));
+		}
     }
 
     /**

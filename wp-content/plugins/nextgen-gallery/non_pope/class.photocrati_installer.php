@@ -66,8 +66,6 @@ if (!class_exists('C_Photocrati_Installer'))
 			$last_module_list		= $reset ? array() : $global_settings->get('pope_module_list', array());
 			$current_module_list	= self::_generate_module_info();
 
-			$global_settings->set('pope_module_list', $current_module_list);
-
 			if (count(($modules = array_diff($current_module_list, $last_module_list)))>0) {
 
 				// The cache should be flushed
@@ -83,6 +81,9 @@ if (!class_exists('C_Photocrati_Installer'))
 					}
 				}
 
+				// Update the module list
+				$global_settings->set('pope_module_list', $current_module_list);
+
 				// Save any changes settings
 				$global_settings->save();
 				$local_settings->save();
@@ -95,7 +96,7 @@ if (!class_exists('C_Photocrati_Installer'))
 			$registry = C_Component_Registry::get_instance();
 			foreach ($registry->get_module_list() as $module_id) {
 				$module_version = $registry->get_module($module_id)->module_version;
-				$retval[] = "{$module_id}|{$module_version}";
+				$retval[$module_id] = "{$module_id}|{$module_version}";
 			}
 			return $retval;
 		}

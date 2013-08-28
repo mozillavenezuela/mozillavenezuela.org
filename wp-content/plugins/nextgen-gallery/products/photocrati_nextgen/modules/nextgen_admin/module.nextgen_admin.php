@@ -19,7 +19,7 @@ class M_NextGen_Admin extends C_Base_Module
 			'photocrati-nextgen_admin',
 			'NextGEN Administration',
 			'Provides a framework for adding Administration pages',
-			'0.1',
+			'0.4',
 			'http://www.nextgen-gallery.com',
 			'Photocrati Media',
 			'http://www.photocrati.com'
@@ -27,6 +27,13 @@ class M_NextGen_Admin extends C_Base_Module
 
 		include_once('class.nextgen_admin_installer.php');
 		C_Photocrati_Installer::add_handler($this->module_id, 'C_NextGen_Admin_Installer');
+
+		include_once('class.nextgen_admin_option_handler.php');
+		C_NextGen_Global_Settings::add_option_handler('C_NextGen_Admin_Option_Handler', array(
+			'jquery_ui_theme',
+			'jquery_ui_theme_version',
+			'jquery_ui_theme_url'
+		));
 	}
 
 	/**

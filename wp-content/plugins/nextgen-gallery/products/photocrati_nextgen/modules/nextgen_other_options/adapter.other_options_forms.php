@@ -12,7 +12,7 @@ class A_Other_Options_Forms extends Mixin
 			'styles'				=>	'A_Styles_Form',
 			'roles_and_capabilities'=>	'A_Roles_Form',
 			'miscellaneous'			=>	'A_Miscellaneous_Form',
-			'reset_and_uninstall'	=>	'A_Reset_Form',
+			//'reset_and_uninstall'	=>	'A_Reset_Form',
 		);
 
 		$registry = $this->object->get_registry();

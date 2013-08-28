@@ -64,9 +64,9 @@ class A_Image_Options_Form extends Mixin
             if (!$gallerypath) $gallerypath = $this->object->get_model()->get('gallerypath');
             $fs = $this->get_registry()->get_utility('I_Fs');
             $gallerypath = $fs->get_abspath($gallerypath);
-            if (!file_exists($gallerypath)) {
+            if (!@file_exists($gallerypath)) {
                 @mkdir($gallerypath);
-                $retval = file_exists($gallerypath);
+                $retval = @file_exists($gallerypath);
             }
             
             return $retval;

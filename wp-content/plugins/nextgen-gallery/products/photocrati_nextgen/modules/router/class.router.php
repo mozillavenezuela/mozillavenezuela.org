@@ -150,7 +150,11 @@ class Mixin_Router extends Mixin
 	 */
 	function is_https()
 	{
-		return isset($_SERVER['HTTPS']);
+		return (
+			(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || 
+			(!empty($_SERVER['HTTP_USESSL']) && $_SERVER['HTTP_USESSL'] !== 'off') || 
+			(!empty($_SERVER['REDIRECT_HTTPS']) && $_SERVER['REDIRECT_HTTPS'] !== 'off') || 
+			$_SERVER['SERVER_PORT'] == 443);
 	}
 
 

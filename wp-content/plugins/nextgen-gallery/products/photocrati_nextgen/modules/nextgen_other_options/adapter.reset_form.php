@@ -17,7 +17,7 @@ class A_Reset_Form extends Mixin
                 'reset_label'			=> _('Reset settings'),
                 'reset_confirmation'	=> _("Reset all options to default settings?\n\nChoose [Cancel] to Stop, [OK] to proceed."),
                 'uninstall_label'		=> _('Deactivate & Uninstall'),
-				'uninstall_confirmation'=>_("Completely remove NextGEN Gallery (delete galleries, tables, etc)?\n\nChoose [Cancel] to Stop, [OK] to proceed."),
+				'uninstall_confirmation'=>_("Completely uninstall NextGEN Gallery (will reset settings and de-activate)?\n\nChoose [Cancel] to Stop, [OK] to proceed."),
             ),
             TRUE
         );
@@ -26,7 +26,8 @@ class A_Reset_Form extends Mixin
 	function reset_action()
 	{
 		$installer = C_Photocrati_Installer::get_instance();
-		$installer->uninstall(NEXTGEN_GALLERY_PLUGIN_BASENAME);
+		// TODO right now we pass $hard = TRUE because many modules only delete settings in that specific case
+		$installer->uninstall(NEXTGEN_GALLERY_PLUGIN_BASENAME, TRUE);
 		$installer->update(TRUE);
 	}
 

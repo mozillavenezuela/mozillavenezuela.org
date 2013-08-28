@@ -7,9 +7,10 @@ if (!class_exists('C_Photocrati_Settings_Manager_Base')) {
 	 */
 	abstract class C_Photocrati_Settings_Manager_Base implements ArrayAccess
 	{
-		static $option_name		= 'pope_settings';
-		protected $_options		= array();
-		protected $_defaults	= array();
+		static $option_name			= 'pope_settings';
+		protected $_options			= array();
+		protected $_defaults		= array();
+		protected $_option_handlers = array();
 
 		abstract function save();
 		abstract function destroy();
@@ -18,6 +19,39 @@ if (!class_exists('C_Photocrati_Settings_Manager_Base')) {
 		protected function __construct()
 		{
 			$this->load();
+		}
+
+		/**
+		 * Adds a class to handle dynamic options
+		 * @param string $klass
+		 * @param array $options
+		 */
+		function add_option_handler($klass, $options=array())
+		{
+			if (!is_array($options)) $options = array($options);
+			foreach ($options as $option_name) {
+				$this->_option_handlers[$option_name] = $klass;
+			}
+		}
+
+		/**
+		 * Gets a handler used to provide a dynamic option
+		 * @param string $option_name
+		 * @return null|mixed
+		 */
+		protected function _get_option_handler($option_name, $method='get')
+		{
+			$retval = NULL;;
+
+			if (isset($this->_option_handlers[$option_name])) {
+				if (!is_object($this->_option_handlers[$option_name])) {
+					$klass = $this->_option_handlers[$option_name];
+					$this->_option_handlers[$option_name] = new $klass;
+				}
+				$retval = $this->_option_handlers[$option_name];
+				if (!method_exists($retval, $method)) $retval = NULL;
+			}
+			return $retval;
 		}
 
 		/**
@@ -32,6 +66,9 @@ if (!class_exists('C_Photocrati_Settings_Manager_Base')) {
 
 			if (isset($this->_options[$key]))
 				$retval =  $this->_options[$key];
+			elseif (($handler = $this->_get_option_handler($key, 'get'))) {
+				$retval = $handler->get($key, $default);
+			}
 
 			// In case a stdObject has been passed in as a value, we
 			// want to only return scalar values or arrays
@@ -46,12 +83,15 @@ if (!class_exists('C_Photocrati_Settings_Manager_Base')) {
 		 * @param mixed $value
 		 * @return mixed
 		 */
-		function set($key, $value=NULL)
+		function set($key, $value=NULL, $skip_handlers=FALSE)
 		{
 			if (is_object($value)) $value = (array) $value;
 
 			if (is_array($key)) {
 				foreach ($key as $k=>$v) $this->set($k, $v);
+			}
+			elseif (!$skip_handlers && ($handler = $this->_get_option_handler($key, 'set'))) {
+				$handler->set($key, $value);
 			}
 			else $this->_options[$key] = $value;
 
@@ -64,7 +104,12 @@ if (!class_exists('C_Photocrati_Settings_Manager_Base')) {
 		 */
 		function delete($key)
 		{
-			unset($this->_options[$key]);
+			if (($handler = $this->_get_option_handler($key, 'delete'))) {
+				$handler->delete($key);
+			}
+			else {
+				unset($this->_options[$key]);
+			}
 		}
 
 		/**
@@ -197,6 +242,7 @@ if (!class_exists('C_Photocrati_Global_Settings_Manager')) {
 		{
 			$this->_options = get_site_option(self::$option_name, $this->to_array());
 			if (!$this->_options) $this->_options = array();
+			else if (is_string($this->_options)) $this->_options = unserialize($this->_options);
 		}
 
 		function destroy()
@@ -238,6 +284,8 @@ if (!class_exists('C_Photocrati_Settings_Manager')) {
 		function load()
 		{
 			$this->_options = get_option(self::$option_name, array());
+			if (!$this->_options) $this->_options = array();
+			else if (is_string($this->_options)) $this->_options = unserialize($this->_options);
 		}
 
 		function destroy()

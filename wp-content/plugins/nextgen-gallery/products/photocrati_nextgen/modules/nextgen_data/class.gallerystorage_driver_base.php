@@ -96,7 +96,7 @@ class Mixin_GalleryStorage_Driver_Base extends Mixin
     {
         $retval = FALSE;
 
-        if (file_exists($abspath)) {
+        if (@file_exists($abspath)) {
             $files = scandir($abspath);
             array_shift($files);
             array_shift($files);
@@ -106,7 +106,7 @@ class Mixin_GalleryStorage_Driver_Base extends Mixin
                 else unlink($file_abspath);
             }
             rmdir($abspath);
-            $retval = file_exists($abspath);
+            $retval = @file_exists($abspath);
         }
 
         return $retval;
@@ -303,7 +303,7 @@ class Mixin_GalleryStorage_Driver_Base extends Mixin
 				
 					$abspath = $this->object->get_image_abspath($image, $size);
 				
-					if (file_exists($abspath))
+					if (@file_exists($abspath))
 					{
 						$dims = getimagesize($abspath);
 						
@@ -518,28 +518,28 @@ class Mixin_GalleryStorage_Driver_Base extends Mixin
 			$upload_dir = $this->object->get_upload_abspath($gallery);
 
 			// Perhaps a filename was given instead of base64 data?
-			if ($data[0] == '/' && file_exists($data)) {
+			if ($data[0] == '/' && @file_exists($data)) {
 				if (!$filename) $filename = basename($data);
 				$data = file_get_contents($data);
 			}
 
 			// Determine filenames
 			$filename = $filename ? sanitize_title_with_dashes($filename) : uniqid('nextgen-gallery');
-            if (preg_match("/\-(png|jpg|gif|jpeg)$/i", $filename, $match)) {
-                $filename = str_replace($match[0], '.'.$match[1], $filename);
-            }
+			if (preg_match("/\-(png|jpg|gif|jpeg)$/i", $filename, $match)) {
+				$filename = str_replace($match[0], '.'.$match[1], $filename);
+			}
 			$abs_filename = path_join($upload_dir, $filename);
-
+			
 			// Create the database record
 			$factory = $this->object->get_registry()->get_utility('I_Component_Factory');
 			$retval = $image = $factory->create('image');
-			$image->alttext		= sanitize_title_with_dashes($filename);
+			$image->alttext		= sanitize_title_with_dashes(basename($filename, '.' . pathinfo($filename, PATHINFO_EXTENSION)));
 			$image->galleryid	= $this->object->_get_gallery_id($gallery);
 			$image->filename	= $filename;
 			$image_key			= $this->object->_image_mapper->get_primary_key_column();
 
             // If we can't write to the directory, then there's no point in continuing
-            if (!file_exists($upload_dir)) @wp_mkdir_p($upload_dir);
+            if (!@file_exists($upload_dir)) @wp_mkdir_p($upload_dir);
             if (!is_writable($upload_dir)) {
                 throw new E_InsufficientWriteAccessException(
                     FALSE, $upload_dir, FALSE
@@ -550,7 +550,7 @@ class Mixin_GalleryStorage_Driver_Base extends Mixin
 			if (($image_id = $this->object->_image_mapper->save($image))) {
 				try {
 					// Try writing the image
-					if (!file_exists($upload_dir)) wp_mkdir_p($upload_dir);
+					if (!@file_exists($upload_dir)) wp_mkdir_p($upload_dir);
 					$fp = fopen($abs_filename, 'w');
 					fwrite($fp, $data);
 					fclose($fp);
@@ -614,7 +614,7 @@ class Mixin_GalleryStorage_Driver_Base extends Mixin
     function import_gallery_from_fs($abspath, $gallery_id=FALSE)
     {
         $retval = FALSE;
-        if (file_exists($abspath)) {
+        if (@file_exists($abspath)) {
 
             // Ensure that this folder has images
             $files = scandir($abspath);
@@ -695,7 +695,7 @@ class Mixin_GalleryStorage_Driver_Base extends Mixin
 		$result  = NULL;
 
 		// Ensure we have a valid image
-		if ($image_path && file_exists($image_path))
+		if ($image_path && @file_exists($image_path))
 		{
 			// Ensure target directory exists, but only create 1 subdirectory
 			$image_dir = dirname($image_path);
@@ -1048,7 +1048,7 @@ class Mixin_GalleryStorage_Driver_Base extends Mixin
 		$settings = C_NextGen_Settings::get_instance();
 
 		// Ensure we have a valid image
-		if ($image_path && file_exists($image_path) && $result != null && !isset($result['error']))
+		if ($image_path && @file_exists($image_path) && $result != null && !isset($result['error']))
 		{
 			$image_dir = dirname($image_path);
 			$clone_path = $result['clone_path'];
@@ -1058,7 +1058,7 @@ class Mixin_GalleryStorage_Driver_Base extends Mixin
 			$format_list = $this->object->get_image_format_list();
 
 			// Ensure target directory exists, but only create 1 subdirectory
-			if (!file_exists($clone_dir))
+			if (!@file_exists($clone_dir))
 			{
 				if (strtolower(realpath($image_dir)) != strtolower(realpath($clone_dir)))
 				{
@@ -1109,7 +1109,7 @@ class Mixin_GalleryStorage_Driver_Base extends Mixin
 			}
 
 			// We successfully generated the thumbnail
-			if (is_string($destpath) && (file_exists($destpath) || $thumbnail != null))
+			if (is_string($destpath) && (@file_exists($destpath) || $thumbnail != null))
 			{
 				if ($clone_format != null)
 				{
@@ -1138,7 +1138,7 @@ class Mixin_GalleryStorage_Driver_Base extends Mixin
 							$destpath_basename = $destpath_info['filename'];
 							$destpath_new = $destpath_dir . DIRECTORY_SEPARATOR . $destpath_basename . $clone_format_extension_str;
 
-							if ((file_exists($destpath) && rename($destpath, $destpath_new)) || $thumbnail != null)
+							if ((@file_exists($destpath) && rename($destpath, $destpath_new)) || $thumbnail != null)
 							{
 								$destpath = $destpath_new;
 							}

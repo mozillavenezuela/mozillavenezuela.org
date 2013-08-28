@@ -135,7 +135,7 @@ class C_NextGen_Style_Manager
 		$abspath = $this->get_selected_stylesheet_saved_abspath($selected);
 
 		wp_mkdir_p(dirname($abspath));
-		if (is_writable($abspath) OR (!file_exists($abspath) && is_writable(dirname($abspath)))) {
+		if (is_writable($abspath) OR (!@file_exists($abspath) && is_writable(dirname($abspath)))) {
 			$retval = file_put_contents($abspath, $contents);
 		}
 		return $retval;
@@ -168,7 +168,7 @@ class C_NextGen_Style_Manager
 				$selected
 			));
 
-			if (file_exists($path)) {
+			if (@file_exists($path)) {
 				$retval = $path;
 				break;
 			}
@@ -185,11 +185,13 @@ class C_NextGen_Style_Manager
 	{
 		if (!$selected) $selected = $this->get_selected_stylesheet();
 
-		return str_replace(
+		$retval =  str_replace(
 			trailingslashit(ABSPATH),
 			trailingslashit(site_url()),
 			$this->find_selected_stylesheet_abspath($selected)
 		);
+
+		return str_replace('\\', '/', $retval);
 	}
 
 
@@ -202,7 +204,8 @@ class C_NextGen_Style_Manager
 				untrailingslashit($dir),
 				'*.css'
 			));
-			foreach (glob($path) as $abspath) {
+			$files = glob($path);
+			if (is_array($files)) foreach ($files as $abspath) {
 				if (($meta = $this->get_stylesheet_metadata($abspath))) {
 					$filename = $meta['filename'];
 					$retval[$filename] = $meta;

@@ -124,7 +124,9 @@ class C_Gallery_Display_Installer
 
 		$this->uninstall_display_types();
 		$this->uninstall_displayed_gallery_sources();
-		if ($hard) $this->uninstall_displayed_galleries();
+		
+		// TODO temporary Don't remove galleries on uninstall
+		//if ($hard) $this->uninstall_displayed_galleries();
 	}
 
 

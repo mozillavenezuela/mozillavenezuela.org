@@ -82,6 +82,7 @@ class Mixin_NextGen_Admin_Page_Instance_Methods extends Mixin
 	 */
 	function enqueue_backend_resources()
 	{
+		wp_enqueue_script('jquery');
 		$this->object->enqueue_jquery_ui_theme();
 		wp_enqueue_script('jquery-ui-accordion');
 		wp_enqueue_script(

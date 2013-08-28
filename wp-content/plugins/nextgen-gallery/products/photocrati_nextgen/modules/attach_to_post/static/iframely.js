@@ -9,15 +9,25 @@ if (window.frameElement) {
 		$('form').each(function(){
 			$(this).append("<input type='hidden' name='attach_to_post' value='1'/>");
 		});
-
-		// Adjust the height of the frame
-		parent.adjust_height_for_frame(window.frameElement, function(){
-			$('#iframely').css({
-				position: 'static',
-				visibility: 'visible'
-			}).animate({
-				opacity: 1.0
+		
+		var parent = window.parent;
+		
+		if (parent == null || typeof(parent.adjust_height_for_frame) == "undefined") {
+			if (window != null && typeof(window.adjust_height_for_frame) != "undefined") {
+				parent = window;
+			}
+		}
+		
+		if (typeof(parent.adjust_height_for_frame) != "undefined") {
+			// Adjust the height of the frame
+			parent.adjust_height_for_frame(window.frameElement, function(){
+				$('#iframely').css({
+					position: 'static',
+					visibility: 'visible'
+				}).animate({
+					opacity: 1.0
+				});
 			});
-		});
+		}
 	});
 }

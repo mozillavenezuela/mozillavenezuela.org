@@ -35,7 +35,7 @@ class C_NextGen_Metadata extends C_Component
 
         $this->file_path = $this->get_registry()->get_utility('I_Gallery_Storage')->get_image_abspath($this->image);
 
-        if (!file_exists($this->file_path))
+        if (!@file_exists($this->file_path))
         {
             return FALSE;
         }

@@ -19,7 +19,7 @@ echo $settings['widget_setting_before_widget']
            <?php echo $effect_code ?>
            ><img title="<?php echo esc_attr($image->alttext)?>"
                  alt="<?php echo esc_attr($image->alttext)?>"
-                 src="<?php echo esc_attr($storage->get_image_url($image, 'thumb')); ?>"
+                 src="<?php echo esc_attr($storage->get_image_url($image, $settings['image_type'])); ?>"
                  width="<?php echo esc_attr($settings['image_width']); ?>"
                  height="<?php echo esc_attr($settings['image_height']); ?>"
             /></a>

@@ -81,17 +81,22 @@ class C_Widget_Gallery extends WP_Widget
         $image_ids = array();
 
         $sql = "SELECT `pid` FROM `{$wpdb->nggpictures}` WHERE `exclude` = 0";
+
         // possibly filter images not from certain galleries
         if ($instance['exclude'] == 'allow')
             $sql .= sprintf(" AND `galleryid` IN (%s)", $instance['list']);
+
         // possibly filter images from certain galleries
         if ($instance['exclude'] == 'denied')
             $sql .= sprintf(" AND `galleryid` NOT IN (%s)", $instance['list']);
+
         if ($instance['type'] == 'random')
             $sql .= ' ORDER BY RAND()';
         else if ($instance['type'] == 'recent')
             $sql .= ' ORDER BY `imagedate` DESC';
+
         $sql .= " LIMIT {$instance['items']}";
+
         foreach ($wpdb->get_results($sql, ARRAY_N) as $res) {
             $image_ids[] = reset($res);
         }
@@ -116,6 +121,12 @@ class C_Widget_Gallery extends WP_Widget
             $after_widget  = '</div>' . $after_widget;
         }
 
+        // 'Original' was the value used in 1.9x; so alias original => 'full'
+        if ($instance['show'] == 'original')
+            $show = 'full';
+        else
+            $show = 'thumb';
+
         echo $renderer->display_images(array(
             'source' => 'galleries',
             'order_by' => $order_by,
@@ -125,6 +136,7 @@ class C_Widget_Gallery extends WP_Widget
             'images_per_page' => $instance['items'],
             'maximum_entity_count' => $instance['items'],
             'template' => $view->get_template_abspath('photocrati-widget#display_gallery'),
+            'image_type' => $show,
             'show_all_in_lightbox' => FALSE,
             'show_slideshow_link' => FALSE,
             'disable_pagination' => TRUE,

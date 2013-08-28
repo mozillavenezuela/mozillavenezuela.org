@@ -142,7 +142,7 @@ class Mixin_Displayed_Gallery_Renderer extends Mixin
             }
 
             // Albums ?
-            elseif ($args['album_ids']) {
+            elseif ($args['album_ids'] || $args['album_ids'] === '0') {
                 $args['source'] = 'albums';
                 $args['container_ids'] = $args['album_ids'];
                 unset($args['albums_ids']);
@@ -281,10 +281,26 @@ class Mixin_Displayed_Gallery_Renderer extends Mixin
 			if ($key != null) 
 				C_Photocrati_Cache::set($key, $html);
 			$controller->set_render_mode($current_mode);
+
+			// Compress the html to avoid wpautop problems
+			$html = $this->compress_html($html);
 		}
 
 		if (!$return) echo $html;
 
 		return $html;
     }
+
+	/**
+	 * Removes any un-nessessary whitespace from the HTML
+	 * @param string $html
+	 * @return string
+	 */
+	function compress_html($html)
+	{
+		$html = preg_replace("/>\\s+/", ">", $html);
+		$html = preg_replace("/\\s+</", "<", $html);
+		$html = preg_replace("/<!--(?:(?!-->).)*-->/m", "", $html);
+		return $html;
+	}
 }

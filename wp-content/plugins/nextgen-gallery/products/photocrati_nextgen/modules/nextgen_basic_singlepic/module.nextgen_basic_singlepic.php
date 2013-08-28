@@ -17,7 +17,7 @@ class M_NextGen_Basic_Singlepic extends C_Base_Module
             NEXTGEN_BASIC_SINGLEPIC_MODULE_NAME,
             'NextGen Basic Singlepic',
             'Provides a singlepic gallery for NextGEN Gallery',
-            '1.9.6',
+            '0.3',
             'http://www.photocrati.com',
             'Photocrati Media',
             'http://www.photocrati.com'
@@ -59,7 +59,7 @@ class M_NextGen_Basic_Singlepic extends C_Base_Module
 
 	function _register_hooks()
 	{
-		add_shortcode('singlepic',    array(&$this, 'render_singlepic'));
+		C_NextGen_Shortcode_Manager::add('singlepic',    array(&$this, 'render_singlepic'));
 	}
 
     /**
@@ -77,7 +77,7 @@ class M_NextGen_Basic_Singlepic extends C_Base_Module
 
 	function render_singlepic($params, $inner_content=NULL)
 	{
-		$params['display_type'] = $this->_get_param('display_type', 'photocrati-nextgen_basic_singlepic', $params);
+		$params['display_type'] = $this->_get_param('display_type', NEXTGEN_BASIC_SINGLEPIC_MODULE_NAME, $params);
         $params['image_ids'] = $this->_get_param('id', NULL, $params);
         unset($params['id']);
 

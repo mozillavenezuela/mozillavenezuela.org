@@ -19,6 +19,10 @@
     margin-right: 5px;
 }
 
+.ngg-template-caption .ngg-gallery-thumbnail-box {
+    margin-right: 0px;
+}
+
 .ngg-gallery-thumbnail {
     float: left;
     text-align: center;

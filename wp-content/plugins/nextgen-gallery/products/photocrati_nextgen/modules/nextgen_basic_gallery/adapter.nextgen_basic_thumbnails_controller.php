@@ -77,7 +77,7 @@ class A_NextGen_Basic_Thumbnails_Controller extends Mixin_NextGen_Basic_Gallery_
             }
 
             if ($display_settings['show_piclens_link'] || $display_settings['ajax_pagination'])
-                $gallery_id = $displayed_gallery->to_transient();
+                $gallery_id = $displayed_gallery->transient_id;
 
 			$thumbnail_size_name = 'thumbnail';
 

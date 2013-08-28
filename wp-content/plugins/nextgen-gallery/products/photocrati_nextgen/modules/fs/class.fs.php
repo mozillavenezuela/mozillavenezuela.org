@@ -286,7 +286,7 @@ class Mixin_Fs_Instance_Methods extends Mixin
 
 		foreach ($segments as $segment) {
             $segment = trim($segment, '/\\');
-            $pieces = array_values(array_filter(preg_split('/[\/\\\\]/', $segment)));
+            $pieces = array_values(preg_split('/[\/\\\\]/', $segment));
 
             // determine if each piece should be appended to $retval
             foreach ($pieces as $ndx => $val) {

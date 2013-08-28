@@ -19,7 +19,7 @@ class M_NextGen_Basic_ImageBrowser extends C_Base_Module
 			'photocrati-nextgen_basic_imagebrowser',
 			'NextGEN Basic ImageBrowser',
 			'Provides the NextGEN Basic ImageBrowser Display Type',
-			'0.1',
+            '0.3',
 			'http://www.nextgen-gallery.com',
 			'Photocrati Media',
 			'http://www.photocrati.com'
@@ -75,7 +75,7 @@ class M_NextGen_Basic_ImageBrowser extends C_Base_Module
 
 	function _register_hooks()
 	{
-		add_shortcode('imagebrowser', array(&$this, 'render_shortcode'));
+		C_NextGen_Shortcode_Manager::add('imagebrowser', array(&$this, 'render_shortcode'));
 	}
 
     /**

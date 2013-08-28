@@ -139,11 +139,12 @@ function ngg_remove_capability($capability){
  */
 function nggallery_uninstall() {
 	global $wpdb;
-
+	
+	// TODO don't remove data on uninstall
 	// first remove all tables
-	$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}ngg_pictures");
-	$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}ngg_gallery");
-	$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}ngg_album");
+#	$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}ngg_pictures");
+#	$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}ngg_gallery");
+#	$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}ngg_album");
 
 	// then remove all options
 	delete_option( 'ngg_options' );

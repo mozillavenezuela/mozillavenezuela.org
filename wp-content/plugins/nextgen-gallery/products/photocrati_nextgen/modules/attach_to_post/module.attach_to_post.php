@@ -23,12 +23,19 @@ class M_Attach_To_Post extends C_Base_Module
 			'photocrati-attach_to_post',
 			'Attach To Post',
 			'Provides the "Attach to Post" interface for displaying galleries and albums',
-			'0.3',
+			'0.6',
 			'http://www.nextgen-gallery.com',
 			'Photocrati Media',
 			'http://www.photocrati.com',
 		    $context
 		);
+
+		include_once('class.attach_to_post_option_handler.php');
+		C_NextGen_Global_Settings::add_option_handler('C_Attach_To_Post_Option_Handler', array(
+			'attach_to_post_url',
+			'gallery_preview_url',
+			'attach_to_post_display_tab_js_url'
+		));
 
 		include_once('class.attach_to_post_installer.php');
 		C_Photocrati_Installer::add_handler($this->module_id, 'C_Attach_To_Post_Installer');
@@ -107,7 +114,7 @@ class M_Attach_To_Post extends C_Base_Module
 		add_action('after_delete_post', array(&$this, 'cleanup_displayed_galleries'));
 
 		// Add hook to subsitute displayed gallery placeholders
-		add_filter('the_content', array(&$this, 'substitute_placeholder_imgs'), 1000, 1);
+		add_filter('the_content', array(&$this, 'substitute_placeholder_imgs'), PHP_INT_MAX, 1);
 
 		// Emit frame communication events
 		add_action('ngg_created_new_gallery',	array(&$this, 'new_gallery_event'));
@@ -168,27 +175,13 @@ class M_Attach_To_Post extends C_Base_Module
                         }
 
                         // Replace the placeholder with the displayed gallery content
-                        $img->outertext = $this->compress_html($content);
+                        $img->outertext = $content;
                     }
                 }
                 $content = (string)$doc->save();
             }
             return $content;
         }
-    }
-
-
-    /**
-	 * Removes any un-nessessary whitespace from the HTML
-	 * @param string $html
-	 * @return string
-	 */
-    function compress_html($html)
-    {
-        $html = preg_replace("/>\s+/", ">", $html);
-        $html = preg_replace("/\s+</", "<", $html);
-        $html = preg_replace("/<!--(?:(?!-->).)*-->/m", "", $html);
-        return $html;
     }
 
 	/**

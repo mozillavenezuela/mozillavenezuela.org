@@ -132,7 +132,7 @@ class C_NggLegacy_Thumbnail {
         $this->watermarkText		= '';
 
         //check to see if file exists
-        if(!file_exists($this->fileName)) {
+        if(!@file_exists($this->fileName)) {
             $this->errmsg = 'File not found';
             $this->error = true;
         }

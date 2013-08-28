@@ -59,7 +59,7 @@ class Mixin_Mvc_View_Instance_Methods extends Mixin
     {
         if (!$value) $value = $this->object->_template;
         
-        if ($value[0] == '/' && file_exists($value)) {
+        if ($value[0] == '/' && @file_exists($value)) {
             // key is already abspath
         }
         else $value = $this->object->find_template_abspath($value);
@@ -246,7 +246,7 @@ class Mixin_Mvc_View_Instance_Methods extends Mixin
 		 $path
 	   );
 
-       if (!file_exists($retval))
+       if (!@file_exists($retval))
            throw new RuntimeException("{$retval} is not a valid MVC template");
 
        return $retval;

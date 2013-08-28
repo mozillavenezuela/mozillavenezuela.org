@@ -15,6 +15,10 @@ class Mixin_Attach_To_Post_Display_Tab extends Mixin
 
         // Ensure that JS is returned
         $this->object->set_content_type('javascript');
+				    
+				while (ob_get_level() > 0) {
+					ob_end_clean();
+				}
 
         // Get all entities used by the display tab
         $context = 'attach_to_post';
@@ -41,7 +45,7 @@ class Mixin_Attach_To_Post_Display_Tab extends Mixin
         
         usort($display_types, array($this->object, '_display_type_list_sort'));
 
-        return $this->object->render_view('photocrati-attach_to_post#display_tab_js', array(
+        $output = $this->object->render_view('photocrati-attach_to_post#display_tab_js', array(
                 'displayed_gallery'		=>	json_encode($this->object->_displayed_gallery->get_entity()),
                 'sources'				=>	json_encode($source_mapper->select()->order_by('title')->run_query()),
                 'gallery_primary_key'	=>	$gallery_mapper->get_primary_key_column(),
@@ -51,6 +55,8 @@ class Mixin_Attach_To_Post_Display_Tab extends Mixin
                 'display_types'			=>	json_encode($display_types),
                 'sec_token'				=>	$security->get_request_token('nextgen_edit_displayed_gallery')->get_json()
         ), $return);
+        
+        return $output;
 	}
 	
 	function _display_type_list_sort($type_1, $type_2)
@@ -83,6 +89,11 @@ class Mixin_Attach_To_Post_Display_Tab extends Mixin
 	 */
 	function _get_display_tabs()
 	{
+		// The ATP requires more memmory than some applications, somewhere around 60MB.
+		// Because it's such an important feature of NextGEN Gallery, we temporarily disable
+		// any memory limits
+		@ini_set('memory_limit', -1);
+
 		return array(
 			$this->object->_render_display_types_tab(),
 			$this->object->_render_display_source_tab(),

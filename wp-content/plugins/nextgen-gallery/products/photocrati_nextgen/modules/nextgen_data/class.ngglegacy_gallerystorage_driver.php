@@ -16,18 +16,26 @@ class Mixin_NggLegacy_GalleryStorage_Driver extends Mixin
 	{
 		// Base upload path
 		$retval = C_NextGen_Settings::get_instance()->gallerypath;
-        $fs = $this->get_registry()->get_utility('I_Fs');
+    $fs = $this->get_registry()->get_utility('I_Fs');
 
 		// If a gallery has been specified, then we'll
 		// append the slug
 		if ($gallery) {
-			if (is_object($gallery) && isset($gallery->slug)) {
-				$retval = $fs->join_paths($retval, $gallery->slug);
-			}
-			else {
+			if (!is_object($gallery)) {
 				$gallery = $this->object->_get_gallery_id($gallery);
 				$gallery = $this->object->_gallery_mapper->find($gallery);
-				if ($gallery) $retval = $fs->join_paths($retval, $gallery->slug);
+			}
+			
+			if ($gallery) {
+				$path = $gallery->path;
+				$base = basename($path);
+				$slug = $gallery->slug;
+				
+				if ($base == null) {
+					$base = $slug;
+				}
+				
+				$retval = $fs->join_paths($retval, $base);
 			}
 		}
 
@@ -134,7 +142,7 @@ class Mixin_NggLegacy_GalleryStorage_Driver extends Mixin
 						}
 
 						// Should we check whether the image actually exists?
-						if ($check_existance && file_exists($image_path)) {
+						if ($check_existance && @file_exists($image_path)) {
 							$retval = $image_path;
 						}
 						elseif (!$check_existance) $retval = $image_path;
@@ -381,7 +389,7 @@ class Mixin_NggLegacy_GalleryStorage_Driver extends Mixin
 				// XXX change this? 'full' should be the resized path and 'original' the _backup path
 				$backup_path = $this->object->get_backup_abspath($image);
 
-				if (!file_exists($backup_path))
+				if (!@file_exists($backup_path))
 				{
 					@copy($filename, $backup_path);
 				}
@@ -392,7 +400,7 @@ class Mixin_NggLegacy_GalleryStorage_Driver extends Mixin
 			$existing_image_dir = dirname($existing_image_abpath);
 
 			// removing the old thumbnail is actually not needed as generate_image_clone() will replace it, leaving commented in as reminder in case there are issues in the future
-			if (file_exists($existing_image_abpath)) {
+			if (@file_exists($existing_image_abpath)) {
 				//unlink($existing_image_abpath);
 			}
 
@@ -541,7 +549,7 @@ class Mixin_NggLegacy_GalleryStorage_Driver extends Mixin
 			if ($size)
             {
 				$abspath = $this->object->get_image_abspath($image, $size);
-				if ($abspath && file_exists($abspath))
+				if ($abspath && @file_exists($abspath))
                     unlink($abspath);
 				if (isset($image->meta_data) && isset($image->meta_data[$size]))
                 {
@@ -566,7 +574,7 @@ class Mixin_NggLegacy_GalleryStorage_Driver extends Mixin
 
 				// Delete each image
 				foreach ($abspaths as $abspath) {
-					if ($abspath && file_exists($abspath))
+					if ($abspath && @file_exists($abspath))
                     {
                         unlink($abspath);
                     }
@@ -679,7 +687,7 @@ class Mixin_NggLegacy_GalleryStorage_Driver extends Mixin
 
                 $prefix       = '';
                 $prefix_count = 0;
-                while (file_exists($gallery->path . DIRECTORY_SEPARATOR . $new_path))
+                while (@file_exists($gallery->path . DIRECTORY_SEPARATOR . $new_path))
                 {
                     $prefix = 'copy_' . ($prefix_count++) . '_';
                     $new_path = $prefix . $new_path;
@@ -753,7 +761,7 @@ class Mixin_NggLegacy_GalleryStorage_Driver extends Mixin
             return ' <strong>' . esc_html($image->filename) . __(' is not writeable', 'nggallery') . '</strong>';
         }
 
-        if (!file_exists($path . '_backup'))
+        if (!@file_exists($path . '_backup'))
         {
             return ' <strong>' . __('Backup file does not exist', 'nggallery') . '</strong>';
         }

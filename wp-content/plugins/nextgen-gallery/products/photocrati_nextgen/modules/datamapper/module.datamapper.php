@@ -14,7 +14,7 @@ class M_DataMapper extends C_Base_Module
 			'photocrati-datamapper',
 			'DataMapper',
 			'Provides a database abstraction layer following the DataMapper pattern',
-			'0.1',
+			'0.2',
 			'http://www.photocrati.com',
 			'Photocrati Media',
 			'http://www.photocrati.com'
@@ -105,6 +105,12 @@ class M_DataMapper extends C_Base_Module
                 array_unshift($group_by_columns, trim($column));
             }
             $retval = "GROUP BY ".implode(', ', $group_by_columns);
+        }
+        // Not all mysql servers allow access to create temporary tables which are used when doing GROUP BY
+        // statements; this can potentially ruin basic queries. If no group_by_columns is set AND the query originates
+        // within the datamapper we strip the "GROUP BY" clause entirely in this filter.
+        else if ($wp_query->get('datamapper')) {
+            $retval = '';
         }
         return $retval;
     }

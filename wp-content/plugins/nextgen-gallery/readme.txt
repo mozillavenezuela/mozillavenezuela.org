@@ -195,6 +195,31 @@ For more information, feel free to visit the official website for the NextGEN Ga
 
 == Changelog ==
 
+= V2.0.14 - 08.27.2013 =
+* NEW:     Added the ability to override thumbnail settings for NextGEN Basic Albums
+* NEW:     Shortcode Manager API, which ensures that shortcodes are outputted as intended
+* Changed: Re-added the ability to select the original image size for widgets
+* Fixed:   Ensure that stylesheet url returned is correct for Windows hosts
+* Fixed:   Broken links and lightbox effects with AJAX pagination
+* Fixed:   Try to ensure that third party plugins don't add content to our dynamic JS
+* Fixed:   Improved reliability of iframely.js
+* Fixed:   Ensure that urls are generated correctly in HTTPs environments
+* Fixed:   Datamapper works correctly in environments where temporary tables aren't supported
+* Fixed:   Fixed an issue with thickbox loading animation when home url differs from site url
+
+= V2.0.11 - 08.19.2013 =
+* NEW:     Added "run_ngg_resource_manager" hook to by-pass our resource manager
+* Changed: Removed "Reset & Uninstall" tab, for now
+* Fixed:   Compatibility with W3 Total Cache. Please flush cache after updating.
+* Fixed:   Conflicts with Photocrati Theme Galleries
+* Fixed:   Blank Attach to Post interface window
+* Fixed:   Fixed ability to change Lightbox Effect settings
+* Fixed:   Implemented techniques to ensure WP_Query variables aren't overwritten
+* Fixed:   Enqueuing AJAX JS libraries twice in wp-admin
+* Fixed:   Encoding issues
+* Fixed:   PHP warnings caused by accessing unserialized data as array
+* Fixed:   Fixed installer issues
+
 = V2.0.7 - 08.09.2013 =
 * NEW:     New resource manager that fixes many plugin and theme incompatibilities
 * NEW:     Styles (custom stylesheets) should reside in wp-content/ngg_styles

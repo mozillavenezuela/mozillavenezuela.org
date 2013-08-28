@@ -4,7 +4,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('You 
 /**
  * Plugin Name: NextGEN Gallery by Photocrati
  * Description: The most popular gallery plugin for WordPress and one of the most popular plugins of all time with over 7 million downloads.
- * Version: 2.0.7
+ * Version: 2.0.14
  * Author: Photocrati Media
  * Plugin URI: http://www.nextgen-gallery.com
  * Author URI: http://www.photocrati.com
@@ -109,6 +109,9 @@ class C_NextGEN_Bootstrap
 
 		// Load the style manager
 		include_once('non_pope/class.nextgen_style_manager.php');
+
+		// Load the shortcode manager
+		include_once('non_pope/class.nextgen_shortcode_manager.php');
 	}
 
 	/**
@@ -120,8 +123,8 @@ class C_NextGEN_Bootstrap
 		if ($this->_pope_loaded) return;
 
 		// Pope requires a a higher limit
-        $tmp = ini_get('xdebug.max_nesting_level');
-        if ($tmp && (int)$tmp <= 300) @ini_set('xdebug.max_nesting_level', 300);
+        	$tmp = ini_get('xdebug.max_nesting_level');
+	        if ($tmp && (int)$tmp <= 300) @ini_set('xdebug.max_nesting_level', 300);
 
 		// Include pope framework
 		require_once(path_join(NEXTGEN_GALLERY_PLUGIN_DIR, implode(
@@ -139,9 +142,9 @@ class C_NextGEN_Bootstrap
 		$this->_registry->add_module_path(NEXTGEN_GALLERY_PRODUCT_DIR, true, false);
 		$this->_registry->load_all_products();
 
-        // Give third-party plugins that opportunity to include their own products
-        // and modules
-        do_action('load_nextgen_gallery_modules', $this->_registry);
+	        // Give third-party plugins that opportunity to include their own products
+        	// and modules
+	        do_action('load_nextgen_gallery_modules', $this->_registry);
 
 		// Initializes all loaded modules
 		$this->_registry->initialize_all_modules();
@@ -180,7 +183,9 @@ class C_NextGEN_Bootstrap
 		add_filter('pre_update_site_option_'.$this->_settings_option_name, array(&$this, 'persist_settings'));
 
 		// This plugin uses jQuery extensively
-		add_action('wp_enqueue_scripts', array(&$this, 'enqueue_jquery'));
+		add_action('init', array(&$this, 'enqueue_jquery'), 1);
+		add_action('wp_print_scripts', array(&$this, 'fix_jquery'));
+		add_action('admin_print_scripts', array(&$this, 'fix_jquery'));
 
 		// If the selected stylesheet is using an unsafe path, then notify the user
 		if (C_NextGen_Style_Manager::get_instance()->is_directory_unsafe()) {
@@ -216,6 +221,27 @@ class C_NextGEN_Bootstrap
 	}
 
 	/**
+	 * Ensures that the latest version of jQuery bundled with WordPress is used
+	 */
+	function fix_jquery()
+	{
+		global $wp_scripts;
+
+		if (isset($wp_scripts->registered['jquery'])) {
+			$jquery = $wp_scripts->registered['jquery'];
+			if (!isset($jquery->ver) OR version_compare('1.8', $jquery->ver) == 1) {
+				ob_start();
+				wp_deregister_script('jquery');
+				ob_end_clean();
+				wp_register_script('jquery', false, array( 'jquery-core', 'jquery-migrate' ), '1.10.0' );
+			}
+		}
+		else wp_register_script( 'jquery', false, array( 'jquery-core', 'jquery-migrate' ), '1.10.0' );
+
+		wp_enqueue_script('jquery');
+	}
+
+	/**
 	 * Displays a notice to the user that the current stylesheet location is unsafe
 	 */
 	function display_stylesheet_notice()
@@ -223,7 +249,7 @@ class C_NextGEN_Bootstrap
 		$styles		= C_NextGen_Style_Manager::get_instance();
 		$filename	= $styles->get_selected_stylesheet();
 		$abspath	= $styles->find_selected_stylesheet_abspath();
-		$newpath	= $styles->get_selected_stylesheet_saved_abspath();
+		$newpath	= $styles->new_dir;
 
 		echo "<div class='updated error'>
 			<h3>WARNING: NextGEN Gallery Stylesheet NOT Upgrade-safe</h3>
@@ -289,7 +315,7 @@ class C_NextGEN_Bootstrap
 		define('NEXTGEN_GALLERY_MODULE_URL', path_join(NEXTGEN_GALLERY_PRODUCT_URL, 'photocrati_nextgen/modules'));
 		define('NEXTGEN_GALLERY_PLUGIN_CLASS', path_join(NEXTGEN_GALLERY_PLUGIN_DIR, 'module.NEXTGEN_GALLERY_PLUGIN.php'));
 		define('NEXTGEN_GALLERY_PLUGIN_STARTED_AT', microtime());
-		define('NEXTGEN_GALLERY_PLUGIN_VERSION', '2.0.7');
+		define('NEXTGEN_GALLERY_PLUGIN_VERSION', '2.0.14');
 	}
 
 

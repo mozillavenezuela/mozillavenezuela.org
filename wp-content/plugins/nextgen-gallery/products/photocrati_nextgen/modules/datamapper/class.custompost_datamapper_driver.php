@@ -423,15 +423,28 @@ class Mixin_CustomPost_DataMapper_Driver extends Mixin
 		}
 
 		// Execute the query
-		$query = new WP_Query($this->object->_query_args);
+		$query = new WP_Query();
+		$query->query_vars = $this->object->_query_args;
+		add_action('pre_get_posts', array(&$this, 'set_query_args'), PHP_INT_MAX-1, 1);
 		foreach ($query->get_posts() as $row) {
 			$row = $this->object->convert_post_to_entity($this->scrub_result($row), $model);
 			if (!$model)
                 $row->id_field = $this->object->get_primary_key_column();
 			$retval[] = $row;
 		}
+		remove_action('pre_get_posts', array(&$this, 'set_query_args'), PHP_INT_MAX-1, 1);
 
 		return $retval;
+	}
+
+	/**
+	 * Ensure that the query args are set. We need to do this in case a third-party
+	 * plugin overrides our query
+	 * @param $query
+	 */
+	function set_query_args($query)
+	{
+		if ($query->get('datamapper')) $query->query_vars = $this->object->_query_args;
 	}
 
 		/**

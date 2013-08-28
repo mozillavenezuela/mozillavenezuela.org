@@ -9,10 +9,17 @@ class C_Display_Type_Mapper extends C_CustomPost_DataMapper_Driver
 
 	function define($context=FALSE)
 	{
-		parent::define(NULL, array($context, 'display_type'));
+		$object_name = 'display_type';
+
+		// Add the object name to the context of the object as well
+		// This allows us to adapt the driver itself, if required
+		if (!is_array($context)) $context = array($context);
+		array_push($context, $object_name);
+		parent::define(NULL, $context);
+
 		$this->add_mixin('Mixin_Display_Type_Mapper');
 		$this->implement('I_Display_Type_Mapper');
-		$this->set_model_factory_method('display_type');
+		$this->set_model_factory_method($object_name);
 	}
 
 	function initialize($context=FALSE)

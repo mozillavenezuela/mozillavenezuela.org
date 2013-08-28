@@ -26,7 +26,7 @@ class A_Dynamic_Thumbnails_Storage_Driver extends Mixin
 
 					if ($check_existance)
 					{
-						if (file_exists($image_path))
+						if (@file_exists($image_path))
 						{
 							$retval = $image_path;
 						}

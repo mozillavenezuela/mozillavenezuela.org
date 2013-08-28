@@ -21,7 +21,7 @@ class M_MVC extends C_Base_Module
             "photocrati-mvc",
             "MVC Framework",
             "Provides an MVC architecture for the plugin to use",
-            "0.1",
+            "0.4",
             "http://www.photocrati.com",
             "Photocrati Media",
             "http://www.photocrati.com"
@@ -29,6 +29,11 @@ class M_MVC extends C_Base_Module
 
 		include_once('class.mvc_installer.php');
 		C_Photocrati_Installer::add_handler($this->module_id, 'C_Mvc_Installer');
+
+		include_once('class.mvc_option_handler.php');
+		C_NextGen_Global_Settings::add_option_handler('C_Mvc_Option_Handler', array(
+			'mvc_template_dir'
+		));
     }
 
     function _register_utilities()

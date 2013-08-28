@@ -59,21 +59,23 @@ class A_Lightbox_Manager_Form extends Mixin
 
 			// If a valid library, we have updated settings from the user, then
 			// try saving the changes
-			if ($library && (($params = $this->object->param($library->name))))
+			if ($library)
             {
-                // bind our new values, use display_settings if it isn't a part of the core library
-				foreach ($params as $k => $v) {
-                    if (isset($library->$k))
-                    {
-                        $library->$k = $v;
-                    }
-                    else {
-                        $library->display_settings[$k] = $v;
-                    }
+				if (($params = $this->object->param($library->name))) {
+            		// bind our new values, use display_settings if it isn't a part of the core library
+					foreach ($params as $k => $v) {
+		                if (isset($library->$k)) {
+		                    $library->$k = $v;
+		                }
+		                else {
+		                    $library->display_settings[$k] = $v;
+		                }
 
-                }
-				$mapper->save($library);
-
+		            }
+		            
+					$mapper->save($library);
+				}
+		
 				// If the requested changes weren't valid, add the validation
 				// errors to the C_NextGen_Settings object
 				if ($settings->is_invalid())

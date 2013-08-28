@@ -268,6 +268,11 @@ class C_Image_Wrapper
                 return $this->_cache['previewpic'];
 
             case 'size':
+				if (is_string($this->_orig_image->meta_data)) {
+					$this->_orig_image = C_Image_Mapper::get_instance()->unserialize(
+						$this->_orig_image->meta_data
+					);
+				}
                 $w = $this->_orig_image->meta_data['thumbnail']['width'];
                 $h = $this->_orig_image->meta_data['thumbnail']['height'];
                 return "width='{$w}' height='{$h}'";

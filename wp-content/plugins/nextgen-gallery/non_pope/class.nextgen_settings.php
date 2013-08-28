@@ -7,11 +7,17 @@ if (!class_exists('C_NextGen_Settings')) {
 		{
 			return C_Photocrati_Settings_Manager::get_instance();
 		}
+
+		static function add_option_handler($klass, $options=array())
+		{
+			$instance = self::get_instance();
+			return $instance->add_option_handler($klass, $options);
+		}
 	}
 }
 
 if (!class_exists('C_NextGen_Global_Settings')) {
-	class C_NextGen_Global_Settings {
+	class C_NextGen_Global_Settings extends C_NextGen_Settings {
 		static function get_instance()
 		{
 			if (is_multisite()) {
