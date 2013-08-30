@@ -195,6 +195,9 @@ For more information, feel free to visit the official website for the NextGEN Ga
 
 == Changelog ==
 
+= V2.0.17 - 08.30.2013 =
+Fixed:     Match legacy behaviour when changing gallery path, i.e. don't move files
+
 = V2.0.14 - 08.27.2013 =
 * NEW:     Added the ability to override thumbnail settings for NextGEN Basic Albums
 * NEW:     Shortcode Manager API, which ensures that shortcodes are outputted as intended

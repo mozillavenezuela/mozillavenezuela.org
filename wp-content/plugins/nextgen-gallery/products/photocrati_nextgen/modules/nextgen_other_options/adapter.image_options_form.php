@@ -134,30 +134,32 @@ class A_Image_Options_Form extends Mixin
 				$fs               = $this->get_registry()->get_utility('I_Fs');
 				$original_dir     = $fs->get_abspath($this->object->get_model()->get('gallerypath'));
 				$new_dir	  = $fs->get_abspath($image_options['gallerypath']);
-                                $image_options['gallerypath'] = $fs->add_trailing_slash($image_options['gallerypath']);
+        $image_options['gallerypath'] = $fs->add_trailing_slash($image_options['gallerypath']);
 
-				// If the gallery path has changed...
-				if ($original_dir != $new_dir) {
+				// Note: the below file move is disabled because it's quite unreliable as it doesn't perform any checks
+				//       For instance changing gallery path from /wp-content to /wp-content/gallery would attempt a recursive copy and then delete ALL files under wp-content, which would be disastreus
+#				// If the gallery path has changed...
+#				if ($original_dir != $new_dir) {
 
-                    // Try creating the new directory
-                    if ($this->object->_create_gallery_storage_dir($new_dir) AND is_writable($new_dir)) {
+#                    // Try creating the new directory
+#                    if ($this->object->_create_gallery_storage_dir($new_dir) AND is_writable($new_dir)) {
 
-					    // Try moving files
-						$this->object->recursive_copy($original_dir, $new_dir);
-						$this->object->recursive_delete($original_dir);
+#					    // Try moving files
+#						$this->object->recursive_copy($original_dir, $new_dir);
+#						$this->object->recursive_delete($original_dir);
 
-						// Update gallery paths
-						$mapper = $this->get_registry()->get_utility('I_Gallery_Mapper');
-						foreach ($mapper->find_all() as $gallery) {
-							$gallery->path = $image_options['gallerypath'] . $gallery->name;
-							$mapper->save($gallery);
-						}
-					}
-					else {
-						$this->get_model()->add_error("Unable to change gallery path. Insufficient filesystem permissions");
-						$save = FALSE;
-					}
-				}
+#						// Update gallery paths
+#						$mapper = $this->get_registry()->get_utility('I_Gallery_Mapper');
+#						foreach ($mapper->find_all() as $gallery) {
+#							$gallery->path = $image_options['gallerypath'] . $gallery->name;
+#							$mapper->save($gallery);
+#						}
+#					}
+#					else {
+#						$this->get_model()->add_error("Unable to change gallery path. Insufficient filesystem permissions");
+#						$save = FALSE;
+#					}
+#				}
 			}
 			elseif (isset($image_options['gallerypath'])) {
 				unset($image_options['gallerypath']);
