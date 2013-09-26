@@ -85,7 +85,7 @@ class C_NextGen_Metadata extends C_Component
         $meta = $this->image->meta_data;
 
         // check if we already import the meta data to the database
-        if (!is_array($meta) || ($meta['saved'] != TRUE))
+        if (!is_array($meta) || !isset($meta['saved']) OR ($meta['saved'] != TRUE))
         {
             return FALSE;
         }

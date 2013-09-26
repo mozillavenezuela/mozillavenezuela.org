@@ -642,6 +642,7 @@ class Mixin_NggLegacy_GalleryStorage_Driver extends Mixin
             // Ensure that there is capacity available
             if ((is_multisite()) && $settings->get('wpmuQuotaCheck'))
             {
+                require_once(ABSPATH . 'wp-admin/includes/ms.php');
                 if (upload_is_user_over_quota(FALSE)) {
                     $message .= sprintf(__('Sorry, you have used your space allocation. Please delete some files to upload more files.', 'nggallery'));
                     throw new E_NoSpaceAvailableException();

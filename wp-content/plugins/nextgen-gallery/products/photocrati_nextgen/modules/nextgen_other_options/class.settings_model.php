@@ -22,7 +22,7 @@ class C_Settings_Model extends C_Component
 		parent::define($context);
 		$this->add_mixin('Mixin_Validation');
 		if ($this->has_context('global') OR $this->has_context('site')) {
-			 $this->wrapper = C_NextGen_Global_Settings::get_instance();
+			 $this->wrapper = C_NextGen_Settings::get_instance();
 		}
 		else $this->wrapper = C_NextGen_Settings::get_instance();
 	}

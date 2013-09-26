@@ -35,7 +35,7 @@ class M_Frame_Communication extends C_Base_Module
 
 	function _register_hooks()
 	{
-		add_action('admin_enqueue_scripts', array(&$this, 'enqueue_admin_scripts'));
+		add_action('init', array(&$this, 'enqueue_admin_scripts'));
 
 	}
 

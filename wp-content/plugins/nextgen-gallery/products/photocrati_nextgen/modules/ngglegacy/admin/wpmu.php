@@ -92,16 +92,16 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('You 
 					<td>
 					<select name="wpmuCSSfile">
 					<?php
-						$csslist = ngg_get_cssfiles();
-						foreach ($csslist as $key =>$a_cssfile) {
-							$css_name = $a_cssfile['Name'];
+                        // $csslist = ngg_get_cssfiles();
+                        $csslist = C_NextGen_Style_Manager::get_instance()->find_all_stylesheets();
+						foreach ($csslist as $key => $a_cssfile) {
+							$css_name = $a_cssfile['name'];
 							if ($key == $ngg_options['wpmuCSSfile']) {
-								$file_show = $key;
 								$selected = " selected='selected'";
 							}
 							else $selected = '';
 							$css_name = esc_attr($css_name);
-							echo "\n\t<option value=\"$key\" $selected>$css_name</option>";
+							echo "\n\t<option value=\"{$key}\" {$selected}>{$css_name}</option>";
 						}
 					?>
 					</select><br />

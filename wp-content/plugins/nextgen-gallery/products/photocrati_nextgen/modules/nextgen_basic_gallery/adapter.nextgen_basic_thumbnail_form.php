@@ -36,6 +36,7 @@ class A_NextGen_Basic_Thumbnail_Form extends Mixin_Display_Type_Form
             'nextgen_basic_thumbnails_number_of_columns',
             'nextgen_basic_thumbnails_ajax_pagination',
             'nextgen_basic_thumbnails_hidden',
+            'nextgen_basic_thumbnails_imagebrowser_effect',
             'nextgen_basic_thumbnails_show_piclens_link',
             'nextgen_basic_thumbnails_piclens_link_text',
             'nextgen_basic_thumbnails_show_slideshow_link',
@@ -132,6 +133,17 @@ class A_NextGen_Basic_Thumbnail_Form extends Mixin_Display_Type_Form
             'Add Hidden Images',
             $display_type->settings['show_all_in_lightbox'],
             'If pagination is used this option will show all images in the modal window (Thickbox, Lightbox etc.) This increases page load.'
+        );
+    }
+
+    function _render_nextgen_basic_thumbnails_imagebrowser_effect_field($display_type)
+    {
+        return $this->_render_radio_field(
+            $display_type,
+            'use_imagebrowser_effect',
+            'Use imagebrowser effect',
+            $display_type->settings['use_imagebrowser_effect'],
+            'When active each image in the gallery will link to an imagebrowser display and lightbox effects will not be applied.'
         );
     }
 

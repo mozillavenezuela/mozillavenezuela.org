@@ -40,6 +40,7 @@ jQuery.fn.nggShowSlideshow = function(args) {
                 containerResize: false,
                 fit: 1,
                 timeout: s.timeout,
+                next: self, // advance to next image when clicked
                 after: function(currSlideElement, nextSlideElement, options, forwardFlag) {
                     // update the pro-lightbox triggers should they exist
                     jQuery(nextSlideElement).parent().siblings('div.ngg-trigger-buttons').each(function() {

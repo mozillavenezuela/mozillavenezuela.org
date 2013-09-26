@@ -62,8 +62,10 @@ class Mixin_Gallery_Image_Mapper extends Mixin
         $retval = $this->call_parent('_save_entity', $entity);
         if ($retval) {
             include_once(NGGALLERY_ABSPATH.'/admin/functions.php');
-            $image_id = $this->get_id($entity);;
-            nggAdmin::import_MetaData($image_id);
+            $image_id = $this->get_id($entity);
+			if (!isset($entity->meta_data['saved'])) {
+				nggAdmin::import_MetaData($image_id);
+			}
 			C_Photocrati_Cache::flush();
         }
         return $retval;

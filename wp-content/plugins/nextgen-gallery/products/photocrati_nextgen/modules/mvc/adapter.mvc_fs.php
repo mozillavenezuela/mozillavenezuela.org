@@ -20,7 +20,7 @@ class A_MVC_Fs extends Mixin
 		// Create the absolute path to the file
 		$path = $fs->join_paths(
 			$mod_dir,
-			C_NextGen_Global_Settings::get_instance()->get('mvc_static_dirname'),
+			C_NextGen_Settings::get_instance()->get('mvc_static_dirname'),
 			$path
 		);
 

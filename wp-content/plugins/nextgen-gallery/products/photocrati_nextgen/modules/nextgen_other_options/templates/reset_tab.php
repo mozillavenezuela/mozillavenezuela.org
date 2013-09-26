@@ -15,6 +15,7 @@
 				/>
         </td>
     </tr>
+    <?php /*
         <tr>
             <td class='column1'>
                 <?php echo $uninstall_label; ?>
@@ -29,4 +30,5 @@
 				/>
             </td>
         </tr>
+    */ ?>
 </table>

@@ -22,7 +22,7 @@ class A_NextGen_Basic_Album_Routes extends Mixin
 		// Get router
         $router = $this->get_registry()->get_utility('I_Router');
         $app 	= $router->get_routed_app();
-		$slug	= C_NextGen_Global_Settings::get_instance()->router_param_slug;
+		$slug	= C_NextGen_Settings::get_instance()->router_param_slug;
 
 		// If we're viewing an album, rewrite the urls
 		$regex = "/photocrati-nextgen_basic_\w+_album/";

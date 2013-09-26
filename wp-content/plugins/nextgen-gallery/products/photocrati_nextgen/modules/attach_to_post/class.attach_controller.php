@@ -81,7 +81,7 @@ class Mixin_Attach_To_Post extends Mixin
 		);
 
 		// Enqueue the backbone app for the display tab
-		$settings			= C_NextGen_Global_Settings::get_instance();
+		$settings			= C_NextGen_Settings::get_instance();
 		$preview_url		= $settings->gallery_preview_url;
 		$display_tab_js_url	= $settings->attach_to_post_display_tab_js_url;
 		if ($this->object->_displayed_gallery->id()) {

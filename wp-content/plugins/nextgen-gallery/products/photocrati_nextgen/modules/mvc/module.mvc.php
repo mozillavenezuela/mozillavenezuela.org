@@ -3,7 +3,7 @@
 /***
 	{
 		Module: photocrati-mvc,
-		Depends: { photocrati-router }
+		Depends: { photocrati-router, photocrati-nextgen_settings }
 	}
 ***/
 
@@ -31,7 +31,7 @@ class M_MVC extends C_Base_Module
 		C_Photocrati_Installer::add_handler($this->module_id, 'C_Mvc_Installer');
 
 		include_once('class.mvc_option_handler.php');
-		C_NextGen_Global_Settings::add_option_handler('C_Mvc_Option_Handler', array(
+		C_NextGen_Settings::add_option_handler('C_Mvc_Option_Handler', array(
 			'mvc_template_dir'
 		));
     }

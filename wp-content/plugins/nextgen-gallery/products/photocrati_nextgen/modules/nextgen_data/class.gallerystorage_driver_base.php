@@ -505,6 +505,7 @@ class Mixin_GalleryStorage_Driver_Base extends Mixin
 		if (($gallery_id = $this->object->_get_gallery_id($gallery))) {
 
 			// Ensure that there is capacity available
+            require_once(ABSPATH . 'wp-admin/includes/ms.php');
 			if ( (is_multisite()) && nggWPMU::wpmu_enable_function('wpmuQuotaCheck')) {
 				if (upload_is_user_over_quota(FALSE)) {
 					throw new E_NoSpaceAvailableException();

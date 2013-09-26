@@ -230,7 +230,7 @@ class Mixin_Mvc_View_Instance_Methods extends Mixin
    function find_template_abspath($path, $module=FALSE)
    {
        $fs       = $this->get_registry()->get_utility('I_Fs');
-       $settings = C_NextGen_Global_Settings::get_instance();
+       $settings = C_NextGen_Settings::get_instance();
 
        // We also accept module_name#path, which needs parsing.
        if (!$module)

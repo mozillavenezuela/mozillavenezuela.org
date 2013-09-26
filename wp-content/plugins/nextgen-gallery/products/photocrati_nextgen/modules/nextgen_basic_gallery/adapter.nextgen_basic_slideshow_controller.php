@@ -12,6 +12,7 @@ class A_NextGen_Basic_Slideshow_Controller extends Mixin_NextGen_Basic_Gallery_C
 		// Get the images to be displayed
         $current_page = (int)$this->param('page', 1);
 
+		// TODO: Shouldn't we be using maximum_entity_count instead?
         $limit = FALSE;
         if (in_array($displayed_gallery->source, array('random_images', 'recent_images')))
             $limit = $displayed_gallery->display_settings['images_per_page'];

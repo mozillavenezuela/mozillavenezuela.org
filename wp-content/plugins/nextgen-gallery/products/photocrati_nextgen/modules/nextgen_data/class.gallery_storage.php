@@ -24,7 +24,7 @@ class Mixin_GalleryStorage extends Mixin
 		if (!defined('GALLERYSTORAGE_DRIVER')) {
 
 			// Get the datamapper configured in the database
-			$factory_method = C_NextGen_Global_Settings::get_instance()->gallerystorage_driver;
+			$factory_method = C_NextGen_Settings::get_instance()->gallerystorage_driver;
 
 			// Define a constant and use this as the global gallerystorage driver,
 			// unless running in a SimpleTest Environment

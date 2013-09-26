@@ -21,7 +21,7 @@ class M_Ajax extends C_Base_Module
 		);
 
 		include_once('class.ajax_option_handler.php');
-		C_NextGen_Global_Settings::add_option_handler('C_Ajax_Option_Handler', array(
+		C_NextGen_Settings::add_option_handler('C_Ajax_Option_Handler', array(
 			'ajax_slug',
 			'ajax_url',
 			'ajax_js_url'
@@ -56,7 +56,7 @@ class M_Ajax extends C_Base_Module
 	 */
 	function enqueue_scripts()
 	{
-        $settings = C_NextGen_Global_Settings::get_instance();
+        $settings = C_NextGen_Settings::get_instance();
         $router   = $this->get_registry()->get_utility('I_Router');
 
         $site_url = $router->get_base_url(TRUE);

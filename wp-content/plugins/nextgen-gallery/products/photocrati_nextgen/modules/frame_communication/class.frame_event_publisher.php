@@ -15,7 +15,7 @@ class C_Frame_Event_Publisher extends C_Component
 	function initialize()
 	{
 		parent::initialize();
-		$this->setting_name = C_NextGen_Global_Settings::get_instance()->frame_communication_option_name;
+		$this->setting_name = C_NextGen_Settings::get_instance()->frame_communication_option_name;
 	}
 
 	/**
@@ -64,7 +64,15 @@ class Mixin_Frame_Event_Publisher extends Mixin
 	{
 		$id			= md5(serialize($data));
 		$data['context'] = $this->object->context;
-		setrawcookie($this->object->setting_name.'_'.$id,$this->object->_encode($data));
+
+		$write_cookie = TRUE;
+		if (defined('XMLRPC_REQUEST')) {
+			$write_cookie = XMLRPC_REQUEST == FALSE;
+		}
+
+		if ($write_cookie) {
+			setrawcookie($this->object->setting_name.'_'.$id,$this->object->_encode($data));
+		}
 
 		return $data;
 	}

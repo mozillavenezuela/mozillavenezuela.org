@@ -48,7 +48,7 @@ class A_NextGen_Basic_TagCloud_Urls extends Mixin
 		);
 
 		// Get the settings manager
-		$settings	= C_NextGen_Global_Settings::get_instance();
+		$settings	= C_NextGen_Settings::get_instance();
 
 		// Create the regex pattern
 		$sep		= preg_quote($settings->router_param_separator, '#');

@@ -113,7 +113,8 @@ class M_NextGen_Basic_ImageBrowser extends C_Base_Module
             'C_Nextgen_Basic_Imagebrowser_Installer' => 'class.nextgen_basic_imagebrowser_installer.php',
             'A_Nextgen_Basic_Imagebrowser_Mapper' => 'adapter.nextgen_basic_imagebrowser_mapper.php',
             'A_Nextgen_Basic_Imagebrowser_Routes' => 'adapter.nextgen_basic_imagebrowser_routes.php',
-            'A_Nextgen_Basic_Imagebrowser_Urls' => 'adapter.nextgen_basic_imagebrowser_urls.php'
+            'A_Nextgen_Basic_Imagebrowser_Urls' => 'adapter.nextgen_basic_imagebrowser_urls.php',
+            'Hook_NextGen_Basic_Imagebrowser_Alt_URLs' => 'hook.nextgen_basic_imagebrowser_alt_urls.php'
         );
     }
 }

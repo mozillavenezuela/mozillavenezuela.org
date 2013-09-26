@@ -118,7 +118,7 @@ class Mixin_NextGen_Admin_Page_Instance_Methods extends Mixin
 
 	function enqueue_jquery_ui_theme()
 	{
-		$settings = C_NextGen_Global_Settings::get_instance();
+		$settings = C_NextGen_Settings::get_instance();
 		wp_enqueue_style(
 			$settings->jquery_ui_theme,
 			is_ssl() ?

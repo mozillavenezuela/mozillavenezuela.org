@@ -172,7 +172,7 @@ class nggAdminPanel{
 
 		add_menu_page( _n( 'Gallery', 'Galleries', 1, 'nggallery' ), _n( 'Gallery', 'Galleries', 1, 'nggallery' ), 'nggallery-wpmu', NGGFOLDER, array (&$this, 'show_network_settings'), path_join(NGGALLERY_URLPATH, 'admin/images/nextgen_16_color.png') );
 		add_submenu_page( NGGFOLDER , __('Network settings', 'nggallery'), __('Network settings', 'nggallery'), 'nggallery-wpmu', NGGFOLDER,  array (&$this, 'show_network_settings'));
-        add_submenu_page( NGGFOLDER , __('Reset / Uninstall', 'nggallery'), __('Reset / Uninstall', 'nggallery'), 'activate_plugins', 'nggallery-setup', array (&$this, 'show_menu'));
+        // add_submenu_page( NGGFOLDER , __('Reset / Uninstall', 'nggallery'), __('Reset / Uninstall', 'nggallery'), 'activate_plugins', 'nggallery-setup', array (&$this, 'show_menu'));
 	}
 
     /**
@@ -392,7 +392,7 @@ class nggAdminPanel{
 
 	function enqueue_jquery_ui_theme()
 	{
-		$settings = C_NextGen_Global_Settings::get_instance();
+		$settings = C_NextGen_Settings::get_instance();
 		wp_enqueue_style(
 			$settings->jquery_ui_theme,
 			$settings->jquery_ui_theme_url,

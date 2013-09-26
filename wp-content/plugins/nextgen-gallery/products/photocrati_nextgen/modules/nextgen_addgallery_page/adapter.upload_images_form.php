@@ -47,10 +47,14 @@ class A_Upload_Images_Form extends Mixin
         $imgs->extensions   = "jpg,jpeg,gif,png,JPG,JPEG,GIF,PNG";
         $retval[]           = $imgs;
 
-        $zips               = new stdClass;
-        $zips->title        = "Zip files";
-        $zips->extensions   = "zip,ZIP";
-        $retval[]           = $zips;
+        $settings = C_NextGen_Settings::get_instance();
+        if (!is_multisite() || (is_multisite() && $settings->get('wpmuZipUpload')))
+        {
+            $zips             = new stdClass;
+            $zips->title      = "Zip files";
+            $zips->extensions = "zip,ZIP";
+            $retval[]         = $zips;
+        }
 
         return $retval;
     }

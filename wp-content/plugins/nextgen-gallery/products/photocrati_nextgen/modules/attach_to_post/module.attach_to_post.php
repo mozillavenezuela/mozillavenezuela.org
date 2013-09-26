@@ -31,7 +31,7 @@ class M_Attach_To_Post extends C_Base_Module
 		);
 
 		include_once('class.attach_to_post_option_handler.php');
-		C_NextGen_Global_Settings::add_option_handler('C_Attach_To_Post_Option_Handler', array(
+		C_NextGen_Settings::add_option_handler('C_Attach_To_Post_Option_Handler', array(
 			'attach_to_post_url',
 			'gallery_preview_url',
 			'attach_to_post_display_tab_js_url'
@@ -130,58 +130,42 @@ class M_Attach_To_Post extends C_Base_Module
      */
     function substitute_placeholder_imgs($content)
     {
-        // Load html into parser
-        $doc = new simple_html_dom();
-        if ($content) {
-            $doc->load($content);
+		// Get some utilities
+		$mapper = $this->get_registry()->get_utility('I_Displayed_Gallery_Mapper');
+		$router	= $this->get_registry()->get_utility('I_Router');
 
-            // Find all placeholder images
-            $imgs = $doc->find("img[class='ngg_displayed_gallery']");
-            if ($imgs) {
+		// To match ATP entries we compare the stored url against a generic path
+		// We must check HTTP and HTTPS as well as permalink and non-permalink forms
+		$preview_url = parse_url($router->join_paths(
+			$router->remove_url_segment('index.php', $router->get_base_url()),
+			'/nextgen-attach_to_post/preview'
+		));
+		$preview_url = preg_quote($preview_url['host'] . $preview_url['path'], '#');
 
-                // Get some utilities
-                $mapper = $this->get_registry()->get_utility('I_Displayed_Gallery_Mapper');
-				$router	= $this->get_registry()->get_utility('I_Router');
+		$alt_preview_url = parse_url($router->join_paths(
+			$router->remove_url_segment('index.php', $router->get_base_url()),
+			'index.php/nextgen-attach_to_post/preview'
+		));
+		$alt_preview_url = preg_quote($alt_preview_url['host'] . $alt_preview_url['path'], '#');
 
-				// To match ATP entries we compare the stored url against a generic path
-				// We must check HTTP and HTTPS as well as permalink and non-permalink forms
-                $preview_url = parse_url($router->join_paths(
-					$router->remove_url_segment('index.php', $router->get_base_url()),
-					'/nextgen-attach_to_post/preview'
-				));
-				$preview_url = preg_quote($preview_url['host'] . $preview_url['path'], '#');
+		// The placeholder MUST have a gallery instance id
+		if (preg_match_all("#<img.*http(s)?://({$preview_url}|{$alt_preview_url})/id--(\\d+).*\\/>#mi", $content, $matches, PREG_SET_ORDER)) {
+			foreach ($matches as $match) {
+				// Find the displayed gallery
+				$displayed_gallery_id = $match[3];
+				$displayed_gallery = $mapper->find($displayed_gallery_id, TRUE);
 
-				$alt_preview_url = parse_url($router->join_paths(
-					$router->remove_url_segment('index.php', $router->get_base_url()),
-					'index.php/nextgen-attach_to_post/preview'
-				));
-				$alt_preview_url = preg_quote($alt_preview_url['host'] . $alt_preview_url['path'], '#');
+				// Get the content for the displayed gallery
+				$retval = '<p>'._('Invalid Displayed Gallery').'</p>';
+				if ($displayed_gallery) {
+					$renderer = $this->get_registry()->get_utility('I_Displayed_Gallery_Renderer');
+					$retval = $renderer->render($displayed_gallery, TRUE);
+				}
+				$content = str_replace($match[0], $retval, $content);
+			}
+		}
 
-                // Substitute each image for the gallery type frontent content
-                foreach ($imgs as $img) {
-
-                    // The placeholder MUST have a gallery instance id
-                    if (preg_match("#http(s)?://({$preview_url}|{$alt_preview_url})/id--(\d+)#", $img->src, $match)) {
-
-                        // Find the displayed gallery
-                        $displayed_gallery_id = $match[3];
-                        $displayed_gallery = $mapper->find($displayed_gallery_id, TRUE);
-
-                        // Get the content for the displayed gallery
-                        $content = '<p>'._('Invalid Displayed Gallery').'</p>';
-                        if ($displayed_gallery) {
-                            $renderer = $this->get_registry()->get_utility('I_Displayed_Gallery_Renderer');
-                            $content = $renderer->render($displayed_gallery, TRUE);
-                        }
-
-                        // Replace the placeholder with the displayed gallery content
-                        $img->outertext = $content;
-                    }
-                }
-                $content = (string)$doc->save();
-            }
-            return $content;
-        }
+		return $content;
     }
 
 	/**
@@ -194,13 +178,6 @@ class M_Attach_To_Post extends C_Base_Module
 		// Enqueue resources needed at post/page level
 		if (preg_match("/\/wp-admin\/(post|post-new)\.php$/", $_SERVER['SCRIPT_NAME'])) {
 			$this->_enqueue_tinymce_resources();
-
-#			wp_enqueue_style(
-#				'ngg_custom_scrollbar', $this->get_static_url('jquery.mCustomScrollbar.css')
-#			);
-#			wp_enqueue_script(
-#				'ngg_custom_scrollbar', $this->get_static_url('jquery.mCustomScrollbar.concat.min.js'), array('jquery')
-#			);
 			wp_enqueue_style(
 				'ngg_attach_to_post_dialog', $router->get_static_url('photocrati-attach_to_post#attach_to_post_dialog.css')
 			);
@@ -222,7 +199,7 @@ class M_Attach_To_Post extends C_Base_Module
         wp_localize_script(
 			'media-editor',
 			'nextgen_gallery_attach_to_post_url',
-			C_NextGen_Global_Settings::get_instance()->attach_to_post_url
+			C_NextGen_Settings::get_instance()->attach_to_post_url
 		);
 
 		// Registers our tinymce button and plugin for attaching galleries

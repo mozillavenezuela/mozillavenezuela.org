@@ -88,7 +88,6 @@ class M_Gallery_Display extends C_Base_Module
 		);
 
 		$this->get_registry()->add_adapter('I_MVC_View', 'A_Gallery_Display_View');
-        $this->get_registry()->add_adapter('I_MVC_View', 'A_Displayed_Gallery_Related_Element');
 	}
 
 	/**
@@ -100,6 +99,77 @@ class M_Gallery_Display extends C_Base_Module
 		C_NextGen_Shortcode_Manager::add('ngg_images', array(&$this, 'display_images'));
         add_action('init', array(&$this, '_register_resources'));
         add_action('admin_bar_menu', array(&$this, 'add_admin_bar_menu'), 100);
+        add_filter('the_content', array($this, '_render_related_images'));
+	}
+
+  function _render_related_string()
+  {
+      $settings = C_NextGen_Settings::get_instance();
+      $type = $settings->appendType;
+      $maxImages = $settings->maxImages;
+      $sluglist = array();
+
+      switch ($type) {
+          case 'tags':
+              if (function_exists('get_the_tags'))
+              {
+                  $taglist = get_the_tags();
+                  if (is_array($taglist)) {
+                      foreach ($taglist as $tag) {
+                          $sluglist[] = $tag->slug;
+                      }
+                  }
+              }
+              break;
+          case 'category':
+              $catlist = get_the_category();
+              if (is_array($catlist))
+              {
+                  foreach ($catlist as $cat) {
+                      $sluglist[] = $cat->category_nicename;
+                  }
+              }
+              break;
+      }
+
+      $taglist = implode(',', $sluglist);
+
+      if ($taglist === 'uncategorized' || empty($taglist))
+          return;
+
+      $renderer = C_Component_Registry::get_instance()->get_utility('I_Displayed_Gallery_Renderer');
+      $view     = C_Component_Registry::get_instance()->get_utility('I_Component_Factory')
+                                                      ->create('mvc_view', '');
+      $retval = $renderer->display_images(array(
+          'source' => 'tags',
+          'container_ids' => $taglist,
+          'display_type' => NEXTGEN_GALLERY_BASIC_THUMBNAILS,
+          'images_per_page' => $maxImages,
+          'maximum_entity_count' => $maxImages,
+          'template' => $view->get_template_abspath('photocrati-nextgen_gallery_display#related'),
+          'show_all_in_lightbox' => FALSE,
+          'show_slideshow_link' => FALSE,
+          'disable_pagination' => TRUE,
+          'display_no_images_error' => FALSE
+      ));
+
+      return apply_filters('ngg_show_related_gallery_content', $retval, $taglist);
+  }
+
+	function _render_related_images($content)
+	{
+    $settings = C_NextGen_Settings::get_instance();
+      
+		if ($settings->get('activateTags')) {
+			$related = $this->_render_related_string();
+			
+			if ($related != null) {
+		    $heading = $settings->relatedHeading;
+				$content .= $heading . $related;
+			}
+		}
+		
+		return $content;
 	}
 
     /**
@@ -136,6 +206,12 @@ class M_Gallery_Display extends C_Base_Module
             'nextgen_gallery_display_settings',
             $router->get_static_url('photocrati-nextgen_gallery_display#nextgen_gallery_display_settings.css')
         );
+
+        wp_register_style(
+            'nextgen_gallery_related_images',
+            $router->get_static_url('photocrati-nextgen_gallery_display#nextgen_gallery_related_images.css')
+        );
+        wp_enqueue_style('nextgen_gallery_related_images');
 
         wp_register_script(
             'jquery.nextgen_radio_toggle',
@@ -192,7 +268,6 @@ class M_Gallery_Display extends C_Base_Module
         return array(
             'A_Display_Settings_Controller' => 'adapter.display_settings_controller.php',
             'A_Display_Settings_Page' => 'adapter.display_settings_page.php',
-            'A_Displayed_Gallery_Related_Element' => 'adapter.displayed_gallery_related_element.php',
             'A_Gallery_Display_Factory' => 'adapter.gallery_display_factory.php',
             'C_Gallery_Display_Installer' => 'class.gallery_display_installer.php',
             'A_Gallery_Display_View' => 'adapter.gallery_display_view.php',

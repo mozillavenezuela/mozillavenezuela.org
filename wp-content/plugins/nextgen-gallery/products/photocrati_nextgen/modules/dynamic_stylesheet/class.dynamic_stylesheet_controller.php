@@ -17,7 +17,7 @@ class C_Dynamic_Stylesheet_Controller extends C_MVC_Controller
 	function initialize()
 	{
 		parent::initialize();
-		$this->_app = C_NextGen_Global_Settings::get_instance()->dynamic_stylesheet_slug;
+		$this->_app = C_NextGen_Settings::get_instance()->dynamic_stylesheet_slug;
 	}
 
 	static function &get_instance($context=FALSE)

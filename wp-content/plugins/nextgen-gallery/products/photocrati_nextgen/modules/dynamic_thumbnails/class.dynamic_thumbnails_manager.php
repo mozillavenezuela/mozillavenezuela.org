@@ -4,7 +4,7 @@ class Mixin_Dynamic_Thumbnails_Manager extends Mixin
 {
 	function get_route_name()
 	{
-		return C_NextGen_Global_Settings::get_instance()->get('dynamic_thumbnail_slug');
+		return C_NextGen_Settings::get_instance()->get('dynamic_thumbnail_slug');
 	}
 
 	function _get_params_sanitized($params)

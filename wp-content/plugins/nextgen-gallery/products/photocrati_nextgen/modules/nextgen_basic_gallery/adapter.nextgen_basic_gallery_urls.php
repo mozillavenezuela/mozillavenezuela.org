@@ -25,6 +25,7 @@ class A_NextGen_Basic_Gallery_Urls extends Mixin
 		if ($key == 'show') {
             if ($value == NEXTGEN_GALLERY_BASIC_SLIDESHOW) $value = 'slideshow';
             elseif ($value == NEXTGEN_GALLERY_BASIC_THUMBNAILS) $value = 'thumbnails';
+            elseif ($value == NEXTGEN_GALLERY_NEXTGEN_BASIC_IMAGEBROWSER) $value = 'imagebrowser';
             return '/'.$value;
         }
         elseif ($key == 'page') {
@@ -57,7 +58,7 @@ class A_NextGen_Basic_Gallery_Urls extends Mixin
 		);
 
 		// Get the settings manager
-		$settings	= C_NextGen_Global_Settings::get_instance();
+		$settings	= C_NextGen_Settings::get_instance();
 
 		// Create the regex pattern
 		$sep		= preg_quote($settings->router_param_separator, '#');

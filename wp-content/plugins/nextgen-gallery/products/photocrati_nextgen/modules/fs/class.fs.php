@@ -295,11 +295,13 @@ class Mixin_Fs_Instance_Methods extends Mixin
                 $one = (FALSE === $one ? 0 : count($one) + 1);
                 $two = (FALSE === $two ? 0 : count($two) + 1);
                 if (!empty($protocol)) {
-                    if (@$retval[$ndx] !== $val || $two >= $one)
+					$existing_val = isset($retval[$ndx]) ? $retval[$ndx] : NULL;
+                    if ($existing_val !== $val || $two >= $one)
                         $retval[] = $val;
                 }
                 else {
-                    if (@$retval[$ndx] !== $val && $two >= $one)
+					$existing_val = isset($retval[$ndx]) ? $retval[$ndx] : NULL;
+                    if ($existing_val !== $val && $two >= $one)
                         $retval[] = $val;
                 }
             }

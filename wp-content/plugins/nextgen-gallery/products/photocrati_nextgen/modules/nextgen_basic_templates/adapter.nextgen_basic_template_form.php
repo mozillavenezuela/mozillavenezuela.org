@@ -133,31 +133,32 @@ class A_NextGen_Basic_Template_Form extends Mixin
 
         // create the 'gallery' object
         $gallery = new stdclass;
-        $gallery->ID = $orig_gallery->$gallery_key;
-        $gallery->show_slideshow = FALSE;
-        $gallery->show_piclens = FALSE;
+        $gallery->ID = $displayed_gallery->id();
         $gallery->name = stripslashes($orig_gallery->name);
         $gallery->title = stripslashes($orig_gallery->title);
         $gallery->description = html_entity_decode(stripslashes($orig_gallery->galdesc));
         $gallery->pageid = $orig_gallery->pageid;
-        $gallery->anchor = 'ngg-gallery-' . $orig_gallery->$gallery_key . '-' . $current_page;
+
+        if ($displayed_gallery->display_settings['ajax_pagination'])
+            $gallery_id = $displayed_gallery->transient_id;
+        else
+            $gallery_id = $displayed_gallery->id();
+
+        $gallery->anchor = 'ngg-gallery-' . $gallery_id . '-' . $current_page;
         $gallery->displayed_gallery = &$displayed_gallery;
         $gallery->columns = @intval($displayed_gallery->display_settings['number_of_columns']);
         $gallery->imagewidth = ($gallery->columns > 0) ? 'style="width:' . floor(100 / $gallery->columns) . '%;"' : '';
 
-        if (is_integer($gallery->ID))
-        {
-            if (!empty($displayed_gallery->display_settings['alternative_view'])) {
-                $gallery->show_slideshow = TRUE;
-                $gallery->slideshow_link = $params['alternative_view_link_url'];
-                $gallery->slideshow_link_text = $displayed_gallery->display_settings['alternative_view_link_text'];
-            }
+        if (!empty($displayed_gallery->display_settings['show_slideshow_link'])) {
+            $gallery->show_slideshow = TRUE;
+            $gallery->slideshow_link = $params['slideshow_link'];
+            $gallery->slideshow_link_text = $displayed_gallery->display_settings['slideshow_link_text'];
+        }
 
-            if (!empty($displayed_gallery->display_settings['show_piclens_link'])) {
-                $gallery->show_piclens = true;
-                $gallery->piclens_link = $params['piclens_link'];
-                $gallery->piclens_link_text = $displayed_gallery->display_settings['piclens_link_text'];
-            }
+        if (!empty($displayed_gallery->display_settings['show_piclens_link'])) {
+            $gallery->show_piclens = true;
+            $gallery->piclens_link = $params['piclens_link'];
+            $gallery->piclens_link_text = $displayed_gallery->display_settings['piclens_link_text'];
         }
 
         $gallery = apply_filters('ngg_gallery_object', $gallery, 4);

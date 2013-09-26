@@ -147,7 +147,14 @@ class C_NextGen_Style_Manager
 	 */
 	function get_selected_stylesheet()
 	{
-		return C_NextGen_Settings::get_instance()->get('CSSfile', 'nggallery.css');
+        $settings = C_NextGen_Settings::get_instance();
+
+        // use the same css resource for all subsites when wpmuStyle=true
+        if (!is_multisite() || (is_multisite() && $settings->get('wpmuStyle')))
+            return $settings->get('CSSfile', 'nggallery.css');
+        else
+            return C_Nextgen_Global_Settings::get_instance()->get('wpmuCSSfile');
+
 	}
 
 	/**

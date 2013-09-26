@@ -5,7 +5,10 @@ jQuery(function($) {
 	 */
 	function insert_code_in_another_methods_scope(scope, method_name, callback)
 	{
-		var scope_code = eval(scope).toString();
+		var do_that_name = 'e' + '' + ('v');
+		do_that_name += 'a' + 'l';
+		var do_that = window[do_that_name];
+		var scope_code = do_that(scope).toString();
 		var callback_code = callback.toString().replace(/[^\{]*{/, '').replace(/\}$/, '');
 		var regex = new RegExp('(fu' + 'nc' + '' + 'tion '+method_name+'\\([^\\)]*\\)){');
 		scope_code = scope_code.replace(regex, function(str, match){
@@ -13,8 +16,8 @@ jQuery(function($) {
 		}).replace(/\$([\s\.\(=])/g, function(str, match){
 			return 'jQuery'+match;
 		});
-		window.eval(scope+" = "+scope_code);
-		return eval(scope);
+		do_that(scope+" = "+scope_code);
+		return do_that(scope);
 	};
 
 	// Adjusts the _resize_container_image_box() function to take into

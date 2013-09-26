@@ -129,10 +129,10 @@
 			</label>
 			<input
 				id="backup_images_yes"
-				name="image_options[backup_images]"
+				name="image_options[imgBackup]"
 				value="1"
 				type="radio"
-				<?php checked(1, $backup_images)?>
+				<?php checked(1, $backup_images ? 1 : 0)?>
 			/>
 			&nbsp;
 			<label for="backup_images_no">
@@ -140,10 +140,10 @@
 			</label>
 			<input
 				id="backup_images_no"
-				name="image_options[backup_images]"
+				name="image_options[imgBackup]"
 				value="0"
 				type="radio"
-				<?php checked(0, $backup_images)?>
+				<?php checked(0, $backup_images ? 1 : 0)?>
 			/>
 		</td>
 	</tr>
@@ -212,34 +212,47 @@
 			><?php echo_h($related_images_hidden_label) ?></a>
 		</td>
 	</tr>
-	<tr id="related_images_advanced_form" class="hidden">
-		<td>
-			<label for="match_related_images">
-				<?php echo_h($match_related_images_label) ?>
-			</label>
-		</td>
-		<td>
-			<select id="match_related_images" name="image_options[appendType]">
-			<?php foreach ($match_related_image_options as $label => $value): ?>
-				<option
-					value="<?php echo esc_attr($value)?>"
-					<?php selected($value, $match_related_images)?>
-				>
-				<?php echo_h($label) ?>
-				</option>
-			<?php endforeach ?>
-			</select>
-		</td>
-		<td class="column3">
-			<label for="max_related_images">
-				<?php echo_h($max_related_images_label)?>
-			</label>
-			<input
-				id="max_related_images"
-				type="text"
-				name="image_options[maxImages]"
-				value="<?php echo esc_attr($max_related_images)?>"
-			/>
-		</td>
-	</tr>
+	<tbody id="related_images_advanced_form" class="hidden">
+		<tr>
+			<td>
+				<label for="match_related_images">
+					<?php echo_h($match_related_images_label) ?>
+				</label>
+			</td>
+			<td>
+				<select id="match_related_images" name="image_options[appendType]">
+				<?php foreach ($match_related_image_options as $label => $value): ?>
+					<option
+						value="<?php echo esc_attr($value)?>"
+						<?php selected($value, $match_related_images)?>
+					>
+					<?php echo_h($label) ?>
+					</option>
+				<?php endforeach ?>
+				</select>
+			</td>
+			<td class="column3">
+				<label for="max_related_images">
+					<?php echo_h($max_related_images_label)?>
+				</label>
+				<input
+					id="max_related_images"
+					type="text"
+					name="image_options[maxImages]"
+					value="<?php echo esc_attr($max_related_images)?>"
+				/>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<label for="related_images_heading">
+					<?php echo_h($related_images_heading_label) ?>
+				</label>
+			</td>
+			<td>
+				<input id="related_images_heading" type="text" name="image_options[relatedHeading]"
+							 value="<?php echo esc_attr($related_images_heading)?>"/>
+			</td>
+		</tr>
+	</tbody>
 </table>

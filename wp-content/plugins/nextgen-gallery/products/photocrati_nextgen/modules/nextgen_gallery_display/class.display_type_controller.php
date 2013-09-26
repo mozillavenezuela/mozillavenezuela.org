@@ -75,7 +75,7 @@ class Mixin_Display_Type_Controller extends Mixin
         $this->object->_add_script_data(
             'ngg_common',
             'nextgen_lightbox_settings',
-            array('static_path' => $this->object->get_static_relpath('', 'lightbox')),
+            array('static_path' => $this->object->get_static_relpath('', 'photocrati-lightbox')),
             TRUE,
             FALSE
         );

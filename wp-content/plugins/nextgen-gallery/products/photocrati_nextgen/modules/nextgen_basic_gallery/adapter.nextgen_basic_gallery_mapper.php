@@ -71,7 +71,9 @@ class Hook_NextGen_Basic_Gallery_Defaults extends Hook
         $this->object->_set_default_value($entity, 'settings', 'thumbnail_height', $settings->thumbheight);
         $this->object->_set_default_value($entity, 'settings', 'show_all_in_lightbox', $settings->galHiddenImg);
         $this->object->_set_default_value($entity, 'settings', 'ajax_pagination', $settings->galAjaxNav);
+        $this->object->_set_default_value($entity, 'settings', 'use_imagebrowser_effect', $settings->galImgBrowser);
         $this->object->_set_default_value($entity, 'settings', 'template', '');
+        $this->object->_set_default_value($entity, 'settings', 'display_no_images_error', 1);
 
         // TODO: Should this be called enable pagination?
         $this->object->_set_default_value($entity, 'settings', 'disable_pagination', 0);

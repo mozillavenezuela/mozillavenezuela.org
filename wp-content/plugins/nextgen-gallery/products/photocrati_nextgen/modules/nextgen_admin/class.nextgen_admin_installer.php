@@ -8,7 +8,7 @@ class C_NextGen_Admin_Installer
 		// were statically set rather than dynamically using a handler. Therefore, we need
 		// to delete those static values
 		$module_name = 'photocrati-nextgen_admin';
-		$settings = C_NextGen_Global_Settings::get_instance();
+		$settings = C_NextGen_Settings::get_instance();
 		$modules = $settings->pope_module_list;
 		$cleanup = FALSE;
 		if (!isset($modules[$module_name])) $cleanup = FALSE;

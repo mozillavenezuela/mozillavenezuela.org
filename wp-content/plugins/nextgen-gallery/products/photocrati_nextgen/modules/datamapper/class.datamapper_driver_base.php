@@ -267,9 +267,10 @@ class Mixin_DataMapper_Driver_Base extends Mixin
 			// A bind could be an array, used for the 'IN' operator
 			// or a simple scalar value. We need to convert arrays
 			// into scalar values
-			if (is_object($bind)) $bind = (array)$bind;
-			if (is_array($bind)) {
-				if (empty($bind)) return FALSE;
+			if (is_object($bind))
+                $bind = (array)$bind;
+
+			if (is_array($bind) && !empty($bind)) {
 				foreach ($bind as &$val) {
 					if (!is_numeric($val)) {
 						$val = '"'.addslashes($val).'"';
@@ -278,7 +279,12 @@ class Mixin_DataMapper_Driver_Base extends Mixin
 				}
 				$bind = implode(',', $bind);
 			}
-			elseif(!is_numeric($bind)) $numeric = FALSE;
+            else if (is_array($bind) && empty($bind)) {
+                $bind = 'NULL';
+            }
+			else if(!is_numeric($bind)) {
+                $numeric = FALSE;
+            }
 		}
 		$condition = $wpdb->prepare($condition, $binds);
 

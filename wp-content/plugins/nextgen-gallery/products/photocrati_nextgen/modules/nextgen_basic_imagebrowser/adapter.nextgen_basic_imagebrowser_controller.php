@@ -3,7 +3,7 @@
 /**
  * Provides rendering logic for the NextGen Basic ImageBrowser
  */
-class A_NextGen_Basic_ImageBrowser_Controller extends Mixin
+class A_NextGen_Basic_ImageBrowser_Controller extends Mixin_NextGen_Basic_Gallery_Controller
 {
 	/**
 	 * Renders the front-end display for the imagebrowser display type
@@ -98,17 +98,21 @@ class A_NextGen_Basic_ImageBrowser_Controller extends Mixin
         $picture_list_pos = $key + 1;
 
         // our image to display
-        $picture = new C_Image_Wrapper($imap->find($numeric_pid), NULL, TRUE);
+        $picture = new C_Image_Wrapper($imap->find($numeric_pid), $displayed_gallery, TRUE);
         $picture = apply_filters('ngg_image_object', $picture, $numeric_pid);
 
         // determine URI to the next & previous images
         $back_pid = ($key >= 1) ? $picture_array[$key - 1] : end($picture_array);
 
+        // 'show' is set when using the imagebrowser as an alternate view to a thumbnail or slideshow
+        // for which the basic-gallery module will rewrite the show parameter into existence as long as 'image'
+        // is set. We remove 'show' here so navigation appears fluid.
         $prev_image_link = $this->object->set_param_for(
             $application->get_routed_url(TRUE),
             'pid',
             $picture_list[$back_pid]->image_slug
         );
+        $prev_image_link = trailingslashit($this->object->remove_param_for($prev_image_link, 'show', $displayed_gallery->id()));
 
         $next_pid = ($key < ($total - 1)) ? $picture_array[$key + 1] : reset($picture_array);
         $next_image_link = $this->object->set_param_for(
@@ -116,6 +120,7 @@ class A_NextGen_Basic_ImageBrowser_Controller extends Mixin
             'pid',
             $picture_list[$next_pid]->image_slug
         );
+        $next_image_link = trailingslashit($this->object->remove_param_for($next_image_link, 'show', $displayed_gallery->id()));
 
         // css class
         $anchor = 'ngg-imagebrowser-' . $picture->galleryid . '-' . (get_the_ID() == false ? 0 : get_the_ID());

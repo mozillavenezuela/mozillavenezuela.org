@@ -41,7 +41,7 @@ if (!class_exists('C_Photocrati_Settings_Manager_Base')) {
 		 */
 		protected function _get_option_handler($option_name, $method='get')
 		{
-			$retval = NULL;;
+			$retval = NULL;
 
 			if (isset($this->_option_handlers[$option_name])) {
 				if (!is_object($this->_option_handlers[$option_name])) {

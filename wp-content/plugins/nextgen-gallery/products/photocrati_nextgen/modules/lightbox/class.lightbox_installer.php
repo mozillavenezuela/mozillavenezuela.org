@@ -128,7 +128,7 @@ class C_Lightbox_Installer
 		$this->install_lightbox(
 			'highslide',
             'Highslide',
-			'class="highslide" onclick="return hs.expand(this, galleryOptions);"',
+			'class="highslide" onclick="return hs.expand(this, {slideshowGroup: ' . "'%GALLERY_NAME%'" . '});"',
 			array('photocrati-lightbox#highslide/highslide.css'),
 			array('photocrati-lightbox#highslide/highslide-full.packed.js', 'photocrati-lightbox#highslide/nextgen_highslide_init.js'),
 			array('nextgen_highslide_graphics_dir' => $this->router->get_static_url('photocrati-lightbox#highslide/graphics'))
@@ -171,6 +171,6 @@ class C_Lightbox_Installer
 	 */
 	function uninstall($hard = FALSE)
 	{
-		if ($hard) $this->mapper->delete()->run_query();
+        $this->mapper->delete()->run_query();
 	}
 }

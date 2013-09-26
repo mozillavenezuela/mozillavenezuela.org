@@ -29,7 +29,7 @@ class M_NextGen_Admin extends C_Base_Module
 		C_Photocrati_Installer::add_handler($this->module_id, 'C_NextGen_Admin_Installer');
 
 		include_once('class.nextgen_admin_option_handler.php');
-		C_NextGen_Global_Settings::add_option_handler('C_NextGen_Admin_Option_Handler', array(
+		C_NextGen_Settings::add_option_handler('C_NextGen_Admin_Option_Handler', array(
 			'jquery_ui_theme',
 			'jquery_ui_theme_version',
 			'jquery_ui_theme_url'

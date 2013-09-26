@@ -172,6 +172,7 @@ class nggXMLRPC{
 		//clean filename and extract extension
 		$filepart = nggGallery::fileinfo( $name );
 		$name = $filepart['basename'];
+		$gallery_path = $gallery->path;
 
 		// check for allowed extension and if it's an image file
 		$ext = array('jpg', 'png', 'gif');
@@ -209,9 +210,12 @@ class nggXMLRPC{
 			logIO('O', '(NGG) ' . $errorString);
 			return new IXR_Error(500, $errorString);
 		}
+		
+		if (!empty($gallery->path))
+			$gallery_path = $gallery->path;
 
 		// this is the dir to the gallery
-		$path = WINABSPATH . $gallery->path;
+		$path = WINABSPATH . $gallery_path;
 
 		// check if the filename already exist, if not add a counter index
 		$filename = wp_unique_filename( $path, $name );

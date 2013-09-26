@@ -8,8 +8,9 @@ class C_Photocrati_Resource_Manager
 	var $styles = '';
 	var $scripts = '';
 	var $other_output = '';
-	var $wrote_footer = FALSE;
-	var $run_shutdown = FALSE;
+	var $wrote_footer =  FALSE;
+	var $run_shutdown =  FALSE;
+	var $valid_request = TRUE;
 
 	/**
 	 * Start buffering all generated output. We'll then do two things with the buffer
@@ -18,33 +19,30 @@ class C_Photocrati_Resource_Manager
 	 */
 	function __construct()
 	{
-		// Add default request exceptions
-		add_filter('run_ngg_resource_manager', array(&$this, 'is_valid_request'));
+		// Validate the request
+		$this->validate_request();
 
-		// Check if we should process this request
-		if (apply_filters('run_ngg_resource_manager', TRUE)) {
-			add_action('init',array(&$this, 'start_buffer'), 1);
-			add_action('wp_print_footer_scripts', array(&$this, 'get_resources'), 1);
-			add_action('admin_print_footer_scripts', array(&$this, 'get_resources'), 1);
-			add_action('shutdown', array(&$this, 'shutdown'));
-		}
+		add_action('init',array(&$this, 'start_buffer'), 1);
 	}
 
 	/**
 	 * Determines if the resource manager should perform it's routines for this request
-	 * @param $retval
 	 * @return bool
 	 */
-	function is_valid_request($retval)
+	function validate_request()
 	{
+		$retval = TRUE;
+
 		if (is_admin()) {
 			if (isset($_REQUEST['page']) && !preg_match("#^(ngg|nextgen)#", $_REQUEST['page'])) $retval = FALSE;
 		}
 
 		if (strpos($_SERVER['REQUEST_URI'], 'wp-admin/update') !== FALSE) $retval = FALSE;
-		else if (isset($_GET['display_gallery_iframe'])) $retval = FALSE;
+		else if (isset($_GET['display_gallery_iframe'])) 				  $retval = FALSE;
+		else if (preg_match("/(js|css|xsl|xml)$/", $_SERVER['REQUEST_URI'])) $retval = FALSE;
+        else if (defined('WP_ADMIN') && WP_ADMIN && defined('DOING_AJAX') && DOING_AJAX) $retval = FALSE;
 
-		return $retval;
+		$this->valid_request = $retval;
 	}
 
 	/**
@@ -52,8 +50,14 @@ class C_Photocrati_Resource_Manager
 	 */
 	function start_buffer()
 	{
-		ob_start(array(&$this, 'output_buffer_handler'));
-		ob_start(array(&$this, 'get_buffer'));
+		if (apply_filters('run_ngg_resource_manager', $this->valid_request)) {
+			ob_start(array(&$this, 'output_buffer_handler'));
+			ob_start(array(&$this, 'get_buffer'));
+
+			add_action('wp_print_footer_scripts', array(&$this, 'get_resources'), 1);
+			add_action('admin_print_footer_scripts', array(&$this, 'get_resources'), 1);
+			add_action('shutdown', array(&$this, 'shutdown'));
+		}
 	}
 
 	/**
@@ -74,8 +78,12 @@ class C_Photocrati_Resource_Manager
 
 		$this->wrote_footer = TRUE;
 	}
-	
-	
+
+	/**
+	 * Output the buffer after PHP execution has ended (but before shutdown)
+	 * @param $content
+	 * @return string
+	 */
 	function output_buffer_handler($content)
 	{
 		return $this->output_buffer();
@@ -98,18 +106,20 @@ class C_Photocrati_Resource_Manager
 	 */
 	function move_resources()
 	{
-		// Move stylesheets to head
-		if ($this->styles) {
-			$this->buffer = str_ireplace('</head>', $this->styles.'</head>', $this->buffer);
-		}
+		if ($this->valid_request) {
+			// Move stylesheets to head
+			if ($this->styles) {
+				$this->buffer = str_ireplace('</head>', $this->styles.'</head>', $this->buffer);
+			}
 
-		// Move the scripts to the bottom of the page
-		if ($this->scripts) {
-			$this->buffer = str_ireplace('</body>', $this->scripts.'</body>', $this->buffer);
-		}
+			// Move the scripts to the bottom of the page
+			if ($this->scripts) {
+				$this->buffer = str_ireplace('</body>', $this->scripts.'</body>', $this->buffer);
+			}
 
-		if ($this->other_output) {
-			$this->buffer = str_replace('</body>', $this->other_output.'</body>', $this->buffer);
+			if ($this->other_output) {
+				$this->buffer = str_replace('</body>', $this->other_output.'</body>', $this->buffer);
+			}
 		}
 	}
 
@@ -124,14 +134,19 @@ class C_Photocrati_Resource_Manager
 
 			// If W3TC is installed and activated, we can't output the
 			// scripts and manipulate the buffer, so we can only provide a warning
-			if (defined('W3TC')) {
-				define('DONOTCACHEPAGE', TRUE);
+			if (defined('W3TC') && defined('WP_DEBUG') && WP_DEBUG) {
+				if (defined('DONOTCACHEPAGE')) define('DONOTCACHEPAGE', TRUE);
 				if (!did_action('wp_footer')) {
 					error_log("We're sorry, but your theme's page template didn't make a call to wp_footer(), which is required by NextGEN Gallery. Please add this call to your page templates.");
 				}
 				else {
 					error_log("We're sorry, but your theme's page template didn't make a call to wp_print_footer_scripts(), which is required by NextGEN Gallery. Please add this call to your page templates.");
 				}
+			}
+
+			// We don't want to manipulate the buffer if it doesn't contain HTML
+			elseif (strpos($this->buffer, '</body>') === FALSE) {
+				$this->valid_request = FALSE;
 			}
 
 			// The output_buffer() function has been called in the PHP shutdown callback

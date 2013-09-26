@@ -129,6 +129,8 @@ class nggMeta{
                     $meta['created_timestamp'] = date_i18n(get_option('date_format') . ' ' . get_option('time_format'), $this->exif_date2ts($exif['DateTimeDigitized']));
                 else if (!empty($exif['DateTimeOriginal']))
                     $meta['created_timestamp'] = date_i18n(get_option('date_format') . ' ' . get_option('time_format'), $this->exif_date2ts($exif['DateTimeOriginal']));
+				else if (!empty($exif['FileDateTime']))
+					$meta['created_timestamp'] = date_i18n(get_option('date_format') . ' ' . get_option('time_format'), $this->exif_date2ts($exif['FileDateTime']));
                 if (!empty($exif['FocalLength']))
                     $meta['focal_length'] = $this->exif_frac2dec( $exif['FocalLength'] ) . __(' mm','nggallery');
                 if (!empty($exif['ISOSpeedRatings']))
@@ -498,25 +500,37 @@ class nggMeta{
      */
     function get_date_time() {
 
-        $date_time = time();
+		$date = time();
 
-        // get exif - data
-        if ( isset( $this->exif_data['EXIF']) ) {
+		// Try XMP first
+		if (isset($this->xmp_array['created_timestamp'])) {
+			$date = @strtotime($this->xmp_array['created_timestamp']);
+		}
 
-            // try to read the date / time from the exif
-            foreach (array('DateTimeDigitized', 'DateTimeOriginal', 'FileDateTime') as $key) {
-                if (isset($this->exif_data['EXIF'][$key])) {
-                    $date_time = strtotime($this->exif_data['EXIF'][$key]);
-                    break;
-                }
-            }
-        } else {
-            // if no other date available, get the filetime
-            $date_time = @filectime($this->image->imagePath );
-        }
+		// Then EXIF
+		else if (isset($this->exif_array['created_timestamp'])) {
+			$date = @strtotime($this->exif_array['created_timestamp']);
+		}
+
+		// Then IPTC
+		else if (isset($this->iptc_array['created_date'])) {
+			$date = $this->iptc_array['created_date'];
+			if (isset($this->iptc_array['created_time'])) {
+				$date .= " {$this->iptc_array['created_time']}";
+			}
+			$date = @strtotime($date);
+		}
+
+		// If all else fails, use the file creation time
+		else if ($this->image->imagePath) {
+			$date = @filectime($this->image->imagePath);
+		}
+
+		// Failback
+		if (!$date) $date = time();
 
         // Return the MySQL format
-        $date_time = date( 'Y-m-d H:i:s', $date_time );
+        $date_time = date( 'Y-m-d H:i:s', $date);
 
         return $date_time;
     }

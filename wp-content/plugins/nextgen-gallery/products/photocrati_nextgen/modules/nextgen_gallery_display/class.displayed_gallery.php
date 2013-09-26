@@ -76,7 +76,7 @@ class Mixin_Displayed_Gallery_Validation extends Mixin
 
 			// If no maximum_entity_count has been given, then set a maximum
 			if (!isset($this->object->maximum_entity_count)) {
-				$this->object->maximum_entity_count = C_Photocrati_Global_Settings_Manager::get('maximum_entity_count', 500);
+				$this->object->maximum_entity_count = C_Photocrati_Settings_Manager::get('maximum_entity_count', 500);
 			}
 
 		}
@@ -281,14 +281,27 @@ class Mixin_Displayed_Gallery_Queries extends Mixin
 			// Container ids are tags
 			if ($source_obj->name == 'tags') {
 				$term_ids = $this->object->get_term_ids_for_tags($this->object->container_ids);
-                if ($term_ids) {
-				    $mapper->where(array("{$image_key} IN %s",get_objects_in_term($term_ids, 'ngg_tag')));
-                }
+				$mapper->where(array("{$image_key} IN %s",get_objects_in_term($term_ids, 'ngg_tag')));
 			}
 
 			// Container ids are gallery ids
 			else {
 				$mapper->where(array("galleryid IN %s", $this->object->container_ids));
+			}
+		}
+
+		// Filter based on excluded container ids
+		if ($this->object->excluded_container_ids) {
+
+			// Container ids are tags
+			if ($source_obj->name == 'tags') {
+				$term_ids = $this->object->get_term_ids_for_tags($this->object->excluded_container_ids);
+				$mapper->where(array("{$image_key} NOT IN %s",get_objects_in_term($term_ids, 'ngg_tag')));
+			}
+
+			// Container ids are gallery ids
+			else {
+				$mapper->where(array("galleryid NOT IN %s", $this->object->excluded_container_ids));
 			}
 		}
 
@@ -565,7 +578,7 @@ class Mixin_Displayed_Gallery_Queries extends Mixin
 		              		unset($counts[$id]);
                 		}
                 	}
-                	
+
                 	$retval[] = $gallery;
                 }
             }
@@ -710,23 +723,34 @@ class Mixin_Displayed_Gallery_Queries extends Mixin
 	{
 		global $wpdb;
 
-        // don't run for galleries without a container-id, like the tagcloud
-        if (!$tags && empty($this->object->container_ids))
-            return array();
-
         // If no tags were provided, get them from the container_ids
         if (!$tags) $tags = $this->object->container_ids;
 
 		// Convert container ids to a string suitable for WHERE IN
 		$container_ids = array();
-		foreach ($tags as $container) {
-			$container_ids[]= "'{$container}'";
+		if (!in_array('All', $tags)) {
+			foreach ($tags as $container) {
+				$container_ids[]= "'{$container}'";
+			}
+			$container_ids = implode(',', $container_ids);
 		}
-		$container_ids = implode(',', $container_ids);
+
+		// Construct query
+		$query = $wpdb->prepare("
+			SELECT {$wpdb->term_taxonomy}.term_id FROM {$wpdb->term_taxonomy}
+			INNER JOIN {$wpdb->terms} ON {$wpdb->term_taxonomy}.term_id = {$wpdb->terms}.term_id
+			WHERE {$wpdb->term_taxonomy}.term_id = {$wpdb->terms}.term_id
+			AND taxonomy = %s
+		", 'ngg_tag');
+
+		// Filter by selected tags
+		if ($container_ids) $query .= "AND (slug IN ({$container_ids}) OR name IN ({$container_ids}))";
+
+		// Add order by clause
+		$query .= "ORDER BY {$wpdb->terms}.term_id";
 
 		// Get all term_ids for each image tag slug
 		$term_ids = array();
-		$query = $wpdb->prepare("SELECT term_id FROM $wpdb->terms WHERE slug IN ({$container_ids}) ORDER BY term_id ASC ", NULL);
 		foreach ($wpdb->get_results($query) as $row) {
 			$term_ids[] = $row->term_id;
 		}
@@ -875,7 +899,9 @@ class Mixin_Displayed_Gallery_Instance_Methods extends Mixin
 
 		$group = 'displayed_galleries';
 		$key = C_Photocrati_Cache::generate_key($this->object->get_entity(), $group);
-		C_Photocrati_Cache::set($key, $this->object->get_entity(), $group);
+		if (is_null(C_Photocrati_Cache::get($key, NULL, $group))) {
+			C_Photocrati_Cache::set($key, $this->object->get_entity(), $group, 1800);
+		}
 
         return $key;
     }

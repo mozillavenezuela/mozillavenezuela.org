@@ -260,7 +260,7 @@ jQuery(function($){
 	 * A collection that can fetch it's entities from the server
 	**/
 	Ngg.Models.Remote_Collection			= Ngg.Models.SelectableItems.extend({
-		fetch_limit: 50,
+		fetch_limit: 5000,
 		in_progress: false,
 		fetch_url:   photocrati_ajax.url,
 		action: 	 '',

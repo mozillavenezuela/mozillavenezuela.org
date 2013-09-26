@@ -13,12 +13,13 @@ class C_Image_Wrapper
     public $_orig_image_id; // original image ID
     public $_cache_overrides; // allow for forcing variable values
     public $_legacy = FALSE;
+    public $_displayed_gallery; // cached object
 
     /**
      * Constructor. Converts the image class into an array and fills from defaults any missing values
      *
      * @param object $gallery Individual result from displayed_gallery->get_entities()
-     * @param object $displayed_gallery Displayed gallery
+     * @param object $displayed_gallery Displayed gallery -- MAY BE NULL
      * @param bool $legacy Whether the image source is from NextGen Legacy or NextGen
      * @return void
      */
@@ -82,11 +83,11 @@ class C_Image_Wrapper
 
         // cache the results
         ksort($image);
-        $this->_cache = $image;
         $id_field = (!empty($image['id_field']) ? $image['id_field'] : 'pid');
+        $this->_cache = (array) apply_filters('ngg_image_object', (object) $image, $image[$id_field]);
         $this->_orig_image_id = $image[$id_field];
-
         $this->_legacy = $legacy;
+        $this->_displayed_gallery = $displayed_gallery;
     }
 
     public function __set($name, $value)
@@ -402,27 +403,26 @@ class C_Image_Wrapper
     */
     function get_thumbcode($gallery_name = '')
     {
-        $settings = $this->get_settings();
-
-        // clean up the name
-        $gallery_name = sanitize_title($gallery_name);
-
-        // get the effect code
-        if ('none' != $settings->get('thumbEffect'))
+        if (empty($this->_displayed_gallery))
         {
-            $this->_cache['thumbcode'] = stripslashes($settings->get('thumbCode'));
-        }
-
-        // for highslide to a different approach
-        if ('highslide' == $settings->get('thumbEffect'))
-        {
-            $this->_cache['thumbcode'] = str_replace('%GALLERY_NAME%', "'{$gallery_name}'", $this->_cache['thumbcode']);
+            $effect_code = C_NextGen_Settings::get_instance()->thumbCode;
+            $effect_code = str_replace('%GALLERY_ID%', $gallery_name, $effect_code);
+            $effect_code = str_replace('%GALLERY_NAME%', $gallery_name, $effect_code);
+            $effect_code = apply_filters('ngg_get_thumbcode', $effect_code, $this);
+            $retval = $effect_code;
         }
         else {
-            $this->_cache['thumbcode'] = str_replace('%GALLERY_NAME%', $gallery_name, $this->_cache['thumbcode']);
+            $controller = C_Component_Registry::get_instance()->get_utility('I_Display_Type_Controller');
+            $retval = $controller->get_effect_code($this->_displayed_gallery);
+
+            // This setting requires that we disable the effect code
+            $ds = $this->_displayed_gallery->display_settings;
+            if (isset($ds['use_imagebrowser_effect']) && $ds['use_imagebrowser_effect'])
+                $retval = '';
         }
 
-        return apply_filters('ngg_get_thumbcode', $this->_cache['thumbcode'], $this);
+        $this->_cache['thumbcode'] = $retval;
+        return $retval;
     }
 
     /**

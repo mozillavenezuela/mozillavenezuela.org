@@ -119,6 +119,8 @@ if (!class_exists('nggLoader')) {
                 case 'image':
                     require_once (dirname (__FILE__) . '/nggshow.php');
                     break;
+                default:
+                    return;
             }
 			C_NextGEN_Bootstrap::shutdown();
 		}

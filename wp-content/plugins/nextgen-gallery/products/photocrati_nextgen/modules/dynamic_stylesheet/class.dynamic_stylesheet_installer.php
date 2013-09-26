@@ -4,7 +4,7 @@ class C_Dynamic_Stylesheet_Installer
 {
 	function __construct()
 	{
-		$this->settings = C_NextGen_Global_Settings::get_instance();
+		$this->settings = C_NextGen_Settings::get_instance();
 	}
 
 	function install()

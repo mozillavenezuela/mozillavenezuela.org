@@ -119,6 +119,10 @@ For more information, feel free to visit the official website for the NextGEN Ga
 == Frequently Asked Questions ==
 
 
+= Why are my galleries not opening up in a lightbox after I move my site? =
+
+This is often due to the URL paths to the CSS and JavaScript files used by the Lightbox Effects not being changed to relevant addresses based on the new site. This article will help sort out this issue if that is the case: <a href="http://www.nextgen-gallery.com/galleries-opening-lightbox/" target="_blank">Why are my galleries not opening up in a lightbox?</a>. 
+
 = Do you have documentation or tutorials? =
 
 Yes. See <a href="http://www.nextgen-gallery.com/help/" target="_blank">NextGEN Gallery Documentation</a>.
@@ -194,6 +198,59 @@ For more information, feel free to visit the official website for the NextGEN Ga
 
 
 == Changelog ==
+
+= V2.0.30 - 09.25.2013 =
+* NEW:     Restored the ability to use imagebrowser display type instead of a lightbox effect
+* Changed: Displayed galleries are no longer rendered in RSS feeds
+* Changed: Removed "Plugin Check" widget from overview page
+* Fixed:   Silence PHP warnings/errors in an output buffer for AJAX actions
+* Fixed:   Compatibility issue with WordPress SEO and broken site maps (and large error_logs)
+* Fixed:   Compatibility issue with AJAX Event Calendar (and possibly others)
+* Fixed:   Adjusted Photocrati Resource Manager to be third-party friendly
+* Fixed:   Fixed empty result set for displayed galleries selecting 'All' tags
+* Fixed:   URL generation for imagebrowser pagination links
+* Fixed:   Ensure that image meta is imported on creation
+* Fixed:   Ensure that transients are removed when an external object cache is used
+* Fixed:   Don't load pluggable.php. This will fix plugin conflicts
+* Fixed:   In Attach to Post interface, galleries created in one tab weren't showing in another
+* Fixed:   Don't output frame events cookie for XML-RPC requests
+
+= V2.0.27 - 09.18.2013 =
+* Fixed:   Reduce performance impact of purging displayed gallery transients
+
+= V2.0.25 - 09.18.2013 =
+* Reverting to the 2.0.21 codebase, due to major performance issues in 2.0.23 and 2.0.24
+
+= V2.0.23 - 09.16.2013 =
+* NEW:     WP-Cron job to periodically clean-up displayed gallery transients
+* NEW:     Added "excluded_container_ids" as parameter for ngg_images shortcode
+* Fixed:   Lightbox effect is honoured by all display types
+* Fixed:   Highslide displays images from the correct displayed galleries
+* Fixed:   Ensure that sub-albums display correctly when the word "album" is part of a slug
+* Fixed:   Ensure that sub-albums display correctly when numerical slugs are used
+* Fixed:   Related images heading only added when Related Images functionality is enabled
+* Fixed:   PHP Warning about undefined index when viewing basic albums
+* Fixed:   AJAX handling is third-party compatible
+* Fixed:   Image date is no longer overwritten when an image is modified
+* Fixed:   Fixed issue with displayed galleries using source='tags'
+* Fixed:   Problem with transient cache not getting flushed properly from Other Options page
+* Fixed:   Use correct gallery/transient ID when ajax pagination is used
+
+= V2.0.21 - 09.09.2013 =
+* NEW:	   Multisite support
+* Changed: Default image quality set to 100 for generated images
+* Changed: Removed dependence on simplehtmldom library
+* Fixed:   Related images functionality works as it did in 1.9.x
+* Fixed:   Don't compress inline JavaScript in post/page content
+* Fixed:   Click-to-advance slideshow behavior for slideshows
+* Fixed:   Security warnings from VaultPress
+* Fixed:   View as Slideshow link works with AJAX pagination
+* Fixed:   Broken links on Overview page
+* Fixed:   Backup images option
+* Fixed:   Stylesheet url generated correctly for Windows hosts
+* Fixed:   Compatibility with NextGen Custom Fields plugin
+* Fixed:   Compatibility with Adsense Explosion plugin
+* Fixed:   Suppress wp_footer notices unless WP_DEBUG is set to TRUE
 
 = V2.0.17 - 08.30.2013 =
 Fixed:     Match legacy behaviour when changing gallery path, i.e. don't move files

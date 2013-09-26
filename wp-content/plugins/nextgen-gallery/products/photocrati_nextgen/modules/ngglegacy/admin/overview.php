@@ -90,9 +90,7 @@ if ( !(get_locale() == 'en_US') )
 add_meta_box('ngg_about_meta_box', __('About', 'nggallery'), 'ngg_AboutMetaBox', 'ngg_overview', 'left', 'core');
 //add_meta_box('ngg_lastdonators', __('Recent donators', 'nggallery'), 'ngg_widget_overview_donators', 'ngg_overview', 'right', 'core');
 if ( !is_multisite() || is_super_admin() ) {
-    add_meta_box('ngg_plugin_check', __('Plugin Check', 'nggallery'), 'ngg_plugin_check', 'ngg_overview', 'right', 'core');
     add_meta_box('ngg_server', __('Server Settings', 'nggallery'), 'ngg_overview_server', 'ngg_overview', 'right', 'core');
-    add_meta_box('dashboard_plugins', __('Related plugins', 'nggallery'), 'ngg_widget_related_plugins', 'ngg_overview', 'left', 'core');
 }
 
 function ngg_AboutMetaBox()
@@ -112,7 +110,12 @@ function ngg_likeThisMetaBox() {
     echo sprintf(__('This plugin is primarily developed, maintained, supported and documented by <a href="%s" target="_blank">Photocrati Media</a> with a lot of love & effort. Any kind of contribution would be highly appreciated. Thanks!', 'nggallery'), 'http://www.photocrati.com/');
 	echo '</p><ul>';
 
-	$url = 'http://wordpress.org/extend/plugins/nextgen-gallery/' ;
+    $url = 'http://wordpress.org/plugins/nextgen-gallery/' ;
+    echo "<li style='padding-left: 38px; background:transparent url(" . NGGALLERY_URLPATH . "admin/images/icon-rating.png ) no-repeat scroll center left; background-position: 16px 50%; text-decoration: none;'><a href='{$url}' target='_blank'>";
+    _e('Please click "Works" on WordPress.org', 'nggallery');
+    echo "</a></li>";
+
+	$url = 'http://wordpress.org/plugins/nextgen-gallery/' ;
 	echo "<li style='padding-left: 38px; background:transparent url(" . NGGALLERY_URLPATH . "admin/images/icon-rating.png ) no-repeat scroll center left; background-position: 16px 50%; text-decoration: none;'><a href='{$url}' target='_blank'>";
 	_e('Give it a good rating on WordPress.org', 'nggallery');
 	echo "</a></li>";
@@ -131,210 +134,6 @@ function ngg_likeThisMetaBox() {
 
 	echo '
 	<div class="social" style="text-align:center;margin:15px 0 10px 0;"><span class="social" style="margin-right:5px;"><a target="_blank" href="http://twitter.com/NextGENGallery"><img title="Follow NextGEN on Twitter" alt="Twitter" src="' . NGGALLERY_URLPATH . 'admin/images/twitter.png"></a></span><span class="social" style="margin-right:5px;"><a target="_blank" href="http://www.facebook.com/NextGENGallery"><img title="Like NextGEN on Facebook" alt="Facebook" src="' . NGGALLERY_URLPATH . 'admin/images/facebook.png"></a></span><span class="social"><a target="_blank" href="http://plus.google.com/101643895780935290171"><img title="Add NextGEN to your circles" alt="GooglePlus" src="' . NGGALLERY_URLPATH . 'admin/images/googleplus.png"></a></span></div>';
-}
-
-/**
- * Ajax Check for conflict with other plugins/themes
- *
- * @return void
- */
-function ngg_plugin_check() {
-
-    global $ngg;
-?>
-<script type="text/javascript">
-(function($) {
-	nggPluginCheck = {
-
-		settings: {
-				img_run:  '<img src="<?php echo esc_url( admin_url( 'images/wpspin_light.gif' ) ); ?>" class="icon" alt="started"/>',
-                img_ok:   '<img src="<?php echo esc_url( admin_url( 'images/yes.png' ) ); ?>" class="icon" alt="ok"/>',
-                img_fail: '<img src="<?php echo esc_url( admin_url( 'images/no.png' ) ); ?>" class="icon" alt="failed" />',
-                domain:   '<?php echo esc_url( home_url('index.php', is_ssl() ? 'https' : 'http') ); ?>'
-		},
-
-        run: function( index, state ) {
- 			ul = $('#plugin_check');
-            s = this.settings;
-            var step = 1;
-            switch ( index ) {
-                case 1:
-                    this.check1();
-                    break;
-                case 2:
-                    this.check2( step );
-                    break;
-                case 3:
-                    this.check3();
-                    break;
-            }
-        },
-
-        // this function check if the json API will work with your theme & plugins
-        check1 : function() {
-            this.start(1);
-			var req = $.ajax({
-                dataType: 'json',
-			   	url: s.domain,
-			   	data:'callback=json&format=json&method=version',
-			   	cache: false,
-			   	timeout: 10000,
-			   	success: function(msg){
-                    if (msg.version == '<?php echo $ngg->version; ?>')
-                        nggPluginCheck.success(1);
-                    else
-                        nggPluginCheck.failed(1);
-			    },
-			    error: function (msg) {
-                    nggPluginCheck.failed(1);
-				},
-                complete: function () {
-                    nggPluginCheck.run(2);
-                }
-			});
-
-        },
-
-        // this function check if GD lib can create images & thumbnails
-        check2 : function( step ) {
-            if (step == 1) this.start(2);
-            var stop = false;
-			var req = $.ajax({
-                type: "POST",
-			   	url: ajaxurl,
-			   	data:"action=ngg_image_check&step=" + step,
-			   	cache: false,
-			   	timeout: 10000,
-			   	success: function(msg){
-                    if (msg.stat == 'ok') {
-                        nggPluginCheck.success(2, msg.message);
-                    } else {
-                        if (step == 1)
-                            nggPluginCheck.failed(2);
-                        stop = true;
-                    }
-
-			    },
-			    error: function (msg) {
-                    if (step == 1)
-                        nggPluginCheck.failed(2);
-                    stop = true;
-				},
-                complete: function () {
-                    step++;
-                    if (step <= 11 && stop == false)
-                        nggPluginCheck.check2(step);
-                    else
-                        nggPluginCheck.run(3);
-                }
-			});
-        },
-
-        // this function check if wp_head / wp_footer is avaiable
-        check3 : function() {
-            this.start(3);
-			var req = $.ajax({
-                type: "POST",
-			   	url: ajaxurl,
-			   	data:"action=ngg_test_head_footer",
-			   	cache: false,
-			   	timeout: 10000,
-			   	success: function(msg){
-                    if (msg == 'success')
-                        nggPluginCheck.success(3);
-                    else
-                        nggPluginCheck.failed(3, msg);
-			    },
-			    error: function (msg) {
-                    nggPluginCheck.failed(3);
-				}
-			});
-        },
-
-		start: function( id ) {
-
-            s = this.settings;
-            var field = "#check" + id;
-
-            if ( ul.find(field + " img").length == 0)
-                $(field).prepend( s.img_run );
-			else
-			    $(field + " img").replaceWith( s.img_run );
-
-            $(field + " .success").hide();
-            $(field + " .failed").hide();
-            $(field + " .default").replaceWith('<p class="default message"><?php echo esc_js( __('Running...', 'nggallery') ); ?></p> ');
-		},
-
-		success: function( id, msg ) {
-
-            s = this.settings;
-            var field = "#check" + id;
-
-            if ( ul.find(field + " img").length == 0)
-                $(field).prepend( s.img_ok );
-			else
-			    $(field + " img").replaceWith( s.img_ok );
-
-            $(field + " .default").hide();
-            if (msg)
-                $(field + " .success").replaceWith('<p class="success message">' + msg +' </p> ');
-            else
-                $(field + " .success").show();
-
-		},
-
-		failed: function( id, msg ) {
-
-            s = this.settings;
-            var field = "#check" + id;
-
-            if ( ul.find(field + " img").length == 0)
-                $(field).prepend( s.img_fail );
-			else
-			    $(field + " img").replaceWith( s.img_fail );
-
-            $(field + " .default").hide();
-            if (msg)
-                $(field + " .failed").replaceWith('<p class="failed message">' + msg +' </p> ');
-            else
-                $(field + " .failed").show();
-
-		}
-
-	};
-})(jQuery);
-</script>
-<div class="dashboard-widget-holder wp_dashboard_empty">
-	<div class="ngg-dashboard-widget">
-	  	<div class="dashboard-widget-content">
-      		<ul id="plugin_check" class="settings">
-                <li id="check1">
-                    <strong><?php _e('Check plugin/theme conflict', 'nggallery'); ?></strong>
-                    <p class="default message"><?php _e('Not tested', 'nggallery'); ?></p>
-                    <p class="success message" style="display: none;"><?php _e('No conflict could be detected', 'nggallery'); ?></p>
-                    <p class="failed message" style="display: none;"><?php _e('Test failed, disable other plugins & switch to default theme', 'nggallery'); ?></p>
-                </li>
-                <li id="check2">
-                    <strong><?php _e('Test image function', 'nggallery'); ?></strong>
-                    <p class="default message"><?php _e('Not tested', 'nggallery'); ?></p>
-                    <p class="success message" style="display: none;"><?php _e('The plugin could create images', 'nggallery'); ?></p>
-                    <p class="failed message" style="display: none;"><?php _e('Couldn\'t create image, check your memory limit', 'nggallery'); ?></p>
-                </li>
-                <li id="check3">
-                    <strong><?php _e('Check theme compatibility', 'nggallery'); ?></strong>
-                    <p class="default message"><?php _e('Not tested', 'nggallery'); ?></p>
-                    <p class="success message" style="display: none;"><?php _e('Your theme should work fine with NextGEN Gallery', 'nggallery'); ?></p>
-                    <p class="failed message" style="display: none;"><?php _e('wp_head()/wp_footer() is missing, contact the theme author', 'nggallery'); ?></p>
-                </li>
-            </ul>
- 			<p class="textright">
-                <input type="button" name="update" value="<?php _e('Check plugin', 'nggallery'); ?>" onclick="nggPluginCheck.run(1);" class="button-secondary" />
-			</p>
-		</div>
-    </div>
-</div>
-<?php
 }
 
 /**
@@ -493,8 +292,8 @@ function ngg_overview_right_now() {
 	<table>
 		<tbody>
 			<tr class="first">
-				<td class="first b"><a href="admin.php?page=nggallery-add-gallery"><?php echo $images; ?></a></td>
-				<td class="t"><a href="admin.php?page=nggallery-add-gallery"><?php echo _n( 'Image', 'Images', $images, 'nggallery' ); ?></a></td>
+				<td class="first b"><a href="admin.php?page=ngg_addgallery"><?php echo $images; ?></a></td>
+				<td class="t"><a href="admin.php?page=ngg_addgallery"><?php echo _n( 'Image', 'Images', $images, 'nggallery' ); ?></a></td>
 				<td class="b"></td>
 				<td class="last"></td>
 			</tr>
@@ -780,82 +579,6 @@ function ngg_get_phpinfo() {
 	    }
 
 	return $phpinfo;
-}
-
-/**
- * Show NextGEN Gallery related plugins. Fetch plugins from wp.org which have added 'nextgen-gallery' as tag in readme.txt
- *
- * @return postbox output
- */
-function ngg_widget_related_plugins() {
-    echo '<p class="widget-loading hide-if-no-js">' . __( 'Loading&#8230;' ) . '</p><p class="describe hide-if-js">' . __('This widget requires JavaScript.') . '</p>';
-}
-function ngg_related_plugins() {
-	include(ABSPATH . 'wp-admin/includes/plugin-install.php');
-
-    if ( false === ( $api = get_transient( 'ngg_related_plugins' ) ) ) {
-    	// this api sucks , tags will not be used in the correct way : nextgen-gallery cannot be searched
-    	$api = plugins_api('query_plugins', array('search' => 'nextgen') );
-
-    	if ( is_wp_error($api) )
-            return;
-
-        set_transient( 'ngg_related_plugins', $api, 60*60*24 );
-    }
-
-  echo '<div style="margin-bottom:10px;padding:8px;font-size:110%;background:#eebbaa;"><b>Note</b>: these plugins are provided by third parties and are <b>NOT</b> supported by Photocrati Media in any way</div>';
-
-	// don't show my own plugin :-) and some other plugins, which come up with the search result
-	$blacklist = array(
-		'nextgen-gallery',
-		'galleria-wp',
-		'photosmash-galleries',
-		'flash-album-gallery',
-		'events-calendar',
-		'widgets',
-		'side-content',
-		'featurific-for-wordpress',
-		'smooth-gallery-replacement',
-		'livesig',
-		'wordpress-gallery-slideshow',
-		'nkmimagefield',
-		'nextgen-ajax',
-        'projectmanager'
-	);
-
-	$i = 0;
-	while ( $i < 4 ) {
-
-		// pick them randomly
-		if ( 0 == count($api->plugins) )
-			return;
-
-		$key = array_rand($api->plugins);
-		$plugin = $api->plugins[$key];
-
-		// don't forget to remove them
-		unset($api->plugins[$key]);
-
-		if ( !isset($plugin->name) )
-			continue;
-
-		if ( in_array($plugin->slug , $blacklist ) )
-			continue;
-
-		$link   = esc_url( $plugin->homepage );
-		$title  = esc_html( $plugin->name );
-
-		$description = esc_html( strip_tags(@html_entity_decode($plugin->short_description, ENT_QUOTES, get_option('blog_charset'))) );
-
-		$ilink = wp_nonce_url('plugin-install.php?tab=plugin-information&plugin=' . $plugin->slug, 'install-plugin_' . $plugin->slug) .
-							'&amp;TB_iframe=true&amp;width=600&amp;height=800';
-
-		echo "<h5><a href='{$link}' target='_blank'>{$title}</a></h5>&nbsp;<span>(<a href='$ilink' class='thickbox' title='$title'>" . __( 'Install' ) . "</a>)</span>\n";
-		echo "<p>$description<strong> " . __( 'Author' ) . " : </strong>$plugin->author</p>\n";
-
-		$i++;
-	}
-
 }
 
 function ngg_list_contributors()	{
