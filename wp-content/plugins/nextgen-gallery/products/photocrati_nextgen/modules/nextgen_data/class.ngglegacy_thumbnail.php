@@ -117,7 +117,7 @@ class C_NggLegacy_Thumbnail {
     	if(!function_exists("gd_info")) {
         	echo 'You do not have the GD Library installed.  This class requires the GD library to function properly.' . "\n";
         	echo 'visit http://us2.php.net/manual/en/ref.image.php for more information';
-        	C_NextGEN_Bootstrap::shutdown();
+        	throw new E_No_Image_Library_Exception();
         }
     	//initialize variables
         $this->errmsg               = '';
@@ -161,7 +161,7 @@ class C_NggLegacy_Thumbnail {
         }
         
 		// increase memory-limit if possible, GD needs this for large images
-		// @ini_set('memory_limit', '128M');
+		@ini_set('memory_limit', '512M');
         
 		if($this->error == false) { 
         // Check memory consumption if file exists

@@ -78,7 +78,7 @@ class nggManageGallery {
 					@unlink($image->imagePath . '_backup' );
 				}
 				$mapper = C_Image_Mapper::get_instance();
-				$mapper->destroy($this->pid);
+				$result = $mapper->destroy($this->pid);
 				do_action('ngg_delete_picture', $this->pid);
 
                 if ($result)
@@ -376,6 +376,16 @@ class nggManageGallery {
 			check_admin_referer('ngg_updategallery');
 
 			if ( nggGallery::current_user_can( 'NextGEN Edit gallery options' )  && !isset ($_GET['s']) ) {
+      	$tags = array('<a>', '<abbr>', '<acronym>', '<address>', '<b>', '<base>', '<basefont>', '<big>', '<blockquote>', '<br>', '<br/>', '<caption>', '<center>', '<cite>', '<code>', '<col>', '<colgroup>', '<dd>', '<del>', '<dfn>', '<dir>', '<div>', '<dl>', '<dt>', '<em>', '<fieldset>', '<font>', '<h1>', '<h2>', '<h3>', '<h4>', '<h5>', '<h6>', '<hr>', '<i>', '<ins>', '<label>', '<legend>', '<li>', '<menu>', '<noframes>', '<noscript>', '<ol>', '<optgroup>', '<option>', '<p>', '<pre>', '<q>', '<s>', '<samp>', '<select>', '<small>', '<span>', '<strike>', '<strong>', '<sub>', '<sup>', '<table>', '<tbody>', '<td>', '<tfoot>', '<th>', '<thead>', '<tr>', '<tt>', '<u>', '<ul>');
+				$fields = array('title', 'gallerydesc');
+				
+				foreach ($fields as $field) {
+		    	$html = $_POST[$field];
+		    	$html = preg_replace('/\\s+on\\w+=(["\']).*?\\1/i', '', $html);
+		    	$html = preg_replace('/(<\/[^>]+?>)(<[^>\/][^>]*?>)/', '$1 $2', $html);
+		    	$html = strip_tags($html, implode('', $tags));
+		    	$_POST[$field] = $html;
+				}
 
 				if ( nggGallery::current_user_can( 'NextGEN Edit gallery title' )) {
 				    // don't forget to update the slug
@@ -606,14 +616,14 @@ class nggManageGallery {
 		$page_links[] = sprintf( "<a class='%s' title='%s' href='%s'>%s</a>",
 			'first-page' . $disable_first,
 			esc_attr__( 'Go to the first page' ),
-			esc_url( remove_query_arg( 'paged', $current_url ) ),
+			nextgen_esc_url( remove_query_arg( 'paged', $current_url ) ),
 			'&laquo;'
 		);
 
 		$page_links[] = sprintf( "<a class='%s' title='%s' href='%s'>%s</a>",
 			'prev-page' . $disable_first,
 			esc_attr__( 'Go to the previous page' ),
-			esc_url( add_query_arg( 'paged', max( 1, $current-1 ), $current_url ) ),
+			nextgen_esc_url( add_query_arg( 'paged', max( 1, $current-1 ), $current_url ) ),
 			'&lsaquo;'
 		);
 
@@ -633,14 +643,14 @@ class nggManageGallery {
 		$page_links[] = sprintf( "<a class='%s' title='%s' href='%s'>%s</a>",
 			'next-page' . $disable_last,
 			esc_attr__( 'Go to the next page' ),
-			esc_url( add_query_arg( 'paged', min( $total_pages, $current+1 ), $current_url ) ),
+			nextgen_esc_url( add_query_arg( 'paged', min( $total_pages, $current+1 ), $current_url ) ),
 			'&rsaquo;'
 		);
 
 		$page_links[] = sprintf( "<a class='%s' title='%s' href='%s'>%s</a>",
 			'last-page' . $disable_last,
 			esc_attr__( 'Go to the last page' ),
-			esc_url( add_query_arg( 'paged', $total_pages, $current_url ) ),
+			nextgen_esc_url( add_query_arg( 'paged', $total_pages, $current_url ) ),
 			'&raquo;'
 		);
 

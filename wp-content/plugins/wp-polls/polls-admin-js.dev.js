@@ -120,11 +120,22 @@ function closing_poll(poll_id, poll_confirm, nonce) {
 
 // Reoder Answer Answer
 function reorder_answer_num() {
-	jQuery('#pollq_multiple').empty();
+	var pollq_multiple = jQuery('#pollq_multiple');
+	var selected = pollq_multiple.val();
+	var previous_size = jQuery('> option', pollq_multiple).size();
+	pollq_multiple.empty();
 	jQuery('#poll_answers tr > th').each(function (i) {
 		jQuery(this).text(pollsAdminL10n.text_answer + ' ' + (i+1));
-		jQuery('#pollq_multiple').append('<option value="' + (i+1) + '">' + (i+1) + '</option>');
+		jQuery(pollq_multiple).append('<option value="' + (i+1) + '">' + (i+1) + '</option>');
 	});
+	if(selected > 1)
+	{
+		var current_size = jQuery('> option', pollq_multiple).size();
+		if(selected <= current_size)
+			jQuery('> option', pollq_multiple).eq(selected - 1).attr('selected', 'selected');
+		else if(selected == previous_size)
+			jQuery('> option', pollq_multiple).eq(current_size - 1).attr('selected', 'selected');
+	}
 }
 
 // Calculate Total Votes

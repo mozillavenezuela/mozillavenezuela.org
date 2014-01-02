@@ -9,7 +9,7 @@ class C_Displayed_Gallery_Source extends C_DataMapper_Model
 {
 	var $_mapper_interface = 'I_Displayed_Gallery_Source_Mapper';
 
-	function define($mapper, $properties, $context=FALSE)
+	function define($properties=array(), $mapper=FALSE, $context=FALSE)
 	{
 		parent::define($mapper, $properties, $context);
 		$this->add_mixin('Mixin_Displayed_Gallery_Source');
@@ -22,7 +22,7 @@ class C_Displayed_Gallery_Source extends C_DataMapper_Model
 	 * @param type $mapper
 	 * @param type $properties
 	 */
-	function initialize($mapper=FALSE, $properties=array())
+	function initialize($properties=array(), $mapper=FALSE, $context=FALSE)
 	{
 		// If no mapper was specified, then get the mapper
 		if (!$mapper) $mapper = $this->get_registry()->get_utility($this->_mapper_interface);

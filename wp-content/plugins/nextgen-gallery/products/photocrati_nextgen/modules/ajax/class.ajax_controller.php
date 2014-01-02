@@ -31,7 +31,9 @@ class C_Ajax_Controller extends C_MVC_Controller
 			$retval = array('error' => 'Not a valid AJAX action');
 
 		// Flush the buffer
-		ob_end_clean();
+		while (ob_get_level() > 0) {
+			ob_end_clean();
+		}
 
 		// Return the JSON to the browser
 		echo json_encode($retval);

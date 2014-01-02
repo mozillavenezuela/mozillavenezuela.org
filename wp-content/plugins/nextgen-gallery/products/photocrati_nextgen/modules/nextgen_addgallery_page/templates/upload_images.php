@@ -159,11 +159,21 @@
 
                             // Display message/notification
                             if (up.state == plupload.STOPPED) {
-                                $.gritter.add({
-                                    title: "Upload complete",
-                                    text: msg,
-                                    sticky: true
-                                });
+								if (typeof(up.error_msg) != 'undefined') {
+									$.gritter.add({
+										title: up.error_msg,
+										text: msg,
+										sticky: true
+									});
+								}
+								else {
+									$.gritter.add({
+										title: "Upload complete",
+										text: msg,
+										sticky: true
+									});
+								}
+
                                 setTimeout(function(){
                                     reinit_plupload(up);
                                 }, 3000);
@@ -187,28 +197,40 @@
                                     return;
                                 }
                             }
-                            window.uploaded_image_ids = window.uploaded_image_ids.concat(response.image_ids);
-                            up.settings.url = window.set_plupload_url(response.gallery_id, $gallery_name.val());
-
-                            // If we created a new gallery, ensure it's now in the drop-down list, and select it
-                            if ($gallery_id.find('option[value="'+response.gallery_id+'"]').length == 0) {
-                                var option = $('<option/>').attr('value', response.gallery_id).text(response.gallery_name);
-                                $gallery_id.append(option);
-                                $gallery_id.val(response.gallery_id);
-                                option.attr('selected', 'selected');
-                            }
-
-                            // our Frame-Event-Publisher hooks onto the jQuery ajaxComplete action which plupload
-                            // of course does not honor. Tie them together here..
-                            if (window.Frame_Event_Publisher) {
-								$.post(photocrati_ajax.url, {'action': 'cookie_dump'}, function(){
-									window.Frame_Event_Publisher.find_parent(window).broadcast();
+							if(typeof(response.error) != 'undefined') {
+								up.trigger('Error', {
+									code: plupload.IO_ERROR,
+									msg: response.error,
+									details: response,
+									file: file
 								});
-                            }
+							}
+							else {
+								window.uploaded_image_ids = window.uploaded_image_ids.concat(response.image_ids);
+								up.settings.url = window.set_plupload_url(response.gallery_id, $gallery_name.val());
+
+								// If we created a new gallery, ensure it's now in the drop-down list, and select it
+								if ($gallery_id.find('option[value="'+response.gallery_id+'"]').length == 0) {
+									var option = $('<option/>').attr('value', response.gallery_id).text(response.gallery_name);
+									$gallery_id.append(option);
+									$gallery_id.val(response.gallery_id);
+									option.attr('selected', 'selected');
+								}
+
+								// our Frame-Event-Publisher hooks onto the jQuery ajaxComplete action which plupload
+								// of course does not honor. Tie them together here..
+								if (window.Frame_Event_Publisher) {
+									$.post(photocrati_ajax.url, {'action': 'cookie_dump'}, function(){
+										window.Frame_Event_Publisher.find_parent(window).broadcast();
+									});
+								}
+							}
                         },
 
                         Error: function(up, args){
-                            if (typeof(window.console) != 'undefined') console.log(args);
+							if (typeof(up.error_msg) == 'undefined') {
+								up.error_msg = args.msg;
+							}{}
                         }
                     };
                     $("#uploader").pluploadQueue(plupload_options);

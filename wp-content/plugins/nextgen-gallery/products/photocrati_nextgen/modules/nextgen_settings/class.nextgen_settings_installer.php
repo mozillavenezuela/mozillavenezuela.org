@@ -58,8 +58,8 @@ class C_NextGen_Settings_Installer
 			'galPagedGalleries' => 0,    // Number of galleries per page (in a album)
 			'galColumns'        => 0,    // Number of columns for the gallery
 			'galShowSlide'      => True, // Show slideshow
-			'galTextSlide'      => __('[Show as slideshow]', 'nggallery'), // Text for slideshow
-			'galTextGallery'    => __('[Show picture list]', 'nggallery'), // Text for gallery
+			'galTextSlide'      => __('[Show slideshow]', 'nggallery'), // Text for slideshow
+			'galTextGallery'    => __('[Show thumbnails]', 'nggallery'), // Text for gallery
 			'galShowOrder'      => 'gallery',   // Show order
 			'galSort'           => 'sortorder', // Sort order
 			'galSortDir'        => 'ASC',       // Sort direction
@@ -71,6 +71,7 @@ class C_NextGen_Settings_Installer
 			// Thumbnail Effect
 			'thumbEffect'  => 'fancybox', // select effect
 			'thumbCode'    => 'class="ngg-fancybox" rel="%GALLERY_NAME%"',
+			'thumbEffectContext'  => 'nextgen_images', // select effect
 
 			// Watermark settings
 			'wmPos'    => 'botRight',             // Postion

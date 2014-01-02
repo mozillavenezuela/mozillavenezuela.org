@@ -8,20 +8,30 @@
 
 
 /**
+ * Allow use of the Minify URI Builder app. Only set this to true while you need it.
+ */
+$min_enableBuilder = false;
+
+/**
+ * If non-empty, the Builder will be protected with HTTP Digest auth.
+ * The username is "admin".
+ */
+$min_builderPassword = 'admin';
+
+
+/**
  * Set to true to log messages to FirePHP (Firefox Firebug addon).
  * Set to false for no error logging (Minify may be slightly faster).
  * @link http://www.firephp.org/
  *
  * If you want to use a custom error logger, set this to your logger
  * instance. Your object should have a method log(string $message).
- *
- * @todo cache system does not have error logging yet.
  */
 $min_errorLogger = false;
 
 
 /**
- * To allow debugging, you must set this option to true.
+ * To allow debug mode output, you must set this option to true.
  *
  * Once true, you can send the cookie minDebug to request debug mode output. The
  * cookie value should match the URIs you'd like to debug. E.g. to debug
@@ -36,20 +46,19 @@ $min_allowDebugFlag = false;
 
 
 /**
- * Allow use of the Minify URI Builder app. If you no longer need 
- * this, set to false.
- **/
-$min_enableBuilder = false;
-
-
-/**
  * For best performance, specify your temp directory here. Otherwise Minify
  * will have to load extra code to guess. Some examples below:
  */
+$min_cachePath = dirname(dirname(__FILE__)) . '/cache';
 //$min_cachePath = 'c:\\WINDOWS\\Temp';
 //$min_cachePath = '/tmp';
 //$min_cachePath = preg_replace('/^\\d+;/', '', session_save_path());
-$min_cachePath = dirname(dirname(__FILE__)) . '/cache/';
+/**
+ * To use APC/Memcache/ZendPlatform for cache storage, require the class and
+ * set $min_cachePath to an instance. Example below:
+ */
+//require dirname(__FILE__) . '/lib/Minify/Cache/APC.php';
+//$min_cachePath = new Minify_Cache_APC();
 
 
 /**
@@ -95,6 +104,13 @@ $min_serveOptions['bubbleCssImports'] = false;
  * querystring, maxAge will be set to one year. E.g. /min/f=hello.css&123456
  */
 $min_serveOptions['maxAge'] = 7200;
+
+
+/**
+ * To use Google's Closure Compiler API to minify Javascript (falling back to JSMin
+ * on failure), uncomment the following line:
+ */
+//$min_serveOptions['minifiers']['application/x-javascript'] = array('Minify_JS_ClosureCompiler', 'minify');
 
 
 /**
@@ -167,4 +183,3 @@ $min_libPath = dirname(__FILE__) . '/lib';
 
 // try to disable output_compression (may not have an effect)
 ini_set('zlib.output_compression', '0');
-?>

@@ -2,10 +2,10 @@
 /**
  * Plugin Name: BackWPup
  * Plugin URI: https://marketpress.com/product/backwpup-pro/
- * Description: WordPress Backup and more...
+ * Description: WordPress Backup Plugin
  * Author: Inpsyde GmbH
  * Author URI: http://inpsyde.com
- * Version: 3.0.13
+ * Version: 3.1.1
  * Text Domain: backwpup
  * Domain Path: /languages/
  * Network: true
@@ -35,16 +35,16 @@
 if ( ! class_exists( 'BackWPup' ) ) {
 
 	// Don't activate on anything less than PHP 5.2.4 or WordPress 3.1
-	if ( version_compare( PHP_VERSION, '5.2.6', '<' ) || version_compare( get_bloginfo( 'version' ), '3.2', '<' ) ) {
+	if ( version_compare( PHP_VERSION, '5.2.6', '<' ) || version_compare( get_bloginfo( 'version' ), '3.4', '<' ) || ! function_exists( 'spl_autoload_register' ) ) {
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		deactivate_plugins( basename( __FILE__ ) );
 		if ( isset( $_GET['action'] ) && ( $_GET['action'] == 'activate' || $_GET['action'] == 'error_scrape' ) )
-			die( __( 'BackWPup requires PHP version 5.2.6 or greater and WordPress 3.2 or greater.', 'backwpup' ) );
+			die( __( 'BackWPup requires PHP version 5.2.6 with spl extension or greater and WordPress 3.4 or greater.', 'backwpup' ) );
 	}
 
 	//Start Plugin
 	if ( function_exists( 'add_filter' ) )
-		add_action( 'plugins_loaded', array( 'BackWPup', 'getInstance' ), 11 );
+		add_action( 'plugins_loaded', array( 'BackWPup', 'get_instance' ), 11 );
 
 	/**
 	 * Main BackWPup Plugin Class
@@ -54,6 +54,7 @@ if ( ! class_exists( 'BackWPup' ) ) {
 		private static $instance = NULL;
 		private static $plugin_data = array();
 		private static $destinations = array();
+		private static $registered_destinations = array();
 		private static $job_types = array();
 		private static $wizards = array();
 
@@ -62,28 +63,30 @@ if ( ! class_exists( 'BackWPup' ) ) {
 		 */
 		private function __construct() {
 
-			// Nothing else matters if we're on WP-MS and not on the main site
-			if ( is_multisite() && ! is_main_site() )
+			// Nothing else matters if we're not on the main site
+			if ( ! is_main_site() )
 				return;
 			//auto loader
-			if ( function_exists( 'spl_autoload_register' ) ) //register auto load
-				spl_autoload_register( array( $this, 'autoloader' ) );
-			else //auto loader fallback
-				$this->autoloader_fallback();
+			spl_autoload_register( array( $this, 'autoloader' ) );
+			//Options
+			new BackWPup_Option();
 			//start upgrade if needed
-			if ( get_site_option( 'backwpup_version' ) != self::get_plugin_data( 'Version' ) && class_exists( 'BackWPup_Install' ) )
+			if ( get_site_option( 'backwpup_version' ) != self::get_plugin_data( 'Version' ) )
 				BackWPup_Install::activate();
 			//load pro features
-			if ( is_file( dirname( __FILE__ ) . '/inc/features/class-features.php' ) )
-				require dirname( __FILE__ ) . '/inc/features/class-features.php';						
+			if ( class_exists( 'BackWPup_Pro' ) )
+				BackWPup_Pro::get_instance();
 			//WP-Cron
 			if ( defined( 'DOING_CRON' ) && DOING_CRON ) {
+				//early disable caches
+				if ( ! empty( $_GET[ 'backwpup_run' ] ) && class_exists( 'BackWPup_Job' ) )
+					BackWPup_Job::disable_caches();
 				// add normal cron actions
 				add_action( 'backwpup_cron', array( 'BackWPup_Cron', 'run' ) );
 				add_action( 'backwpup_check_cleanup', array( 'BackWPup_Cron', 'check_cleanup' ) );
 				// add action for doing thinks if cron active
 				// must done in int before wp-cron control
-				add_action( 'init', array( 'BackWPup_Cron', 'cron_active' ), 1 ); 
+				add_action( 'init', array( 'BackWPup_Cron', 'cron_active' ), 1 );
 				// if in cron the rest must not needed
 				return;
 			}
@@ -93,12 +96,10 @@ if ( ! class_exists( 'BackWPup' ) ) {
 			add_action( 'init', array( $this, 'plugin_init' ) );
 			//only in backend
 			if ( is_admin() && class_exists( 'BackWPup_Admin' ) )
-				BackWPup_Admin::getInstance();
+				BackWPup_Admin::get_instance();
 			//work with wp-cli
-			if ( defined( 'WP_CLI' ) && WP_CLI ) {
-				require dirname( __FILE__ ) . '/inc/class-wp-cli.php';
+			if ( defined( 'WP_CLI' ) && WP_CLI && class_exists( 'WP_CLI' ) && class_exists( 'BackWPup_WP_CLI' ) )
 				WP_CLI::addCommand( 'backwpup', 'BackWPup_WP_CLI' );
-			}
 		}
 
 		/**
@@ -106,7 +107,7 @@ if ( ! class_exists( 'BackWPup' ) ) {
 		 *
 		 * @return self
 		 */
-		public static function getInstance() {
+		public static function get_instance() {
 
 			if (NULL === self::$instance) {
 				self::$instance = new self;
@@ -126,7 +127,7 @@ if ( ! class_exists( 'BackWPup' ) ) {
 		public static function get_plugin_data( $name = NULL ) {
 
 			if ( $name )
-				$name = strtolower( $name );
+				$name = strtolower( trim( $name ) );
 
 			if ( empty( self::$plugin_data ) ) {
 				self::$plugin_data = get_file_data( __FILE__, array(
@@ -152,13 +153,18 @@ if ( ! class_exists( 'BackWPup' ) ) {
 				self::$plugin_data[ 'basename' ] = plugin_basename( dirname( __FILE__ ) );
 				self::$plugin_data[ 'mainfile' ] = __FILE__ ;
 				self::$plugin_data[ 'plugindir' ] = untrailingslashit( dirname( __FILE__ ) ) ;
+				self::$plugin_data[ 'hash' ] = get_site_option( 'backwpup_cfg_hash' );
+				if ( empty( self::$plugin_data[ 'hash' ] ) || strlen( self::$plugin_data[ 'hash' ] ) < 6 || strlen( self::$plugin_data[ 'hash' ] ) > 12 ) {
+					update_site_option( 'backwpup_cfg_hash', substr( md5( md5( BackWPup::get_plugin_data( "mainfile" ) ) ), 14, 6 ) );
+					self::$plugin_data[ 'hash' ] = get_site_option( 'backwpup_cfg_hash' );
+				}
 				if ( defined( 'WP_TEMP_DIR' ) && is_dir( WP_TEMP_DIR ) ) {
-					self::$plugin_data[ 'temp' ] = trailingslashit( str_replace( '\\', '/', WP_TEMP_DIR ) ) . 'backwpup-' . substr( md5( md5( SECURE_AUTH_KEY ) ), - 5 ) . '/';
+					self::$plugin_data[ 'temp' ] = trailingslashit( str_replace( '\\', '/', realpath( WP_TEMP_DIR ) ) . '/backwpup-' . self::$plugin_data[ 'hash' ] );
 				} else {
 					$upload_dir = wp_upload_dir();
-					self::$plugin_data[ 'temp' ] = trailingslashit( str_replace( '\\', '/',$upload_dir[ 'basedir' ] ) ) . 'backwpup-' . substr( md5( md5( SECURE_AUTH_KEY ) ), - 5 ) . '-temp/';
+					self::$plugin_data[ 'temp' ] = trailingslashit( str_replace( '\\', '/', realpath( $upload_dir[ 'basedir' ] ) ) . '/backwpup-' . self::$plugin_data[ 'hash' ] . '-temp' );
 				}
-				self::$plugin_data[ 'running_file' ] = self::$plugin_data[ 'temp' ] . 'backwpup-' . substr( md5( NONCE_SALT ), 13, 6 ) . '-working.php';
+				self::$plugin_data[ 'running_file' ] = self::$plugin_data[ 'temp' ] . 'backwpup-working.php';
 				self::$plugin_data[ 'url' ] = plugins_url( '', __FILE__ );
 				//get unmodified WP Versions
 				include ABSPATH . WPINC . '/version.php';
@@ -182,50 +188,16 @@ if ( ! class_exists( 'BackWPup' ) ) {
 		 */
 		private function autoloader( $class_name ) {
 
-			//BackWPup classes to load
-			if ( strstr( $class_name, 'BackWPup_' ) ) {
-				$class_file_name =  DIRECTORY_SEPARATOR . 'class-' . strtolower( str_replace( array( 'BackWPup_', '_' ), array( '', '-' ), $class_name ) ) . '.php';
-				if ( class_exists( 'BackWPup_Features', FALSE ) && is_file( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'features' . $class_file_name ) )
-					require dirname( __FILE__ ) . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR . 'features' . $class_file_name;
-				elseif ( is_file( dirname( __FILE__ ) . DIRECTORY_SEPARATOR . 'inc' . $class_file_name ) )
-					require dirname( __FILE__ ) . DIRECTORY_SEPARATOR . 'inc' . $class_file_name;
-			}
-		}
-
-		/**
-		 * load all classes if spl auto loader not exists
-		 */
-		private function autoloader_fallback() {
-
-			//add class files that should excluded that are classes that extra loaded with require or needs spl_autoload_register to work
-			$loaded_class_files = array( 'class-auto-update.php', 'class-documentation.php', 'class-features.php',
-										 'class-destination-msazure.php', 'class-destination-msazure-pro.php',
-										 'class-destination-email.php', 'class-destination-email-pro.php',
-										 'class-destination-rsc.php', 'class-destination-rsc-pro.php',
-										 'class-destination-s3.php', 'class-destination-s3-pro.php',
-										 'class-destination-s3-v1.php', 'class-destination-s3-v1-pro.php',
-										 'class-destinations.php', 'class-jobtypes.php', 'class-wizards.php',
-										 'class-wp-cli.php' );
-
-			//load first abstraction classes
-			require dirname( __FILE__ ) . '/inc/class-destinations.php';
-			require dirname( __FILE__ ) . '/inc/class-jobtypes.php';
-			if ( is_file( dirname( __FILE__ ) . '/inc/features/class-features.php' ) )
-				require  dirname( __FILE__ ) . '/inc/features/class-wizards.php';
-			require_once ABSPATH . '/wp-admin/includes/class-wp-list-table.php';
-
-			//load normal classes
-			foreach( glob( dirname( __FILE__ ) . '/inc/class-*.php' ) as $class ) {
-				if ( ! in_array( basename( $class ), $loaded_class_files ) )
-					require $class;
-			}
-
-			//load features
-			if ( is_file( dirname( __FILE__ ) . '/inc/features/class-features.php' ) ) {
-				foreach( glob( dirname( __FILE__ ) . '/inc/features/class-*.php' ) as $class ) {
-					if ( ! in_array( basename( $class ), $loaded_class_files ) )
-						require $class;
+			$class_name = strtolower( $class_name );
+			if ( strstr( $class_name, 'backwpup_' ) ) {
+				$dir = dirname( __FILE__ ) . DIRECTORY_SEPARATOR . 'inc' . DIRECTORY_SEPARATOR;
+				$class_file_name = 'class-' . str_replace( array( 'backwpup_', '_' ), array( '', '-' ), $class_name ) . '.php';
+				if ( strstr( $class_name, 'backwpup_pro' ) ) {
+					$dir .=  'pro' . DIRECTORY_SEPARATOR;
+					$class_file_name = str_replace( 'pro-','', $class_file_name );
 				}
+				if ( file_exists( $dir . $class_file_name ) )
+					require $dir . $class_file_name;
 			}
 		}
 
@@ -237,49 +209,215 @@ if ( ! class_exists( 'BackWPup' ) ) {
 		public function plugin_init() {
 
 			//Add Admin Bar
-			if ( ! defined( 'DOING_CRON' ) && current_user_can( 'backwpup' ) && current_user_can( 'backwpup' ) && is_admin_bar_showing() && get_site_option( 'backwpup_cfg_showadminbar', FALSE ) )
-				BackWPup_Adminbar::getInstance();
-			
+			if ( ! defined( 'DOING_CRON' ) && current_user_can( 'backwpup' ) && current_user_can( 'backwpup' ) && is_admin_bar_showing() && get_site_option( 'backwpup_cfg_showadminbar' ) )
+				BackWPup_Adminbar::get_instance();
 		}
 
 		/**
 		 * Get a array of instances for Backup Destination's
 		 *
+		 * @param $key string Key of Destination where get class instance from
 		 * @return array BackWPup_Destinations
 		 */
-		public static function get_destinations() {
+		public static function get_destination( $key ) {
 
-			if ( ! empty( self::$destinations ) )
-				return self::$destinations;
+			$key  = strtoupper( $key );
 
-			//add BackWPup Destinations
-			self::$destinations[ 'FOLDER' ] 		= new BackWPup_Destination_Folder;
-			if ( class_exists( 'BackWPup_Destination_Email' ) )
-				self::$destinations[ 'EMAIL' ]   	= new BackWPup_Destination_Email;
-			if ( function_exists( 'ftp_login' ) )
-				self::$destinations[ 'FTP' ] 		= new BackWPup_Destination_Ftp;
-			if ( function_exists( 'curl_exec' ) )
-				self::$destinations[ 'DROPBOX' ] 	= new BackWPup_Destination_Dropbox;
-			if (  function_exists( 'curl_exec' ) && version_compare( PHP_VERSION, '5.3.3', '>=' ) && class_exists( 'BackWPup_Destination_S3' ) )
-				self::$destinations[ 'S3' ] 		= new BackWPup_Destination_S3;
-			elseif (  function_exists( 'curl_exec' ) && class_exists( 'BackWPup_Destination_S3_V1' ) )
-				self::$destinations[ 'S3' ] 		= new BackWPup_Destination_S3_V1;
-			if ( version_compare( PHP_VERSION, '5.3.2', '>=' ) && class_exists( 'BackWPup_Destination_MSAzure' )  )
-				self::$destinations[ 'MSAZURE' ] 	= new BackWPup_Destination_MSAzure;
-			if ( function_exists( 'curl_exec' ) && version_compare( PHP_VERSION, '5.3.0', '>=' ) && class_exists( 'BackWPup_Destination_RSC' ) )
-				self::$destinations[ 'RSC' ] 		= new BackWPup_Destination_RSC;
-			if ( function_exists( 'curl_exec' ) )
-				self::$destinations[ 'SUGARSYNC' ]	= new BackWPup_Destination_SugarSync;
+			if ( isset( self::$destinations[ $key ] ) && is_object( self::$destinations[ $key ] ) )
+				return self::$destinations[ $key ];
 
-			self::$destinations = apply_filters( 'backwpup_destinations', self::$destinations );
-
-			//remove destinations can't load
-			foreach ( self::$destinations as $key => $destination ) {
-				if ( empty( $destination ) || ! is_object( $destination ) )
-					unset( self::$destinations[ $key ] );
+			$reg_dests = self::get_registered_destinations();
+			if ( ! empty( $reg_dests[ $key ][ 'class' ] ) ) {
+				self::$destinations[ $key ] = new $reg_dests[ $key ][ 'class' ];
+			} else {
+				return NULL;
 			}
 
-			return self::$destinations;
+			return self::$destinations[ $key ];
+		}
+
+		/**
+		 * Get a array of registered Destination's for Backups
+		 *
+		 * @return array BackWPup_Destinations
+		 */
+		public static function get_registered_destinations() {
+
+			//only run it one time
+			if ( ! empty( self::$registered_destinations ) )
+				return self::$registered_destinations;
+
+			//add BackWPup Destinations
+			// to folder
+			self::$registered_destinations[ 'FOLDER' ] 	= array(
+								'class' => 'BackWPup_Destination_Folder',
+								'info'	=> array(
+									'ID'        	=> 'FOLDER',
+									'name'       	=> __( 'Folder', 'backwpup' ),
+									'description' 	=> __( 'Backup to Folder', 'backwpup' ),
+								),
+								'can_sync' => FALSE,
+								'needed' => array(
+									'php_version'	=> '',
+									'functions'	=> array(),
+									'classes'	=> array()
+								)
+							);
+			// backup with mail
+			self::$registered_destinations[ 'EMAIL' ] 	= array(
+								'class' => 'BackWPup_Destination_Email',
+								'info'	=> array(
+									'ID'        	=> 'EMAIL',
+									'name'       	=> __( 'Email', 'backwpup' ),
+									'description' 	=> __( 'Backup sent via email', 'backwpup' ),
+								),
+								'can_sync' => FALSE,
+								'needed' => array(
+									'php_version'	=> '',
+									'functions'	=> array(),
+									'classes'	=> array()
+								)
+							);
+			// backup to ftp
+			self::$registered_destinations[ 'FTP' ] 	= array(
+								'class' => 'BackWPup_Destination_Ftp',
+								'info'	=> array(
+									'ID'        	=> 'FTP',
+									'name'       	=> __( 'FTP', 'backwpup' ),
+									'description' 	=> __( 'Backup to FTP', 'backwpup' ),
+								),
+								'can_sync' => FALSE,
+								'needed' => array(
+									'mphp_version'	=> '',
+									'functions'	=> array( 'ftp_login' ),
+									'classes'	=> array()
+								)
+							);
+			// backup to dropbox
+			self::$registered_destinations[ 'DROPBOX' ] 	= array(
+								'class' => 'BackWPup_Destination_Dropbox',
+								'info'	=> array(
+									'ID'        	=> 'DROPBOX',
+									'name'       	=> __( 'Dropbox', 'backwpup' ),
+									'description' 	=> __( 'Backup to Dropbox', 'backwpup' ),
+								),
+								'can_sync' => FALSE,
+								'needed' => array(
+									'php_version'	=> '',
+									'functions'	=> array( 'curl_exec' ),
+									'classes'	=> array()
+								)
+							);
+			// Backup to S3
+			if ( version_compare( PHP_VERSION, '5.3.3', '>=' ) )
+				self::$registered_destinations[ 'S3' ] 	= array(
+									'class' => 'BackWPup_Destination_S3',
+									'info'	=> array(
+										'ID'        	=> 'S3',
+										'name'       	=> __( 'S3 Service', 'backwpup' ),
+										'description' 	=> __( 'Backup to an S3 Service', 'backwpup' ),
+									),
+									'can_sync' => FALSE,
+									'needed' => array(
+										'php_version'	=> '5.3.3',
+										'functions'	=> array( 'curl_exec' ),
+										'classes'	=> array()
+									)
+								);
+			else
+				self::$registered_destinations[ 'S3' ] 	= array(
+									'class' => 'BackWPup_Destination_S3_V1',
+									'info'	=> array(
+										'ID'        	=> 'S3',
+										'name'       	=> __( 'S3 Service', 'backwpup' ),
+										'description' 	=> __( 'Backup to an S3 Service v1', 'backwpup' ),
+									),
+									'can_sync' => FALSE,
+									'needed' => array(
+										'php_version'	=> '',
+										'functions'	=> array( 'curl_exec' ),
+										'classes'	=> array()
+									)
+								);
+
+			// backup to MS Azure
+			self::$registered_destinations[ 'MSAZURE' ] 	= array(
+								'class' => 'BackWPup_Destination_MSAzure',
+								'info'	=> array(
+									'ID'        	=> 'MSAZURE',
+									'name'       	=> __( 'MS Azure', 'backwpup' ),
+									'description' 	=> __( 'Backup to Microsoft Azure (Blob)', 'backwpup' ),
+								),
+								'can_sync' => FALSE,
+								'needed' => array(
+									'php_version'	=> '5.3.2',
+									'functions'	=> array(),
+									'classes'	=> array()
+								)
+							);
+			// backup to Rackspace Cloud
+			self::$registered_destinations[ 'RSC' ] 	= array(
+								'class' => 'BackWPup_Destination_RSC',
+								'info'	=> array(
+									'ID'        	=> 'RSC',
+									'name'       	=> __( 'RSC', 'backwpup' ),
+									'description' 	=> __( 'Backup to Rackspace Cloud Files', 'backwpup' ),
+								),
+								'can_sync' => FALSE,
+								'needed' => array(
+									'php_version'	=> '5.3.3',
+									'functions'	=> array( 'curl_exec' ),
+									'classes'	=> array()
+								)
+							);
+			// backup to Sugarsync
+			self::$registered_destinations[ 'SUGARSYNC' ] 	= array(
+								'class' => 'BackWPup_Destination_SugarSync',
+								'info'	=> array(
+									'ID'        	=> 'SUGARSYNC',
+									'name'       	=> __( 'SugarSync', 'backwpup' ),
+									'description' 	=> __( 'Backup to SugarSync', 'backwpup' ),
+								),
+								'can_sync' => FALSE,
+								'needed' => array(
+									'php_version'	=> '',
+									'functions'	=> array( 'curl_exec' ),
+									'classes'	=> array()
+								)
+							);
+
+			//Hook for adding Destinations like above
+			self::$registered_destinations = apply_filters( 'backwpup_register_destination', self::$registered_destinations );
+
+			//check BackWPup Destinations
+			foreach ( self::$registered_destinations as $dest_key => $dest ) {
+				self::$registered_destinations[ $dest_key ][ 'error'] = '';
+				// check PHP Version
+				if ( ! empty( $dest[ 'needed' ][ 'php_version' ] ) && version_compare( PHP_VERSION, $dest[ 'needed' ][ 'php_version' ], '<' ) ) {
+					self::$registered_destinations[ $dest_key ][ 'error' ] .= sprintf( __( 'PHP Version %1$s is to low, you need Version %2$s or above.', 'backwpup' ), PHP_VERSION, $dest[ 'needed' ][ 'php_version' ] ) . ' ';
+					self::$registered_destinations[ $dest_key ][ 'class' ] = NULL;
+				}
+				//check functions exists
+				if ( ! empty( $dest[ 'needed' ][ 'functions' ] ) ) {
+					foreach ( $dest[ 'needed' ][ 'functions' ] as $function_need ) {
+						if ( ! function_exists( $function_need ) ) {
+							self::$registered_destinations[ $dest_key ][ 'error' ] .= sprintf( __( 'Missing function "%s".', 'backwpup' ), $function_need ) . ' ';
+							self::$registered_destinations[ $dest_key ][ 'class' ] = NULL;
+						}
+					}
+				}
+				//check classes exists
+				if ( ! empty( $dest[ 'needed' ][ 'classes' ] ) ) {
+					foreach ( $dest[ 'needed' ][ 'classes' ] as $class_need ) {
+						if ( ! class_exists( $class_need ) ) {
+							self::$registered_destinations[ $dest_key ][ 'error' ] .= sprintf( __( 'Missing class "%s".', 'backwpup' ), $class_need ) . ' ';
+							self::$registered_destinations[ $dest_key ][ 'class' ] = NULL;
+						}
+					}
+				}
+			}
+
+			return self::$registered_destinations;
 		}
 
 
@@ -293,11 +431,10 @@ if ( ! class_exists( 'BackWPup' ) ) {
 			if ( !empty( self::$job_types ) )
 				return self::$job_types;
 
-			self::$job_types[ 'DBDUMP' ]= new BackWPup_JobType_DBDump;
+			self::$job_types[ 'DBDUMP' ]	= new BackWPup_JobType_DBDump;
 			self::$job_types[ 'FILE' ] 		= new BackWPup_JobType_File;
 			self::$job_types[ 'WPEXP' ] 	= new BackWPup_JobType_WPEXP;
 			self::$job_types[ 'WPPLUGIN' ]  = new BackWPup_JobType_WPPlugin;
-			self::$job_types[ 'DBOPTIMIZE' ]= new BackWPup_JobType_DBOptimize;
 			self::$job_types[ 'DBCHECK' ]   = new BackWPup_JobType_DBCheck;
 
 			self::$job_types = apply_filters( 'backwpup_job_types', self::$job_types );
@@ -312,18 +449,17 @@ if ( ! class_exists( 'BackWPup' ) ) {
 		}
 
 
-
 		/**
-		 * Gets a array of instances from Wizards Pro version Only
+		 * Gets a array of instances from Wizards
 		 *
-		 * @return array BackWPup_Wizards
+		 * @return array BackWPup_Pro_Wizards
 		 */
 		public static function get_wizards() {
 
 			if ( !empty( self::$wizards ) )
 				return self::$wizards;
 
-			self::$wizards  = apply_filters( 'backwpup_wizards', self::$wizards );
+			self::$wizards  = apply_filters( 'backwpup_pro_wizards', self::$wizards );
 
 			//remove wizards can't load
 			foreach ( self::$wizards as $key => $wizard ) {

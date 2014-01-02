@@ -19,11 +19,13 @@ class Hook_NextGen_Basic_Gallery_Defaults extends Hook
 {
 	function set_defaults($entity)
 	{
-		if ($entity->name == NEXTGEN_GALLERY_BASIC_SLIDESHOW)
-            $this->set_slideshow_defaults($entity);
-            
-        else if ($entity->name == NEXTGEN_GALLERY_BASIC_THUMBNAILS)
-            $this->set_thumbnail_defaults($entity);
+		if (isset($entity->name)) {
+			if ($entity->name == NEXTGEN_GALLERY_BASIC_SLIDESHOW)
+				$this->set_slideshow_defaults($entity);
+
+			else if ($entity->name == NEXTGEN_GALLERY_BASIC_THUMBNAILS)
+				$this->set_thumbnail_defaults($entity);
+		}
 	}
     
     function set_slideshow_defaults($entity)

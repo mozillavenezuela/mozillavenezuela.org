@@ -18,10 +18,11 @@ class C_CustomTable_DataMapper_Driver_Mixin extends Mixin
 	 * specify DB columns
 	 * @param string $fields
 	 */
-	function select($fields='*')
+	function select($fields=NULL)
 	{
 		// Create a fresh slate
 		$this->object->_init();
+		if (!$fields OR $fields == '*') $fields = $this->get_table_name().'.*';
 		$this->object->_select_clause = "SELECT {$fields}";
 
 		return $this->object;
@@ -182,8 +183,8 @@ class C_CustomTable_DataMapper_Driver_Mixin extends Mixin
 		if ($where_clauses) $sql[] = 'WHERE '.implode(' AND ', $where_clauses);
 
 		if ($this->object->is_select_statement()) {
-			if ($this->object->_order_clauses) $sql[] = 'ORDER BY '.implode(', ', $this->object->_order_clauses);
 			if ($this->object->_group_by_columns) $sql[] = 'GROUP BY '.implode(', ', $this->object->_group_by_columns);
+			if ($this->object->_order_clauses) $sql[] = 'ORDER BY '.implode(', ', $this->object->_order_clauses);
 			if ($this->object->_limit_clause) $sql[] = $this->object->_limit_clause;
 		}
 		return implode(' ', $sql);
@@ -206,8 +207,9 @@ class C_CustomTable_DataMapper_Driver_Mixin extends Mixin
 		// If we have a SQL statement to execute, then heck, execute it!
 		if ($sql)
         {
-            if ($this->object->debug)
-                var_dump($sql);
+            if ($this->object->debug) {
+				var_dump($sql);
+			}
 
 			$this->_wpdb()->query($sql);
 
@@ -220,10 +222,18 @@ class C_CustomTable_DataMapper_Driver_Mixin extends Mixin
                     $retval = $this->_wpdb()->last_result;
                 }
 				else {
+					$id_field = $this->get_primary_key_column();
                     foreach ($this->_wpdb()->last_result as $row) {
-                        $retval[] = $this->_convert_to_entity($this->scrub_result($row));
+						if ($row) {
+							if (isset($row->$id_field)) {
+								$retval[] = $this->object->_convert_to_entity($this->scrub_result($row));
+							}
+						}
                     }
                 }
+			}
+			elseif ($this->object->debug) {
+				var_dump("No entities returned from query");
 			}
 		}
 
@@ -240,7 +250,7 @@ class C_CustomTable_DataMapper_Driver_Mixin extends Mixin
 
 		unset($entity->id_field);
 		$primary_key = $this->object->get_primary_key_column();
-		if (isset($entity->$primary_key)) {
+		if (isset($entity->$primary_key) && $entity->$primary_key > 0) {
 			if($this->object->_update($entity)) $retval = intval($entity->$primary_key);
 		}
 		else {
@@ -359,68 +369,48 @@ class C_CustomTable_DataMapper_Driver_Mixin extends Mixin
 		return $retval;
 	}
 
-
-	/**
-	 * Looks up using SQL the columns existing in the database
-	 */
-	function lookup_columns()
+	function _add_column($column_name, $datatype, $default_value=NULL)
 	{
-		$this->object->_columns = array();
-		$sql = "SHOW COLUMNS FROM `{$this->object->get_table_name()}`";
-		foreach ($this->object->run_query($sql, TRUE) as $row) {
-			$this->object->_columns[] = $row->Field;
+		$sql = "ALTER TABLE `{$this->get_table_name()}` ADD COLUMN `{$column_name}` {$datatype}";
+		if ($default_value) {
+			if (is_string($default_value)) $default_value = str_replace("'", "\\'", $default_value);
+			$sql .= " NOT NULL DEFAULT " . (is_string($default_value) ? "'{$default_value}" : "{$default_value}");
 		}
-		return $this->object->_columns;
+		$this->object->_wpdb()->query($sql);
 	}
 
-	/**
-	 * Determines whether a column is present for the table
-	 * @param string $column_name
-	 * @return string
-	 */
-	function has_column($column_name)
+	function _remove_column($column_name)
 	{
-		if (empty($this->object->_columns)) $this->object->lookup_columns();
-		return array_search($column_name, $this->object->_columns);
-	}
-
-	/**
-	 * Defines a column for this table
-	 * @param string $column_name
-	 * @param string $datatype
-	 */
-	function define_column($column_name, $datatype)
-	{
-		$this->object->_defined_columns[$column_name] = $datatype;
-	}
-
-	function add_column($column_name, $datatype=FALSE)
-	{
-		// If no datatype was specified, perhaps the column was already defined
-		if (!$datatype && isset($this->object->_defined_columns[$column_name])) {
-			$datatype = $this->object->_defined_columns[$column_name];
-		}
-
-		// Ensure that we have a datatype before continuing...
-		if ($datatype) {
-			$sql = "ALTER TABLE `{$this->get_table_name()}` ADD COLUMN ``{$column_name}` {$datatype}";
-			$this->object->run_query($sql);
-		}
-
-		$this->object->lookup_columns();
+		$sql = "ALTER TABLE `{$this->get_table_name()}` DROP COLUMN `{$column_name}`";
+		$this->object->_wpdb()->query($sql);
 	}
 
 	/**
 	 * Migrates the schema of the database
 	 */
-	function migrate()
+	function migrate($lookup=TRUE)
 	{
-		if (empty($this->object->_columns)) $this->object->lookup_columns();
-		foreach ($this->object->_columns as $column_name) {
-			if (!$this->object->has_column($column_name)) {
-				$this->object->add_column($column_name);
+		if (!$this->object->_columns) {
+			throw new E_ColumnsNotDefinedException("Columns not defined for {$this->get_table_name()}");
+		}
+
+		if ($lookup) $this->lookup_columns();
+
+		// Add any missing columns
+		foreach ($this->object->_columns as $key => $properties) {
+			if (!in_array($key, $this->object->_table_columns)) {
+				$this->object->_add_column($key, $properties['type'], $properties['default_value']);
 			}
 		}
+
+		// Remove any columns not defined
+		foreach ($this->object->_table_columns as $key) {
+			if (!isset($this->object->_columns[$key])) {
+				//$this->object->_remove_column($key);
+			}
+		}
+
+		$this->object->lookup_columns();
 	}
 
 
@@ -446,21 +436,20 @@ class C_CustomTable_DataMapper_Driver extends C_DataMapper_Driver_Base
 	var $_limit_clause = '';
 	var $_select_clause = '';
 	var $_delete_clause = '';
-	var $_columns = array();
-	var $_defined_columns = array();
 
 	function define($object_name, $context=FALSE)
 	{
-		parent::define($context);
+		parent::define($object_name, $context);
 		$this->add_mixin('C_CustomTable_DataMapper_Driver_Mixin');
 		$this->implement('I_CustomTable_DataMapper');
 	}
 
-	function initialize($object_name)
+	function initialize($object_name=FALSE)
 	{
 		parent::initialize($object_name);
 		if (!isset($this->_primary_key_column))
 			$this->_primary_key_column = $this->_lookup_primary_key_column();
+		$this->migrate(FALSE);
 	}
 
 	/**

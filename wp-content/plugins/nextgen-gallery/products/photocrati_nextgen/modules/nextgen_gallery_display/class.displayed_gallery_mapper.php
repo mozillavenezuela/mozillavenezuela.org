@@ -4,9 +4,9 @@ class C_Displayed_Gallery_Mapper extends C_CustomPost_DataMapper_Driver
 {
 	static $_instances = array();
 
-	function define($context=FALSE)
+	function define($context=FALSE, $not_used=FALSE)
 	{
-		parent::define(NULL, array($context, 'display_gallery'));
+		parent::define('displayed_gallery', array($context, 'displayed_gallery', 'display_gallery'));
 		$this->add_mixin('Mixin_Displayed_Gallery_Defaults');
 		$this->implement('I_Displayed_Gallery_Mapper');
 		$this->set_model_factory_method('displayed_gallery');

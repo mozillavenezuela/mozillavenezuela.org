@@ -7,6 +7,7 @@
 class C_Display_Type_Controller extends C_MVC_Controller
 {
 	static $_instances = array();
+	var $cachable = TRUE;
 
 	function define($context=FALSE)
 	{
@@ -69,15 +70,16 @@ class Mixin_Display_Type_Controller extends Mixin
 		$settings	= C_NextGen_Settings::get_instance();
 		$mapper		= $this->object->get_registry()->get_utility('I_Lightbox_Library_Mapper');
 		$library	= $mapper->find_by_name($settings->thumbEffect);
+		$thumbEffectContext = isset($settings->thumbEffectContext) ? $settings->thumbEffectContext : '';
 
         // Make the path to the static resources available for libraries
         // Shutter-Reloaded in particular depends on this
         $this->object->_add_script_data(
             'ngg_common',
             'nextgen_lightbox_settings',
-            array('static_path' => $this->object->get_static_relpath('', 'photocrati-lightbox')),
+            array('static_path' => $this->object->get_static_relpath('', 'photocrati-lightbox'), 'context' => $thumbEffectContext),
             TRUE,
-            FALSE
+            true
         );
 
         {
@@ -243,7 +245,7 @@ class Mixin_Display_Type_Controller extends Mixin
 
 			// Get the associated data with this script
 			$script = &$wp_scripts->registered[$handle];
-			$data = &$script->extra['data'];
+			$data = isset($script->extra['data']) ? $script->extra['data'] : '';
 
 			// Construct the addition
 			$addition = $define ? "\nvar {$object_name} = " . json_encode($object_value) . ';' :
@@ -260,6 +262,8 @@ class Mixin_Display_Type_Controller extends Mixin
 			}
 
             $script->extra['data'] = $data;
+
+unset($script);
 		}
 
 		return $retval;

@@ -1,10 +1,14 @@
 <?php
 
-class C_NextGen_Data_Installer
+class C_NextGen_Data_Installer extends C_NggLegacy_Installer
 {
 	function get_registry()
 	{
 		return C_Component_Registry::get_instance();
+	}
+
+	function install()
+	{
 	}
 
 	function uninstall($hard = FALSE)

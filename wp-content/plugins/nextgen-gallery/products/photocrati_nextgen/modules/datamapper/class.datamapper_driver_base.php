@@ -3,7 +3,13 @@
 /**
  * Thrown when an entity does not exist
  */
-class E_EntityNotFoundException extends RuntimeException
+class E_EntityNotFoundException extends E_NggErrorException
+{
+
+}
+
+
+class E_ColumnsNotDefinedException extends E_NggErrorException
 {
 
 }
@@ -13,7 +19,7 @@ class E_EntityNotFoundException extends RuntimeException
  * array which is not yet supported due to a problem with references and the
  * call_user_func_array() function.
  */
-class E_InvalidEntityException extends RuntimeException
+class E_InvalidEntityException extends E_NggErrorException
 {
 	function __construct($message_or_previous=FALSE, $code=0, $previous=NULL)
 	{
@@ -57,6 +63,24 @@ class Mixin_DataMapper_Driver_Base extends Mixin
 	}
 
 	/**
+	 * Notes that a particular columns is serialized, and should be unserialized when converted to an entity
+	 * @param $column
+	 */
+	function add_serialized_column($column)
+	{
+		$this->object->_serialized_columns[] = $column;
+	}
+
+	function unserialize_columns($object)
+	{
+		foreach ($this->object->_serialized_columns as $column) {
+			if (isset($object->$column) && is_string($object->$column)) {
+				$object->$column = $this->unserialize($object->$column);
+			}
+		}
+	}
+
+	/**
 	 * Serializes the data
 	 * @param mixed $value
 	 * @return string
@@ -76,6 +100,7 @@ class Mixin_DataMapper_Driver_Base extends Mixin
 	function unserialize($value)
 	{
 		$retval = NULL;
+
 		if (is_string($value))
 		{
 			$retval = stripcslashes($value);
@@ -343,9 +368,12 @@ class Mixin_DataMapper_Driver_Base extends Mixin
 		// Add name of the id_field to the entity, and convert
 		// the ID to an integer
 		$stdObject->id_field = $key = $this->object->get_primary_key_column();
-		if (isset($stdObject->$key)) {
-			$stdObject->$key = (int) $stdObject->$key;
-		}
+
+		// Cast columns to their appropriate data type
+		$this->cast_columns($stdObject);
+
+		// Unserialize columns
+		$this->unserialize_columns($stdObject);
 
 		// Set defaults for this entity
 		$this->object->set_defaults($stdObject);
@@ -386,7 +414,7 @@ class Mixin_DataMapper_Driver_Base extends Mixin
 			$entity = new stdClass;
 			foreach ($properties as $k=>$v) $entity->$k = $v;
 		}
-		return $factory->create($this->object->get_model_factory_method(), $this->object, $entity, $context);
+		return $factory->create($this->object->get_model_factory_method(), $entity, $this->object, $context);
 	}
 
 
@@ -529,24 +557,79 @@ class Mixin_DataMapper_Driver_Base extends Mixin
             return stripslashes($result);
         }
     }
+
+	function define_column($name, $type, $default_value=NULL)
+	{
+		$this->object->_columns[$name] = array(
+			'type'			=>	$type,
+			'default_value'	=>	$default_value
+		);
+	}
+
+	function has_defined_column($name)
+	{
+		$columns = $this->object->_columns;
+		return isset($columns[$name]);
+	}
+
+	function cast_columns($entity)
+	{
+		foreach ($this->object->_columns as $key => $properties) {
+			$value = isset($entity->$key) ? $entity->$key : NULL;
+			$default_value = $properties['default_value'];
+			if ($value && $value != $default_value) {
+				$column_type = $this->object->_columns[$key]['type'];
+				if (preg_match("/varchar|text/i", $column_type)) {
+					if (!is_array($value) && !is_object($value))
+						$entity->$key = strval($value);
+				}
+				else if (preg_match("/decimal|numeric|double/i", $column_type)) {
+					$entity->$key = doubleval($value);
+				}
+				else if (preg_match("/float/i", $column_type)) {
+					$entity->$key = floatval($value);
+				}
+				else if (preg_match("/int/i", $column_type)) {
+					$entity->$key = intval($value);
+				}
+				else if (preg_match("/bool/i", $column_type)) {
+					$entity->$key = ($value ? TRUE : FALSE);
+				}
+			}
+
+			// Add property and default value
+			else {
+				$entity->$key = $default_value;
+			}
+		}
+		return $entity;
+	}
 }
 
 class C_DataMapper_Driver_Base extends C_Component
 {
 	var $_object_name;
 	var $_model_factory_method = FALSE;
+	var $_columns			   = array();
+	var $_table_columns		   = array();
+	var $_serialized_columns   = array();
 
 	function define($object_name, $context=FALSE)
 	{
 		parent::define($context);
 		$this->add_mixin('Mixin_DataMapper_Driver_Base');
 		$this->implement('I_DataMapper_Driver');
+		$this->_object_name = $object_name;
+
+		if ($this->has_method('define_columns')) {
+			$this->define_columns();
+		}
 	}
 
-	function initialize($object_name)
+	function initialize()
 	{
 		parent::initialize();
-		$this->_object_name = $object_name;
+		$this->lookup_columns();
 	}
 
 	/**
@@ -567,6 +650,32 @@ class C_DataMapper_Driver_Base extends C_Component
 	{
 		global $table_prefix;
 		return $table_prefix.$this->_object_name;
+	}
+
+
+	/**
+	 * Looks up using SQL the columns existing in the database
+	 */
+	function lookup_columns()
+	{
+		global $wpdb;
+		$this->_table_columns = array();
+		$sql = "SHOW COLUMNS FROM `{$this->get_table_name()}`";
+		foreach ($wpdb->get_results($sql) as $row) {
+			$this->_table_columns[] = $row->Field;
+		}
+		return $this->_table_columns;
+	}
+
+	/**
+	 * Determines whether a column is present for the table
+	 * @param string $column_name
+	 * @return string
+	 */
+	function has_column($column_name)
+	{
+		if (empty($this->object->_table_columns)) $this->object->lookup_columns();
+		return array_search($column_name, $this->object->_table_columns) !== FALSE;
 	}
 
 	/**

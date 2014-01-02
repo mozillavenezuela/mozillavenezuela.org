@@ -14,13 +14,17 @@
 		$this->include_template('photocrati-nextgen_gallery_display#image/before', $template_params);
 		
 		?>
-        <a href='<?php echo esc_attr($storage->get_image_url($image)); ?>'
+        <a href='<?php echo esc_attr($storage->get_image_url($image, 'full', TRUE)); ?>'
            title='<?php echo esc_attr($image->description); ?>'
-           data-image-id='<?php echo esc_attr($image->pid); ?>'
+           data-src="<?php echo esc_attr($storage->get_image_url($image)); ?>"
+           data-thumbnail="<?php echo esc_attr($storage->get_image_url($image, 'thumb')); ?>"
+           data-image-id="<?php echo esc_attr($image->{$image->id_field}); ?>"
+           data-title="<?php echo esc_attr($image->alttext); ?>"
+           data-description="<?php echo esc_attr(stripslashes($image->description)); ?>"
            <?php echo $effect_code ?>>
             <img title='<?php echo esc_attr($image->alttext); ?>'
                  alt='<?php echo esc_attr($image->alttext); ?>'
-                 src='<?php echo esc_attr($storage->get_image_url($image)); ?>'/>
+                 src='<?php echo esc_attr($storage->get_image_url($image, 'full', TRUE)); ?>'/>
         </a>
 	  <?php
 
@@ -61,3 +65,12 @@
 
 </div>
 <?php $this->end_element(); ?>
+<script type='text/javascript'>
+	jQuery(function($){
+		new NggPaginatedGallery(
+			'<?php echo $displayed_gallery->id() ?>',
+			$('#<?php echo $anchor ?>'),
+			$('#<?php echo $anchor ?> .ngg-browser-prev, #<?php echo $anchor ?> .ngg-browser-next')
+		)
+	});
+</script>

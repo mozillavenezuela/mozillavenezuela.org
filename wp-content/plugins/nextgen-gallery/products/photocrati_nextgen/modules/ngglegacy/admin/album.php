@@ -71,19 +71,6 @@ class nggManageAlbum {
 	}
 
 	/**
-	 * Gets the album mapper
-	 * @return C_Album_Mapper
-	 */
-	function get_album_mapper()
-	{
-		if (!isset($this->_album_mapper)) {
-			$this->_album_mapper = $this->get_registry()->get_utility('I_Album_Mapper');
-		}
-
-		return $this->_album_mapper;
-	}
-
-	/**
 	 * Init the album output
 	 *
 	 */
@@ -92,9 +79,6 @@ class nggManageAlbum {
 	}
 
 	function controller() {
-		global $nggdb;
-
-		$this->currentID = isset($_REQUEST['act_album']) ? (int) $_REQUEST['act_album'] : 0 ;
 
 		if (isset ($_POST['update']) || isset( $_POST['delete'] ) || isset( $_POST['add'] ) )
 			$this->processor();
@@ -103,12 +87,43 @@ class nggManageAlbum {
 			$this->update_album();
 
 		// get first all galleries & albums
-		$this->albums = $nggdb->find_all_album();
-		$this->galleries  = $nggdb->find_all_galleries();
+		$this->albums = array();
+		foreach (C_Album_Mapper::get_instance()->find_all() as $album) {
+			$this->albums[$album->{$album->id_field}] = $album;
+		}
+
+		$this->galleries = array();
+		foreach (C_Gallery_Mapper::get_instance()->find_all() as $gallery) {
+			$this->galleries[$gallery->{$gallery->id_field}] = $gallery;
+		}
 		$this->num_albums  = count( $this->albums );
 		$this->num_galleries  = count( $this->galleries );
-		$this->output();
 
+		$this->output();
+	}
+
+	function _get_album($id)
+	{
+		$retval = NULL;
+
+		if (isset($this->albums[$id])) {
+			$retval = $this->albums[$id];
+		}
+		else $retval = C_Album_Mapper::get_instance()->find($id);
+
+		return $retval;
+	}
+
+	function _get_gallery($id)
+	{
+		$retval = NULL;
+
+		if (isset($this->galleries[$id])) {
+			$retval = $this->galleries[$id];
+		}
+		else $retval = C_Gallery_Mapper::get_instance()->find($id);
+
+		return $retval;
 	}
 
 	/**
@@ -119,27 +134,23 @@ class nggManageAlbum {
 	 */
 	function _set_album_preview_pic($album)
 	{
-		$set_previewpic = FALSE;
-		$sortorder		= $album->sortorder;
+		$sortorder		= array_merge($album->sortorder);
 
 		while(!$album->previewpic) {
 			// If the album is missing a preview pic, set one!
-			if (($first_entity = array_shift($sortorder))) {
+			if (($first_entity = array_pop($sortorder))) {
 
 				// Is the first entity a gallery or album
 				if (substr($first_entity, 0, 1) == 'a') {
-					$subalbum = $this->get_album_mapper()->find(substr($first_entity, 1));
+					$subalbum = $this->_get_album(substr($first_entity, 1));
 					if ($subalbum->previewpic) {
 						$album->previewpic = $subalbum->previewpic;
-						$set_previewpic = TRUE;
 					}
 				}
 				else {
-					$gallery_mapper = $this->get_registry()->get_utility('I_Gallery_Mapper');
-					$gallery = $gallery_mapper->find($first_entity);
-					if ($gallery->previewpic) {
+					$gallery = $this->_get_gallery($first_entity);
+					if ($gallery && $gallery->previewpic) {
 						$album->previewpic = $gallery->previewpic;
-						$set_previewpic = TRUE;
 					}
 				}
 			}
@@ -162,23 +173,23 @@ class nggManageAlbum {
 
 			$album = new stdClass();
 			$album->name = $_POST['newalbum'];
-			$result = $this->get_album_mapper()->save($album);
-            $this->currentID = $album->{$album->id_field};
-			if (!$this->currentID) $this->currentID = 0;
-
-            //hook for other plugins
-            do_action('ngg_add_album', $this->currentID);
-
-			if ($result)
-				nggGallery::show_message(__('Update Successfully','nggallery'));
+			if (C_Album_Mapper::get_instance()->save($album)) {
+				$this->currentID = $_REQUEST['act_album'] = $album->{$album->id_field};
+				$this->albums[$this->currentID] = $album;
+				do_action('ngg_add_album', $this->currentID);
+					nggGallery::show_message(__('Update Successfully','nggallery'));
+			}
+			else {
+				$this->currentID = $_REQUEST['act_album'] = 0;
+			}
 		}
 
-		if ( isset($_POST['update']) && ($this->currentID > 0) ) {
+		else if ( isset($_POST['update']) && isset($_REQUEST['act_album']) && $this->currentID = intval($_REQUEST['act_album']) ) {
 
             $gid = array();
 
 			// Get the current album being updated
-			$album = $this->get_album_mapper()->find($this->currentID);
+			$album = $this->_get_album($this->currentID);
 
 			// Get the list of galleries/sub-albums to be added to this album
 			parse_str($_REQUEST['sortorder']);
@@ -190,7 +201,7 @@ class nggManageAlbum {
 			$this->_set_album_preview_pic($album);
 
 			// Save the changes
-			$this->get_album_mapper()->save($album);
+			C_Album_Mapper::get_instance()->save($album);
 
             //hook for other plugins
             do_action('ngg_update_album_sortorder', $this->currentID);
@@ -204,34 +215,36 @@ class nggManageAlbum {
 			if (!nggGallery::current_user_can( 'NextGEN Add/Delete album' ))
 				wp_die(__('Cheatin&#8217; uh?'));
 
-			$result = nggdb::delete_album( $this->currentID );
+			$this->currentID = $_REQUEST['act_album'];
 
-            //hook for other plugins
-            do_action('ngg_delete_album', $this->currentID);
+			if (C_Album_Mapper::get_instance()->destroy($this->currentID)) {
+				//hook for other plugins
+				do_action('ngg_delete_album', $this->currentID);
 
-            // jump back to main selection
-            $this->currentID = 0;
+				// jump back to main selection
+				$this->currentID = $_REQUEST['act_album'] = 0;
 
-			if ($result)
 				nggGallery::show_message(__('Album deleted','nggallery'));
+			}
+
 		}
 
 	}
 
 	function update_album() {
-		global $wpdb, $nggdb;
 
 		check_admin_referer('ngg_thickbox_form');
 
 		if (!nggGallery::current_user_can( 'NextGEN Edit album settings' ))
 			wp_die(__('Cheatin&#8217; uh?'));
 
-		$album = $this->get_album_mapper()->find($this->currentID, TRUE);
+		$this->currentID = $_REQUEST['act_album'];
+		$album = $this->_get_album($this->currentID);
 		$album->name		= stripslashes($_POST['album_name']);
 		$album->albumdesc	= stripslashes($_POST['album_desc']);
 		$album->previewpic	= (int)$_POST['previewpic'];
 		$album->pageid		= (int)$_POST['pageid'];
-		$result = $album->save();
+		$result = C_Album_Mapper::get_instance()->save($album);
 
 		//hook for other plugin to update the fields
 		do_action('ngg_update_album', $this->currentID, $_POST);
@@ -244,11 +257,12 @@ class nggManageAlbum {
 
 	global $wpdb, $nggdb;
 
-	$this->currentID = isset($_REQUEST['act_album']) ? (int) $_REQUEST['act_album'] : 0 ;
+	if (isset($_REQUEST['act_album'])) $this->currentID = intval($_REQUEST['act_album']);
 
 	//TODO:Code MUST be optimized, how to flag a used gallery better ?
 	$used_list = $this->get_used_galleries();
 
+	$album = $this->_get_album($this->currentID);
 ?>
 
 <script type="text/javascript">
@@ -398,14 +412,14 @@ function showDialog() {
 					<option value="0" ><?php esc_html_e('No album selected', 'nggallery') ?></option>
 					<?php
 						if( is_array($this->albums) ) {
-							foreach($this->albums as $album) {
-								$selected = ($this->currentID == $album->id) ? 'selected="selected" ' : '';
-								echo '<option value="' . $album->id . '" ' . $selected . '>' . $album->id . ' - ' . esc_attr( $album->name ) . '</option>'."\n";
+							foreach($this->albums as $a) {
+								$selected = ($this->currentID == $a->id) ? 'selected="selected" ' : '';
+								echo '<option value="' . $a->id . '" ' . $selected . '>' . $a->id . ' - ' . esc_attr( $a->name ) . '</option>'."\n";
 							}
 						}
 					?>
 				</select>
-				<?php if ($this->currentID > 0){ ?>
+				<?php if ($album && $this->currentID){ ?>
 					<input class="button-primary" type="submit" name="update" value="<?php esc_attr_e('Update', 'nggallery'); ?>"/>
 					<?php if(nggGallery::current_user_can( 'NextGEN Edit album settings' )) { ?>
 					<input class="button-secondary" type="submit" name="showThickbox" value="<?php esc_attr_e( 'Edit album', 'nggallery'); ?>" onclick="showDialog(); return false;" />
@@ -447,8 +461,8 @@ function showDialog() {
 			<div id="albumContainer" class="widget-holder">
 			<?php
 			if( is_array( $this->albums ) ) {
-				foreach($this->albums as $album) {
-					$this->get_container('a' . $album->id);
+				foreach($this->albums as $a) {
+					$this->get_container('a' . $a->id);
 				}
 			}
 		?>
@@ -465,7 +479,7 @@ function showDialog() {
 
 		if( is_array( $this->galleries ) ) {
 			//get the array of galleries
-			$sort_array =  $this->currentID > 0 ? (array) $this->albums[$this->currentID]->galleries : array() ;
+			$sort_array = $album ? $album->sortorder : array();
 			foreach($this->galleries as $gallery) {
 				if (!in_array($gallery->gid, $sort_array)) {
 					if (in_array($gallery->gid,$used_list))
@@ -481,17 +495,13 @@ function showDialog() {
 
 		<!-- /#target-album -->
 		<div class="widget target-album widget-left">
-
-		<?php
-			if ($this->currentID > 0){
-				$album = $this->albums[$this->currentID];
-				?>
+		<?php if ($album && $this->currentID){ ?>
 				<div class="widget-top">
 					<h3><?php esc_html_e('Album ID', 'nggallery');  ?> <?php echo $album->id . ' : ' . esc_html( $album->name ); ?> </h3>
 				</div>
 				<div id="galleryContainer" class="widget-holder target">
 				<?php
-				$sort_array = (array) $this->albums[$this->currentID]->galleries;
+				$sort_array = $album->sortorder;
 				foreach($sort_array as $galleryid) {
 					$this->get_container($galleryid, false);
 				}
@@ -512,7 +522,7 @@ function showDialog() {
 	</div><!-- /#container -->
 </div><!-- /#wrap -->
 
-<?php if ($this->currentID > 0) : ?>
+<?php if ($album && $this->currentID): ?>
 <!-- #editalbum -->
 <div id="editalbum" style="display: none;" >
 	<form id="form-edit-album" method="POST" accept-charset="utf-8">
@@ -601,7 +611,7 @@ function showDialog() {
 		// if the id started with a 'a', then it's a sub album
 		if (substr( $id, 0, 1) == 'a') {
 
-			if ( !$album = $this->albums[ substr( $id, 1) ] )
+			if ( !$album = $this->_get_album(substr( $id, 1)))
 				return;
 
 			$obj['id']   = $album->id;
@@ -620,7 +630,7 @@ function showDialog() {
 					$image = $nggdb->find_image( $album->previewpic );
                     if ($image) $thumbURL = @add_query_arg('timestamp', time(), $image->thumbURL);
 				}
-				$preview_image = $thumbURL  ? '<div class="inlinepicture"><img rel="'.$album->previewpic.'" src="' . esc_url( $thumbURL ). '" /></div>' : '';
+				$preview_image = $thumbURL  ? '<div class="inlinepicture"><img rel="'.$album->previewpic.'" src="' . nextgen_esc_url( $thumbURL ). '" /></div>' : '';
 			}
 
 			// this indicates that we have a album container
@@ -647,7 +657,7 @@ function showDialog() {
 					$image = $nggdb->find_image( $gallery->previewpic );
 					$thumbURL = @add_query_arg('timestamp', time(), $image->thumbURL);
 				}
-				$preview_image = ( !is_null($thumbURL) )  ? '<div class="inlinepicture"><img rel="'.$gallery->previewpic.'" src="' . esc_url( $thumbURL ). '" /></div>' : '';
+				$preview_image = ( !is_null($thumbURL) )  ? '<div class="inlinepicture"><img rel="'.$gallery->previewpic.'" src="' . nextgen_esc_url( $thumbURL ). '" /></div>' : '';
 			}
 
 			$prefix = '';
@@ -683,9 +693,8 @@ function showDialog() {
 		$used = array();
 
 		if ($this->albums) {
-			foreach($this->albums as $key => $value) {
-				$sort_array = $this->albums[$key]->galleries;
-				foreach($sort_array as $galleryid) {
+			foreach($this->albums as $album) {
+				foreach($album->sortorder as $galleryid) {
 					if (!in_array($galleryid, $used))
 						$used[] = $galleryid;
 				}

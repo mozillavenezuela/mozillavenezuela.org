@@ -8,10 +8,14 @@ jQuery(function($){
         init:                     function(){
             var self = this;
             jQuery('body').on('click', 'a.page-numbers, a.prev, a.next', function(e){
-              e.preventDefault();
               var $this     = $(this);
               var $gallery  = $this.parents('.ngg-galleryoverview:first');
               var gallery_id= $gallery.attr('id').replace('ngg-gallery-','').replace(/-\d+$/, '');
+              
+              if ($gallery.hasClass('ngg-ajax-pagination-none')) 
+              	return;
+              
+              e.preventDefault();
 
               self.toggle_busy(true);
 
@@ -34,7 +38,7 @@ jQuery(function($){
                   $(document).trigger('refreshed');
               }).always(function() { 
                   self.toggle_busy(false);
-              });;
+              });
 
             });
         },

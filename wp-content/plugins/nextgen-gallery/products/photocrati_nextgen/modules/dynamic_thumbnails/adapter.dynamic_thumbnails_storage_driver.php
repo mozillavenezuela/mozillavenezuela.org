@@ -45,7 +45,7 @@ class A_Dynamic_Thumbnails_Storage_Driver extends Mixin
 		return $retval;
 	}
 
-	function get_image_url($image, $size='full')
+	function get_image_url($image, $size='full', $check_existance=FALSE)
 	{
 		$retval = NULL;
 		$dynthumbs = $this->object->get_registry()->get_utility('I_Dynamic_Thumbnails_Manager');
@@ -61,7 +61,14 @@ class A_Dynamic_Thumbnails_Storage_Driver extends Mixin
 		}
 
 		if ($retval == null) {
-			$retval = $this->call_parent('get_image_url', $image, $size);
+			$retval = $this->call_parent('get_image_url', $image, $size, $check_existance);
+		}
+
+		// Try generating the thumbnail
+		if ($retval == null) {
+			$params = array('watermark' => false, 'reflection' => false, 'crop' => true);
+			$result = $this->generate_thumbnail($image, $params);
+			if ($result) $retval = $this->call_parent('get_image_url', $image, $size, $check_existance);
 		}
 
 		return $retval;

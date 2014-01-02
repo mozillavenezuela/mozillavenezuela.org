@@ -70,8 +70,20 @@ msgid "All"
 msgstr "Todo"
 
 #: jquery-archive-list-widget.php:208
-msgid "Current year"
-msgstr "A&ntilde;o actual"
+msgid "Current or post date"
+msgstr "Fecha actual o la de la entrada"
+
+#: jquery-archive-list-widget.php:208
+msgid "Only post date"
+msgstr "Sólo fecha de la entrada"
+
+#: jquery-archive-list-widget.php:208
+msgid "Only current date"
+msgstr "Sólo la fecha actual"
+
+#: jquery-archive-list-widget.php:233
+msgid "Show only post from selected category in a category page"
+msgstr "Visualizar solo entradas de la categor&iacute;a seleccionada en páginas de categor&iacute;as"
 
 #: jquery-archive-list-widget.php:208
 msgid "Current month"

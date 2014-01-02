@@ -143,7 +143,7 @@
 				<img data-image-id='<?php echo esc_attr($image->pid); ?>'
 					 title="<?php echo esc_attr($image->description)?>"
 					 alt="<?php echo esc_attr($image->alttext)?>"
-					 src="<?php echo esc_attr($storage->get_image_url($image))?>"
+					 src="<?php echo esc_attr($storage->get_image_url($image, 'full', TRUE))?>"
 					 width="<?php echo esc_attr($image_size['width'])?>"
 					 height="<?php echo esc_attr($image_size['height'])?>"
 				/>
@@ -171,7 +171,7 @@
 	<div
 		class="ngg-galleryoverview ngg-slideshow"
 		id="<?php echo_h($anchor)?>"
-		data-placeholder="<?php echo esc_url($placeholder)?>"
+		data-placeholder="<?php echo nextgen_esc_url($placeholder)?>"
 		style="max-width:<?php echo_h($gallery_width) ?>px; max-height:<?php echo_h($gallery_height) ?>px;">
 
 		<div

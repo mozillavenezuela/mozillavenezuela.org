@@ -235,7 +235,7 @@ function ngg_overview_news(){
     		$link = $item->get_link();
     		while ( stristr($link, 'http') != $link )
     			$link = substr($link, 1);
-    		$link = esc_url(strip_tags($link));
+    		$link = nextgen_esc_url(strip_tags($link));
     		$title = esc_attr(strip_tags($item->get_title()));
     		if ( empty($title) )
     			$title = __('Untitled');
@@ -345,7 +345,7 @@ function ngg_dashboard_quota() {
 	<div class="table table_content musubtable">
 	<table>
 		<tr class="first">
-			<td class="first b b-posts"><?php printf( __( '<a href="%1$s" title="Manage Uploads" class="musublink">%2$sMB</a>' ), esc_url( admin_url( 'admin.php?page=nggallery-manage-gallery' ) ), $quota ); ?></td>
+			<td class="first b b-posts"><?php printf( __( '<a href="%1$s" title="Manage Uploads" class="musublink">%2$sMB</a>' ), nextgen_esc_url( admin_url( 'admin.php?page=nggallery-manage-gallery' ) ), $quota ); ?></td>
 			<td class="t posts"><?php _e( 'Space Allowed' ); ?></td>
 		</tr>
 	</table>
@@ -353,7 +353,7 @@ function ngg_dashboard_quota() {
 	<div class="table table_discussion musubtable">
 	<table>
 		<tr class="first">
-			<td class="b b-comments"><?php printf( __( '<a href="%1$s" title="Manage Uploads" class="musublink">%2$sMB (%3$s%%)</a>' ), esc_url( admin_url( 'admin.php?page=nggallery-manage-gallery' ) ), $used, $percentused ); ?></td>
+			<td class="b b-comments"><?php printf( __( '<a href="%1$s" title="Manage Uploads" class="musublink">%2$sMB (%3$s%%)</a>' ), nextgen_esc_url( admin_url( 'admin.php?page=nggallery-manage-gallery' ) ), $used, $percentused ); ?></td>
 			<td class="last t comments <?php echo $used_color;?>"><?php _e( 'Space Used' );?></td>
 		</tr>
 	</table>
@@ -385,7 +385,7 @@ function ngg_widget_locale() {
 		?>
 		<p class="hint"><?php _e('Translation file successful updated. Please reload page.', 'nggallery'); ?></p>
 		<p class="textright">
-			<a class="button" href="<?php echo esc_url(strip_tags($overview_url)); ?>"><?php _e('Reload page', 'nggallery'); ?></a>
+			<a class="button" href="<?php echo nextgen_esc_url(strip_tags($overview_url)); ?>"><?php _e('Reload page', 'nggallery'); ?></a>
 		</p>
 		<?php
 		} else {
@@ -416,7 +416,7 @@ function ngg_locale() {
 		if ( !is_wp_error($locale->response) && $locale->response['response']['code'] == '200') {
 		?>
 		<p class="textright">
-			<a class="button" href="<?php echo esc_url( strip_tags($update_url) ); ?>"><?php _e('Update', 'nggallery'); ?></a>
+			<a class="button" href="<?php echo nextgen_esc_url( strip_tags($update_url) ); ?>"><?php _e('Update', 'nggallery'); ?></a>
 		</p>
 		<?php
 		}
@@ -427,7 +427,7 @@ function ngg_locale() {
 		?>
 		<p><strong>Download now your language file !</strong></p>
 		<p class="textright">
-			<a class="button" href="<?php echo esc_url( strip_tags($update_url) ); ?>"><?php _e('Download', 'nggallery'); ?></a>
+			<a class="button" href="<?php echo nextgen_esc_url( strip_tags($update_url) ); ?>"><?php _e('Download', 'nggallery'); ?></a>
 		</p>
 		<?php
 	}
@@ -496,7 +496,8 @@ function ngg_get_serverinfo() {
 	if(ini_get('allow_url_fopen')) $allow_url_fopen = __('On', 'nggallery');
 	else $allow_url_fopen = __('Off', 'nggallery');
 	// Get PHP Max Upload Size
-	if(ini_get('upload_max_filesize')) $upload_max = ini_get('upload_max_filesize');
+	if (function_exists('wp_max_upload_size')) $upload_max = strval(round( (int) wp_max_upload_size() / (1024 * 1024) )) . 'M';
+	else if(ini_get('upload_max_filesize')) $upload_max = ini_get('upload_max_filesize');
 	else $upload_max = __('N/A', 'nggallery');
 	// Get PHP Output buffer Size
 	if(ini_get('pcre.backtrack_limit')) $backtrack_limit = ini_get('pcre.backtrack_limit');

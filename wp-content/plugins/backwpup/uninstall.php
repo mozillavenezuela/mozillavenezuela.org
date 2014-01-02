@@ -10,26 +10,26 @@ global $wpdb;
 if ( ! class_exists( 'BackWPup' ) ) {
 	//remove roles from user
 	/* @var WP_User $user */
-	$users = get_users( array( 'role' => 'backwpup_admin', 'fields' => 'all_with_meta' ) );
+	$users = get_users( array( 'role' => 'backwpup_admin' ) );
 	foreach ( $users as $user ) {
 		$user->remove_role( 'backwpup_admin' );
-	}		
+	}
 	remove_role( 'backwpup_admin' );
-	$users = get_users( array( 'role' => 'backwpup_helper', 'fields' => 'all_with_meta' ) );
+	$users = get_users( array( 'role' => 'backwpup_helper' ) );
 	foreach ( $users as $user ) {
 		$user->remove_role( 'backwpup_helper' );
 	}
 	remove_role( 'backwpup_helper' );
-	$users = get_users( array( 'role' => 'backwpup_check', 'fields' => 'all_with_meta' ) );
+	$users = get_users( array( 'role' => 'backwpup_check' ) );
 	foreach ( $users as $user ) {
 		$user->remove_role( 'backwpup_check' );
 	}
-	remove_role( 'backwpup_check' );	
+	remove_role( 'backwpup_check' );
 	//delete log folder and logs
 	$log_folder = get_site_option( 'backwpup_cfg_logfolder' );
 	if ( $dir = opendir( $log_folder ) ) {
 		while ( FALSE !== ( $file = readdir( $dir ) ) ) {
-			if ( is_file( $log_folder . $file ) && ( substr( $file, -8 ) == '.html.gz' || substr( $file, -5 ) == '.html' ) )
+			if ( file_exists( $log_folder . $file ) && ( substr( $file, -8 ) == '.html.gz' || substr( $file, -5 ) == '.html' ) )
 				unlink( $log_folder . $file );
 		}
 		closedir( $dir );

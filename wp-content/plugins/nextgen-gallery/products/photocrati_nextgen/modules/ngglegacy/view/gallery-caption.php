@@ -19,7 +19,7 @@ Follow variables are useable :
 <?php if ($gallery->show_slideshow) { ?>
 	<!-- Slideshow link -->
 	<div class="slideshowlink">
-		<a class="slideshowlink" href="<?php echo $gallery->slideshow_link ?>">
+		<a class="slideshowlink" href="<?php echo nextgen_esc_url($gallery->slideshow_link) ?>">
 			<?php echo $gallery->slideshow_link_text ?>
 		</a>
 	</div>
@@ -28,7 +28,7 @@ Follow variables are useable :
 <?php if ($gallery->show_piclens) { ?>
 	<!-- Piclense link -->
 	<div class="piclenselink">
-		<a class="piclenselink" href="<?php echo $gallery->piclens_link ?>">
+		<a class="piclenselink" href="<?php echo nextgen_esc_url($gallery->piclens_link) ?>">
 			<?php _e('[View with PicLens]','nggallery'); ?>
 		</a>
 	</div>
@@ -40,9 +40,16 @@ Follow variables are useable :
 	
 	<div id="ngg-image-<?php echo $image->pid ?>" class="ngg-gallery-thumbnail-box" <?php echo $image->style ?> >
 		<div class="ngg-gallery-thumbnail" >
-			<a href="<?php echo $image->imageURL ?>" title="<?php echo $image->description ?>" <?php echo $image->thumbcode ?> >
+			<a href="<?php echo nextgen_esc_url($image->imageURL) ?>"
+               title="<?php echo esc_attr($image->description) ?>"
+               data-src="<?php echo nextgen_esc_url($image->imageURL) ?>"
+               data-thumbnail="<?php echo nextgen_esc_url($image->thumbnailURL); ?>"
+               data-image-id="<?php echo esc_attr($image->pid); ?>"
+               data-title="<?php echo esc_attr($image->alttext); ?>"
+               data-description="<?php echo esc_attr($image->description); ?>"
+               <?php echo $image->thumbcode ?> >
 				<?php if ( !$image->hidden ) { ?>
-				<img title="<?php echo $image->alttext ?>" alt="<?php echo $image->alttext ?>" src="<?php echo $image->thumbnailURL ?>" <?php echo $image->size ?> />
+				<img title="<?php echo esc_attr($image->alttext) ?>" alt="<?php echo esc_attr($image->alttext) ?>" src="<?php echo nextgen_esc_url($image->thumbnailURL) ?>" <?php echo $image->size ?> />
 				<?php } ?>
 			</a>
 			<span><?php echo $image->caption ?></span>

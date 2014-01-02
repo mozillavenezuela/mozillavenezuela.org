@@ -14,11 +14,15 @@ class M_Security extends C_Base_Module
 			'photocrati-security',
 			'Security',
 			'Provides utilities to check for credentials and security',
-			'0.1',
+			'0.2',
 			'http://www.nextgen-gallery.com',
 			'Photocrati Media',
 			'http://www.photocrati.com'
 		);
+
+		if (isset($GLOBALS['_COOKIE_NG_COPY'])) {
+			$_COOKIE = $GLOBALS['_COOKIE_NG_COPY'];
+		}
 	}
 
 	function _register_adapters()

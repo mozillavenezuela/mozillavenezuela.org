@@ -17,7 +17,7 @@ class M_NextGen_Basic_Tagcloud extends C_Base_Module
 			NEXTGEN_BASIC_TAG_CLOUD_MODULE_NAME,
             'NextGen Basic Tagcloud',
             'Provides a tagcloud for NextGEN Gallery',
-            '0.3',
+            '0.5',
             'http://www.photocrati.com',
             'Photocrati Media',
             'http://www.photocrati.com'
@@ -27,6 +27,10 @@ class M_NextGen_Basic_Tagcloud extends C_Base_Module
 		C_Photocrati_Installer::add_handler($this->module_id, 'C_NextGen_Basic_Tagcloud_Installer');
     }
 
+    function _register_utilities()
+    {
+        $this->get_registry()->add_utility('I_Taxonomy_Controller', 'C_Taxonomy_Controller');
+    }
 
     function _register_adapters()
     {
@@ -61,23 +65,33 @@ class M_NextGen_Basic_Tagcloud extends C_Base_Module
 			'A_NextGen_Basic_TagCloud_Urls'
 		);
 
-		// Adds a display settings form
-		$this->get_registry()->add_adapter(
-			'I_Form',
-			'A_NextGen_Basic_TagCloud_Form',
-			$this->module_id
-		);
-
-        // Provides the forms for the settings
-        $this->get_registry()->add_adapter(
-            'I_Form_Manager',
-            'A_NextGen_Basic_TagCloud_Forms'
-        );
+        if (is_admin()) {
+            // Adds a display settings form
+            $this->get_registry()->add_adapter(
+                'I_Form',
+                'A_NextGen_Basic_TagCloud_Form',
+                $this->module_id
+            );
+            // Provides the forms for the settings
+            $this->get_registry()->add_adapter(
+                'I_Form_Manager',
+                'A_NextGen_Basic_TagCloud_Forms'
+            );
+        }
     }
 
 	function _register_hooks()
 	{
 		C_NextGen_Shortcode_Manager::add('tagcloud', array(&$this, 'render_shortcode'));
+
+        add_filter(
+            'the_posts',
+            array(
+                $this->get_registry()->get_utility('I_Taxonomy_Controller'),
+                'detect_ngg_tag'),
+            -10,
+            2
+        );
 	}
 
     /**
@@ -119,7 +133,9 @@ class M_NextGen_Basic_Tagcloud extends C_Base_Module
             'C_NextGen_Basic_Tagcloud_Installer' => 'class.nextgen_basic_tagcloud_installer.php',
             'A_Nextgen_Basic_Tagcloud_Mapper' => 'adapter.nextgen_basic_tagcloud_mapper.php',
             'A_Nextgen_Basic_Tagcloud_Routes' => 'adapter.nextgen_basic_tagcloud_routes.php',
-            'A_Nextgen_Basic_Tagcloud_Urls' => 'adapter.nextgen_basic_tagcloud_urls.php'
+            'A_Nextgen_Basic_Tagcloud_Urls' => 'adapter.nextgen_basic_tagcloud_urls.php',
+            'I_Taxonomy_Controller' => 'interface.taxonomy_controller.php',
+            'C_Taxonomy_Controller' => 'class.taxonomy_controller.php'
         );
     }
 }

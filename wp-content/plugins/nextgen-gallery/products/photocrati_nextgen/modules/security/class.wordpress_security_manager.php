@@ -59,6 +59,19 @@ class Mixin_WordPress_Security_Manager extends Mixin
 
 	function get_current_actor()
 	{
+		// If the current_user has an id of 0, then perhaps something went wrong
+		// with trying to parse the cookie. In that case, we'll force WordPress to try
+		// again
+		global $current_user;
+		if ($current_user->ID == 0) {
+			if (isset($GLOBALS['HTTP_COOKIE_VARS']) && isset($GLOBALS['_COOKIE']))
+			$current_user = NULL;
+			foreach ($GLOBALS['HTTP_COOKIE_VARS'] as $key => $value)
+			if (!isset($_COOKIE[$key])) {
+				$_COOKIE[$key] = $value;
+			}
+		}
+
 		return $this->object->get_actor(get_current_user_id(), 'user');
 	}
 

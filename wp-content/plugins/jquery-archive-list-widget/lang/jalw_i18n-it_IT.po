@@ -73,8 +73,20 @@ msgid "All"
 msgstr "Tutti"
 
 #: jquery-archive-list-widget.php:208
-msgid "Current year"
-msgstr "Anno corrente"
+msgid "Current or post date"
+msgstr "Corrente postale o la data"
+
+#: jquery-archive-list-widget.php:208
+msgid "Only post date"
+msgstr "Solo data postale"
+
+#: jquery-archive-list-widget.php:208
+msgid "Only current date"
+msgstr "Solo data corrente"
+
+#: jquery-archive-list-widget.php:233
+msgid "Show only post from selected category in a category page"
+msgstr "Mostra solo i messaggi di categoria selezionata in paginas di categoria"
 
 #: jquery-archive-list-widget.php:208
 msgid "Current month"

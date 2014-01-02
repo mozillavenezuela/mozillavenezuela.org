@@ -20,7 +20,25 @@ class Mixin_NextGen_Basic_Pagination extends Mixin
         $next_symbol = apply_filters('ngg_next_symbol', '&#9658;');
 
         if (empty($current_url))
+        {
             $current_url = $this->object->get_routed_url(TRUE);
+
+            if (is_archive())
+            {
+                $id = get_the_ID();
+	
+                if ($id == null)
+                {
+                    global $post;
+                    $id = $post ? $post->ID : null;
+                }
+				    
+                if ($id != null && in_the_loop())
+                {
+                    $current_url = get_permalink($id);
+                }
+            }
+        }
 
         $return = array('prev' => '', 'next' => '', 'output' => '');
 

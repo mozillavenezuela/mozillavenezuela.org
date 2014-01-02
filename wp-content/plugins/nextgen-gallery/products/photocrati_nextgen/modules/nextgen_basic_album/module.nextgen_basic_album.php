@@ -18,7 +18,7 @@ class M_NextGen_Basic_Album extends C_Base_Module
             'photocrati-nextgen_basic_album',
             'NextGEN Basic Album',
             "Provides support for NextGEN's Basic Album",
-            '0.3',
+            '0.5',
             'http://nextgen-gallery.com',
             'Photocrati Media',
             'http://www.photocrati.com'
@@ -60,17 +60,19 @@ class M_NextGen_Basic_Album extends C_Base_Module
 			'A_NextGen_Basic_Album_Routes'
 		);
 
-		// Add a display settings form for each display type
-		$this->get_registry()->add_adapter(
-			'I_Form',
-			'A_NextGen_Basic_Compact_Album_Form',
-			NEXTGEN_GALLERY_NEXTGEN_BASIC_COMPACT_ALBUM
-		);
-		$this->get_registry()->add_adapter(
-			'I_Form',
-			'A_NextGen_Basic_Extended_Album_Form',
-			NEXTGEN_GALLERY_NEXTGEN_BASIC_EXTENDED_ALBUM
-		);
+        if (is_admin()) {
+            // Add a display settings form for each display type
+            $this->get_registry()->add_adapter(
+                'I_Form',
+                'A_NextGen_Basic_Compact_Album_Form',
+                NEXTGEN_GALLERY_NEXTGEN_BASIC_COMPACT_ALBUM
+            );
+            $this->get_registry()->add_adapter(
+                'I_Form',
+                'A_NextGen_Basic_Extended_Album_Form',
+                NEXTGEN_GALLERY_NEXTGEN_BASIC_EXTENDED_ALBUM
+            );
+        }
 
         // Creates special parameter segments
         $this->get_registry()->add_adapter(
@@ -78,10 +80,12 @@ class M_NextGen_Basic_Album extends C_Base_Module
             'A_NextGen_Basic_Album_Urls'
         );
 
-        $this->get_registry()->add_adapter(
-            'I_Form_Manager',
-            'A_NextGen_Basic_Album_Forms'
-        );
+        if (is_admin()) {
+            $this->get_registry()->add_adapter(
+                'I_Form_Manager',
+                'A_NextGen_Basic_Album_Forms'
+            );
+        }
     }
 
 	function _register_hooks()

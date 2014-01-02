@@ -45,6 +45,32 @@ class C_Widget_Gallery extends WP_Widget
     function update($new_instance, $old_instance)
     {
         $instance = $old_instance;
+
+        // do not allow 0 or less
+        if ((int)$new_instance['items'] <= 0)
+            $new_instance['items'] = 4;
+
+        // for clarity: empty the list if we're showing every gallery anyway
+        if ($new_instance['exclude'] == 'all')
+            $new_instance['list'] = '';
+
+        // remove gallery ids that do not exist
+        if (in_array($new_instance['exclude'], array('denied', 'allow')))
+        {
+            // do search
+            $mapper = C_Component_Registry::get_instance()->get_utility('I_Gallery_Mapper');
+            $ids = explode(',', $new_instance['list']);
+            foreach ($ids as $ndx => $id) {
+                if (!$mapper->find($id))
+                    unset($ids[$ndx]);
+            }
+            $new_instance['list'] = implode(',', $ids);
+        }
+
+        // reset to show all galleries IF there are no valid galleries in the list
+        if ($new_instance['exclude'] !== 'all' && empty($new_instance['list']))
+            $new_instance['exclude'] = 'all';
+
         $instance['title'] = strip_tags($new_instance['title']);
         $instance['items'] = (int)$new_instance['items'];
         $instance['type'] = $new_instance['type'];
@@ -59,59 +85,23 @@ class C_Widget_Gallery extends WP_Widget
 
     function widget($args, $instance)
     {
+		$router = C_Router::get_instance();
+		wp_enqueue_style('nextgen_widgets_style', $router->get_static_url('photocrati-widget#widgets.css'));
+		wp_enqueue_style('nextgen_basic_thumbnails_style', $router->get_static_url('photocrati-nextgen_basic_gallery#thumbnails/nextgen_basic_thumbnails.css'));
+
         // these are handled by extract() but I want to silence my IDE warnings that these vars don't exist
         $before_widget = NULL;
-        $before_title = NULL;
-        $after_widget = NULL;
-        $after_title = NULL;
-        $widget_id = NULL;
-
-        global $wpdb;
-
+        $before_title  = NULL;
+        $after_widget  = NULL;
+        $after_title   = NULL;
+        $widget_id     = NULL;
         extract($args);
+
         $title = apply_filters('widget_title', empty($instance['title']) ? '&nbsp;' : $instance['title'], $instance, $this->id_base);
 
-        $renderer  = C_Component_Registry::get_instance()->get_utility('I_Displayed_Gallery_Renderer');
-        $factory   = C_Component_Registry::get_instance()->get_utility('I_Component_Factory');
-        $mapper    = C_Component_Registry::get_instance()->get_utility('I_Image_Mapper');
+        $renderer = C_Component_Registry::get_instance()->get_utility('I_Displayed_Gallery_Renderer');
+        $factory  = C_Component_Registry::get_instance()->get_utility('I_Component_Factory');
         $view = $factory->create('mvc_view', '');
-
-        // To prevent huge db scans and/or the loading of every image available: we first retrieve X image
-        // ids and then create a gallery using the results for the image_ids parameter
-        $image_ids = array();
-
-        $sql = "SELECT `pid` FROM `{$wpdb->nggpictures}` WHERE `exclude` = 0";
-
-        // possibly filter images not from certain galleries
-        if ($instance['exclude'] == 'allow')
-            $sql .= sprintf(" AND `galleryid` IN (%s)", $instance['list']);
-
-        // possibly filter images from certain galleries
-        if ($instance['exclude'] == 'denied')
-            $sql .= sprintf(" AND `galleryid` NOT IN (%s)", $instance['list']);
-
-        if ($instance['type'] == 'random')
-            $sql .= ' ORDER BY RAND()';
-        else if ($instance['type'] == 'recent')
-            $sql .= ' ORDER BY `imagedate` DESC';
-
-        $sql .= " LIMIT {$instance['items']}";
-
-        foreach ($wpdb->get_results($sql, ARRAY_N) as $res) {
-            $image_ids[] = reset($res);
-        }
-        $image_ids = implode(',', $image_ids);
-
-        if ($instance['type'] == 'random')
-        {
-            $order_by = 'rand()';
-            $order_direction = 'DESC';
-        }
-        else if ($instance['type'] == 'recent')
-        {
-            $order_by = $mapper->get_primary_key_column();
-            $order_direction = 'DESC';
-        }
 
         // IE8 webslice support if needed
         if ($instance['webslice'])
@@ -121,22 +111,16 @@ class C_Widget_Gallery extends WP_Widget
             $after_widget  = '</div>' . $after_widget;
         }
 
-        // 'Original' was the value used in 1.9x; so alias original => 'full'
-        if ($instance['show'] == 'original')
-            $show = 'full';
-        else
-            $show = 'thumb';
+        $source = ($instance['type'] == 'random' ? 'random_images' : 'recent');
 
-        echo $renderer->display_images(array(
-            'source' => 'galleries',
-            'order_by' => $order_by,
-            'order_direction' => $order_direction,
-            'image_ids' => $image_ids,
+        $params = array(
+            'slug' => 'widget-' . $args['widget_id'],
+            'source' => $source,
             'display_type' => NEXTGEN_GALLERY_BASIC_THUMBNAILS,
             'images_per_page' => $instance['items'],
             'maximum_entity_count' => $instance['items'],
             'template' => $view->get_template_abspath('photocrati-widget#display_gallery'),
-            'image_type' => $show,
+            'image_type' => $instance['show'] == 'original' ? 'full' : 'thumb',
             'show_all_in_lightbox' => FALSE,
             'show_slideshow_link' => FALSE,
             'disable_pagination' => TRUE,
@@ -152,6 +136,26 @@ class C_Widget_Gallery extends WP_Widget
             'widget_setting_height'        => $instance['height'],
             'widget_setting_show_setting'  => $instance['show'],
             'widget_setting_widget_id'     => $widget_id
-        ));
+        );
+
+        switch ($instance['exclude']) {
+            case 'all':
+                break;
+            case 'denied':
+                $mapper = C_Component_Registry::get_instance()->get_utility('I_Gallery_Mapper');
+                $gallery_ids = array();
+                $list = explode(',', $instance['list']);
+                foreach ($mapper->find_all() as $gallery) {
+                    if (!in_array($gallery->{$gallery->id_field}, $list))
+                        $gallery_ids[] = $gallery->{$gallery->id_field};
+                }
+                $params['container_ids'] = implode(',', $gallery_ids);
+                break;
+            case 'allow':
+                $params['container_ids'] = $instance['list'];
+                break;
+        }
+
+        echo $renderer->display_images($params);
     }
 }

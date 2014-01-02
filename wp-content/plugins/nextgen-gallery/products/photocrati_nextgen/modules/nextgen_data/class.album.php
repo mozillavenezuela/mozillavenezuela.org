@@ -5,7 +5,7 @@ class C_Album extends C_DataMapper_Model
     var $_mapper_interface = 'I_Album_Mapper';
 
 
-    function define($mapper=FALSE, $properties=FALSE, $context=FALSE)
+    function define($properties=array(), $mapper=FALSE, $context=FALSE)
     {
         parent::define($mapper, $properties, $context);
         $this->add_mixin('Mixin_NextGen_Album_Instance_Methods');
@@ -18,16 +18,17 @@ class C_Album extends C_DataMapper_Model
      * @param bool|\C_DataMapper|\FALSE $mapper
      * @param array $properties
      */
-    function initialize($mapper=FALSE, $properties=array()) {
+	function initialize($properties=array(), $mapper=FALSE, $context=FALSE)
+	{
 
-        // Get the mapper is not specified
-        if (!$mapper) {
-            $mapper = $this->get_registry()->get_utility($this->_mapper_interface);
-        }
+		// Get the mapper is not specified
+		if (!$mapper) {
+			$mapper = $this->get_registry()->get_utility($this->_mapper_interface);
+		}
 
-        // Initialize
-        parent::initialize($mapper, $properties);
-    }
+		// Initialize
+		parent::initialize($mapper, $properties);
+	}
 }
 
 /**

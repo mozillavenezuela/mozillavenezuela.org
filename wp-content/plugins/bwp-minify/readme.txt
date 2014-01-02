@@ -3,12 +3,14 @@ Contributors: OddOneOut
 Donate link: http://betterwp.net/wordpress-plugins/bwp-minify/
 Tags: CSS, javascript, JS, minify, minification, optimization, optimize
 Requires at least: 2.8
-Tested up to: 3.4.2
-Stable tag: 1.2.2
+Tested up to: 3.7
+Stable tag: 1.2.3
 
 Allows you to minify your CSS and JS files for faster page loading for visitors.
 
 == Description ==
+
+**BWP MINIFY IS WORDPRESS 3.7 COMPATIBLE**
 
 Allows you to minify your CSS and JS files for faster page loading for visitors. This plugin uses the PHP library [Minify](http://code.google.com/p/minify/) and relies on WordPress's enqueueing system rather than the output buffer (will not break your website in most cases). This plugin is very customizable and easy to use.
 
@@ -28,6 +30,7 @@ Allows you to minify your CSS and JS files for faster page loading for visitors.
 
 **Major Features that are scheduled for 1.3.0**
 
+* CDN support
 * Automatic script/style handle detection: you will no longer have to look for script/style handles, all will be put in a convenient dropdown box for you to choose!
 * Friendly Minify URL: no more question mark!
 * Role-based Minification: If you're an admin and would like to debug your scripts, this option is definitely useful!
@@ -43,6 +46,9 @@ If you want to make the most out of BWP Minify, it is highly recommended that yo
 * Turkish (tr_TR) - Thanks to Hakan E
 * French (fr_FR) - Thanks to Sebastien 
 * Italian (it_IT) - Thanks to Gabriele - http://cookspot.it
+* Spanish (es_ES) -  Thanks to Ruben Hernandez - http://usitility.com/
+* Dutch (nl_NL) - Thanks to Martijn van Egmond
+* German (de_DE) - Thanks to Matthias
 
 Please [help translate](http://betterwp.net/wordpress-tips/create-pot-file-using-poedit/) this plugin!
 
@@ -68,6 +74,24 @@ Please [help translate](http://betterwp.net/wordpress-tips/create-pot-file-using
 1. Changing the Minify URL, now one can have a shorter and nicer URL ;)
 
 == Changelog ==
+
+= 1.2.3 =
+* BWP Minify is now WordPress 3.7 compatible (compatibility issues with WordPress 3.5 and 3.6 have been fixed).
+* Updated Minify library to version 2.1.7 (security fix). This updated version of Minify also comes with an updated version of CSSMin library, which solves relative path issues in some plugins' CSS files (such as TablePress).
+* Added support for protocol-relative media sources.
+* Added partial support for bbPress forum plugin (`quicktags` script must be ignored for the Text editor to work, more info [here](http://betterwp.net/community/topic/144/wordpress-plugins-minify-compatibility-report/)).
+* Added a filter (`bwp_minify_is_loadable`) to allow other plugins to disable BWP Minify based on some criteria.
+* Added a Spanish translation - Thanks to Ruben Hernandez!
+* Added a Dutch translation - Thanks to Martijn van Egmond!
+* Added a German translation - Thanks to Matthias!
+* Disabled BWP Minify on Ajax Edit Comment plugin's pages (for now).
+* Disabled BWP Minify on SimplePress forum page.
+* Updated BWP Framework to fix a possible bug that caues BWP setting pages to go blank.
+* Fixed a bug that makes BWP Minify fails to split long minify string into shorter ones.
+* **Good news**: I have created [an official Github repository for BWP Minify](https://github.com/OddOneOut/Better-WordPress-Minify), awaiting coders worldwide.
+* **Good news**: ManageWP.com has become the official sponsor for BWP Minify - [Read more](http://betterwp.net/319-better-wordpress-plugins-updates-2013/).
+
+**Notes:** If you're using All-in-one Calendar plugin and still having issues with it after update, please try this [suggestion](http://betterwp.net/community/post/426/#p426).
 
 = 1.2.2 =
 * Fixed a possible fatal error on certain installations.

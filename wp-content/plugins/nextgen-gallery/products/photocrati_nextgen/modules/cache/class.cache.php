@@ -59,10 +59,10 @@ class Mixin_Cache extends Mixin
 
         foreach ($iterator as $file) {
             if ($file->isFile() || $file->isLink()) {
-                unlink($file->getPathname());
+                @unlink($file->getPathname());
             }
             elseif ($file->isDir() && !$file->isDot() && $recursive) {
-                rmdir($file->getPathname());
+                @rmdir($file->getPathname());
             }
         }
     }

@@ -4,30 +4,37 @@ class C_Album_Mapper extends C_CustomTable_DataMapper_Driver
 {
     static $_instances = array();
 
-	function define($context=FALSE)
-	{
-		if (!is_array($context)) $context = array($context);
-		array_push($context, 'album');
-
-		$this->_primary_key_column = 'id';
-
-		parent::define('ngg_album', $context);
-		$this->add_mixin('Mixin_Album_Mapper');
-		$this->implement('I_Album_Mapper');
-		$this->set_model_factory_method('album');
-        $this->add_post_hook(
-            '_convert_to_entity',
-            'Unserialize Galleries',
-            'Hook_Unserialize_Album_Galleries',
-            'unserialize_galleries'
-        );
-	}
-
-	function initialize()
+	function initialize($object_name=FALSE)
 	{
 		parent::initialize('ngg_album');
 	}
 
+	function define($context=FALSE, $not_used=FALSE)
+	{
+		// Define the context
+		if (!is_array($context)) $context = array($context);
+		array_push($context, 'album');
+		$this->_primary_key_column = 'id';
+
+		// Define the mapper
+		parent::define('ngg_album', $context);
+		$this->add_mixin('Mixin_NextGen_Table_Extras');
+		$this->add_mixin('Mixin_Album_Mapper');
+		$this->implement('I_Album_Mapper');
+		$this->set_model_factory_method('album');
+
+		// Define the columns
+		$this->define_column('id', 'BIGINT', 0);
+		$this->define_column('name', 'VARCHAR(255)');
+		$this->define_column('slug', 'VARCHAR(255');
+		$this->define_column('previewpic', 'BIGINT', 0);
+		$this->define_column('albumdesc', 'TEXT');
+		$this->define_column('sortorder', 'TEXT');
+		$this->define_column('pageid', 'BIGINT', 0);
+
+		// Mark the columns which should be unserialized
+		$this->add_serialized_column('sortorder');
+	}
 
     /**
      * Returns an instance of the album datamapper
@@ -41,19 +48,6 @@ class C_Album_Mapper extends C_CustomTable_DataMapper_Driver
             self::$_instances[$context] = new $klass($context);
         }
         return self::$_instances[$context];
-    }
-}
-
-/**
- * NextGEN stores all gallery ids for the album in a property called sortorder
- */
-class Hook_Unserialize_Album_Galleries extends Hook
-{
-    function unserialize_galleries($entity)
-    {
-        if (isset($entity->sortorder) && is_string($entity->sortorder)) {
-            $entity->sortorder = $this->object->unserialize($entity->sortorder);
-        }
     }
 }
 
@@ -73,29 +67,11 @@ class Mixin_Album_Mapper extends Mixin
 		return $entity->name;
 	}
 
-	/**
-	 * Override the save method to avoid trying to save the 'exclude' property
-	 * to the database, which will fail since the column doesn't exist in the
-	 * database.
-	 * TODO: This is just a workaround and should be removed when we implement
-	 * https://www.wrike.com/open.htm?id=8250095
-	 * @param stdClass|C_DataMapper_Model $entity
-	 * @return boolean
-	 */
-	function _convert_to_table_data($entity)
-	{
-		$exclude = $entity->exclude;
-		unset($entity->exclude);
-		$retval = $this->call_parent('_convert_to_table_data', $entity);
-		$entity->exclude = $exclude;
-		return $retval;
-	}
-
 	function _save_entity($entity)
 	{
 		$retval = $this->call_parent('_save_entity', $entity);
 		if ($retval) {
-			C_Photocrati_Cache::flush();
+			C_Photocrati_Cache::flush('displayed_gallery_rendering');
 		}
 		return $retval;
 	}

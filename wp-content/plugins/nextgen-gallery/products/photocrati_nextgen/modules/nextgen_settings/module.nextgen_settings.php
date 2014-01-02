@@ -17,7 +17,7 @@ class M_NextGen_Settings extends C_Base_Module
 			'photocrati-nextgen_settings',
 			'NextGEN Gallery Settings',
 			'Provides central management for NextGEN Gallery settings',
-			'0.2',
+			'0.3',
 			'http://www.nextgen-gallery.com',
 			'Photocrati Media',
 			'http://www.photocrati.com'

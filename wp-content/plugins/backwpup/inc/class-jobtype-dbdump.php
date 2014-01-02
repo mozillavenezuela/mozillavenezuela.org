@@ -12,7 +12,7 @@ class BackWPup_JobType_DBDump extends BackWPup_JobTypes {
 		$this->info[ 'ID' ]          = 'DBDUMP';
 		$this->info[ 'name' ]        = __( 'DB Backup', 'backwpup' );
 		$this->info[ 'description' ] = __( 'Database backup', 'backwpup' );
-		$this->info[ 'help' ]        = __( 'Creates an .sql database dump file', 'backwpup' );
+		$this->info[ 'help' ]        = __( 'Creates an .sql database backup file', 'backwpup' );
 		$this->info[ 'URI' ]         = translate( BackWPup::get_plugin_data( 'PluginURI' ), 'backwpup' );
 		$this->info[ 'author' ]      = BackWPup::get_plugin_data( 'Author' );
 		$this->info[ 'authorURI' ]   = translate( BackWPup::get_plugin_data( 'AuthorURI' ), 'backwpup' );
@@ -34,7 +34,7 @@ class BackWPup_JobType_DBDump extends BackWPup_JobTypes {
 	public function option_defaults() {
 		global $wpdb;
 		/* @var wpdb $wpdb */
-		
+
 		$defaults = array(
 			'dbdumpexclude'    => array(), 'dbdumpfile' => sanitize_file_name( DB_NAME ), 'dbdumptype' => 'sql', 'dbdumpfilecompression' => ''
 		);
@@ -55,7 +55,7 @@ class BackWPup_JobType_DBDump extends BackWPup_JobTypes {
 	public function edit_tab( $jobid ) {
 		global $wpdb;
 		/* @var wpdb $wpdb */
-		
+
 		?>
         <input name="dbdumpwpony" type="hidden" value="1" />
         <h3 class="title"><?php _e( 'Settings for database backup', 'backwpup' ) ?></h3>
@@ -69,9 +69,8 @@ class BackWPup_JobType_DBDump extends BackWPup_JobTypes {
                     <input type="button" class="button-secondary" id="dbwp" value="<?php echo $wpdb->prefix; ?>">
 					<?php
 					$tables = $wpdb->get_results( 'SHOW FULL TABLES FROM `' . DB_NAME . '`', ARRAY_N );
-					$num_rows = count( $tables );
-					echo '<table id="dbtables"><tr><td valign="top">';
-					$next_row = round( $num_rows / 3, 0 );
+					echo '<fieldset id="dbtables"><div style="width: 30%; float:left; min-width: 250px; margin-right: 10px;">';
+					$next_row = ceil( count( $tables ) / 3 );
 					$counter = 0;
 					foreach ( $tables as $table ) {
 						$tabletype = '';
@@ -80,16 +79,16 @@ class BackWPup_JobType_DBDump extends BackWPup_JobTypes {
 						echo '<label for="idtabledb-' . rawurlencode( $table[ 0 ] ) . '""><input class="checkbox" type="checkbox"' . checked( ! in_array( $table[ 0 ], BackWPup_Option::get( $jobid, 'dbdumpexclude' ) ), TRUE, FALSE ) . ' name="tabledb[]" id="idtabledb-' . rawurlencode( $table[ 0 ] ) . '" value="' . rawurlencode( $table[ 0 ] ) . '"/> ' . $table[ 0 ] . $tabletype . '</label><br />';
 						$counter++;
 						if ($next_row <= $counter) {
-							echo '</td><td valign="top">';
+							echo '</div><div style="width: 30%; float:left; min-width: 250px; margin-right: 10px;">';
 							$counter = 0;
 						}
 					}
-					echo '</td></tr></table>';
+					echo '</div></fieldset>';
 					?>
                 </td>
             </tr>
             <tr>
-                <th scope="row"><label for="iddbdumpfile"><?php _e( 'Dumpfile name', 'backwpup' ) ?></label></th>
+                <th scope="row"><label for="iddbdumpfile"><?php _e( 'Backup file name', 'backwpup' ) ?></label></th>
                 <td>
                     <input id="iddbdumpfile" name="dbdumpfile" type="text"
                            value="<?php echo BackWPup_Option::get( $jobid, 'dbdumpfile' );?>"
@@ -97,19 +96,17 @@ class BackWPup_JobType_DBDump extends BackWPup_JobTypes {
                 </td>
             </tr>
 			<tr>
-				<th scope="row"><?php _e( 'Dumpfile compression', 'backwpup' ) ?></th>
+				<th scope="row"><?php _e( 'Backup file compression', 'backwpup' ) ?></th>
 				<td>
-					<?php
-					echo '<label for="iddbdumpfilecompression"><input class="radio" type="radio"' . checked( '', BackWPup_Option::get( $jobid, 'dbdumpfilecompression' ), FALSE ) . ' name="dbdumpfilecompression"  id="iddbdumpfilecompression" value="" /> ' . __( 'none', 'backwpup' ). '</label><br />';
-					if ( function_exists( 'gzopen' ) )
-						echo '<label for="iddbdumpfilecompression-gz"><input class="radio" type="radio"' . checked( '.gz', BackWPup_Option::get( $jobid, 'dbdumpfilecompression' ), FALSE ) . ' name="dbdumpfilecompression" id="iddbdumpfilecompression-gz" value=".gz" /> ' . __( 'GZip', 'backwpup' ). '</label><br />';
-					else
-						echo '<label for="iddbdumpfilecompression-gz"><input class="radio" type="radio"' . checked( '.gz', BackWPup_Option::get( $jobid, 'dbdumpfilecompression' ), FALSE ) . ' name="dbdumpfilecompression" id="iddbdumpfilecompression-gz" value=".gz" disabled="disabled" /> ' . __( 'GZip', 'backwpup' ). '</label><br />';
-					if ( function_exists( 'bzopen' ) )
-						echo '<label for="iddbdumpfilecompression-bz2"><input class="radio" type="radio"' . checked( '.bz2', BackWPup_Option::get( $jobid, 'dbdumpfilecompression' ), FALSE ) . ' name="dbdumpfilecompression" id="iddbdumpfilecompression-bz2" value=".bz2" /> ' . __( 'BZip2', 'backwpup' ). '</label><br />';
-					else
-						echo '<label for="iddbdumpfilecompression-bz2"><input class="radio" type="radio"' . checked( '.bz2', BackWPup_Option::get( $jobid, 'dbdumpfilecompression' ), FALSE ) . ' name="dbdumpfilecompression" id="iddbdumpfilecompression-bz2" value=".bz2" disabled="disabled" /> ' . __( 'BZip2', 'backwpup' ). '</label><br />';
-					?>
+					<fieldset>
+						<?php
+						echo '<label for="iddbdumpfilecompression"><input class="radio" type="radio"' . checked( '', BackWPup_Option::get( $jobid, 'dbdumpfilecompression' ), FALSE ) . ' name="dbdumpfilecompression"  id="iddbdumpfilecompression" value="" /> ' . __( 'none', 'backwpup' ). '</label><br />';
+						if ( function_exists( 'gzopen' ) )
+							echo '<label for="iddbdumpfilecompression-gz"><input class="radio" type="radio"' . checked( '.gz', BackWPup_Option::get( $jobid, 'dbdumpfilecompression' ), FALSE ) . ' name="dbdumpfilecompression" id="iddbdumpfilecompression-gz" value=".gz" /> ' . __( 'GZip', 'backwpup' ). '</label><br />';
+						else
+							echo '<label for="iddbdumpfilecompression-gz"><input class="radio" type="radio"' . checked( '.gz', BackWPup_Option::get( $jobid, 'dbdumpfilecompression' ), FALSE ) . ' name="dbdumpfilecompression" id="iddbdumpfilecompression-gz" value=".gz" disabled="disabled" /> ' . __( 'GZip', 'backwpup' ). '</label><br />';
+						?>
+					</fieldset>
 				</td>
 			</tr>
         </table>
@@ -123,8 +120,8 @@ class BackWPup_JobType_DBDump extends BackWPup_JobTypes {
 	public function edit_form_post_save( $id ) {
 		global $wpdb;
 		/* @var wpdb $wpdb */
-		
-		if ( $_POST[ 'dbdumpfilecompression' ] == '' || $_POST[ 'dbdumpfilecompression' ] == '.gz' || $_POST[ 'dbdumpfilecompression' ] == '.bz2' )
+
+		if ( $_POST[ 'dbdumpfilecompression' ] == '' || $_POST[ 'dbdumpfilecompression' ] == '.gz' )
 			BackWPup_Option::update( $id, 'dbdumpfilecompression', $_POST[ 'dbdumpfilecompression' ] );
 		BackWPup_Option::update( $id, 'dbdumpfile',  sanitize_file_name( $_POST[ 'dbdumpfile' ]) );
 		//selected tables
@@ -144,27 +141,33 @@ class BackWPup_JobType_DBDump extends BackWPup_JobTypes {
 	}
 
 	/**
+	 * Dumps the Database
+	 *
 	 * @param $job_object BackWPup_Job
+	 *
 	 * @return bool
 	 */
-	public function job_run( $job_object ) {
+	public function job_run( &$job_object ) {
 
-		$job_object->substeps_done = 0;
 		$job_object->substeps_todo = 1;
 
-		$job_object->log( sprintf( __( '%d. Try to dump database&#160;&hellip;', 'backwpup' ), $job_object->steps_data[ $job_object->step_working ][ 'STEP_TRY' ] ) );
+		if ( $job_object->steps_data[ $job_object->step_working ]['SAVE_STEP_TRY'] != $job_object->steps_data[ $job_object->step_working ][ 'STEP_TRY' ] )
+			$job_object->log( sprintf( __( '%d. Try to backup database&#160;&hellip;', 'backwpup' ), $job_object->steps_data[ $job_object->step_working ][ 'STEP_TRY' ] ) );
 
 		//build filename
-		if ( empty( $job_object->temp[ 'dbdumpfile' ] ) )
-			$job_object->temp[ 'dbdumpfile' ] = $job_object->generate_filename( $job_object->job[ 'dbdumpfile' ], 'sql' ) . $job_object->job[ 'dbdumpfilecompression' ];
+		if ( empty( $job_object->steps_data[ $job_object->step_working ][ 'dbdumpfile' ] ) )
+			$job_object->steps_data[ $job_object->step_working ][ 'dbdumpfile' ] = $job_object->generate_filename( $job_object->job[ 'dbdumpfile' ], 'sql' ) . $job_object->job[ 'dbdumpfilecompression' ];
 
 		try {
 
 			//Connect to Database
-			$sql_dump = new BackWPup_MySQLDump( array( 'dumpfile' => BackWPup::get_plugin_data( 'TEMP' ) . $job_object->temp[ 'dbdumpfile' ] ) );
+			$sql_dump = new BackWPup_MySQLDump( array(
+													 'dumpfile'	  => BackWPup::get_plugin_data( 'TEMP' ) . $job_object->steps_data[ $job_object->step_working ][ 'dbdumpfile' ],
+												) );
 
-			if ( is_object( $sql_dump ) )
+			if ( $job_object->steps_data[ $job_object->step_working ]['SAVE_STEP_TRY'] != $job_object->steps_data[ $job_object->step_working ][ 'STEP_TRY' ] )
 				$job_object->log( sprintf( __( 'Connected to database %1$s on %2$s', 'backwpup' ), DB_NAME, DB_HOST ) );
+
 
 			//Exclude Tables
 			foreach ( $sql_dump->tables_to_dump as $key => $table ) {
@@ -176,18 +179,55 @@ class BackWPup_JobType_DBDump extends BackWPup_JobTypes {
 			$job_object->substeps_todo = count( $sql_dump->tables_to_dump );
 
 			if ( $job_object->substeps_todo == 0 ) {
-				$job_object->log( __( 'No tables to dump.', 'backwpup' ), E_USER_WARNING );
+				$job_object->log( __( 'No tables to backup.', 'backwpup' ), E_USER_WARNING );
 				unset( $sql_dump );
+
 				return TRUE;
 			}
 
 			//dump head
-			$sql_dump->dump_head( TRUE );
+			if ( ! isset( $job_object->steps_data[ $job_object->step_working ][ 'is_head' ] ) ) {
+				$sql_dump->dump_head( TRUE );
+				$job_object->steps_data[ $job_object->step_working ][ 'is_head' ] = TRUE;
+			}
 			//dump tables
-			foreach( $sql_dump->tables_to_dump as $table ) {
-				$job_object->log( sprintf( __( 'Dump database table "%s"', 'backwpup' ), $table ) );
-				$job_object->substeps_done ++;
-				$sql_dump->dump_table( $table );
+			$i = 0;
+			foreach(  $sql_dump->tables_to_dump as $table ) {
+				if ( $i < $job_object->substeps_done ) {
+					$i++;
+					continue;
+				}
+				if ( empty( $job_object->steps_data[ $job_object->step_working ][ 'tables' ][ $table ] ) ) {
+					$num_records = $sql_dump->dump_table_head( $table );
+					$job_object->steps_data[ $job_object->step_working ][ 'tables' ][ $table ] = array( 'records' => $num_records,
+																										'start'   => 0,
+																										'length'   => 100 );
+					$job_object->log( sprintf( __( 'Backup database table "%s" with "%d" records', 'backwpup' ), $table, $num_records ) );
+					if ( empty( $num_records ) ) {
+						$job_object->substeps_done++;
+						$i++;
+						continue;
+					}
+				}
+				while ( $job_object->steps_data[ $job_object->step_working ][ 'tables' ][ $table ][ 'start' ] < $job_object->steps_data[ $job_object->step_working ][ 'tables' ][ $table ][ 'records' ] ) {
+					$dump_start_time = microtime( TRUE );
+					$sql_dump->dump_table( $table ,$job_object->steps_data[ $job_object->step_working ][ 'tables' ][ $table ][ 'start' ], $job_object->steps_data[ $job_object->step_working ][ 'tables' ][ $table ][ 'length' ] );
+					$dump_time = microtime( TRUE ) - $dump_start_time + 0.00000001;
+					$job_object->steps_data[ $job_object->step_working ][ 'tables' ][ $table ][ 'start' ] = $job_object->steps_data[ $job_object->step_working ][ 'tables' ][ $table ][ 'start' ] + $job_object->steps_data[ $job_object->step_working ][ 'tables' ][ $table ][ 'length' ];
+					// dump time per record and set next length
+					$length = ceil( ( $job_object->steps_data[ $job_object->step_working ][ 'tables' ][ $table ][ 'length' ] / $dump_time ) * $job_object->get_restart_time() );
+					if ( $length > 25000 ||  0 >= $job_object->get_restart_time() )
+						$length = 25000;
+					if ( $length < 1000 )
+						$length = 1000;
+					$job_object->steps_data[ $job_object->step_working ][ 'tables' ][ $table ][ 'length' ] =  $length;
+					$job_object->do_restart_time();
+				}
+				if ( $job_object->steps_data[ $job_object->step_working ][ 'tables' ][ $table ][ 'records' ] > 0)
+					$sql_dump->dump_table_footer( $table );
+				$job_object->substeps_done++;
+				$i++;
+				$job_object->update_working_data();
 			}
 			//dump footer
 			$sql_dump->dump_footer();
@@ -199,16 +239,18 @@ class BackWPup_JobType_DBDump extends BackWPup_JobTypes {
 			return FALSE;
 		}
 
-
 		//add database file to backup files
-		if ( is_readable( BackWPup::get_plugin_data( 'TEMP' ) . $job_object->temp[ 'dbdumpfile' ] ) ) {
-			$job_object->additional_files_to_backup[ ] = BackWPup::get_plugin_data( 'TEMP' ) . $job_object->temp[ 'dbdumpfile' ];
+		if ( is_readable( BackWPup::get_plugin_data( 'TEMP' ) .$job_object->steps_data[ $job_object->step_working ][ 'dbdumpfile' ] ) ) {
+			$job_object->additional_files_to_backup[ ] = BackWPup::get_plugin_data( 'TEMP' ) . $job_object->steps_data[ $job_object->step_working ][ 'dbdumpfile' ];
 			$job_object->count_files ++;
-			$job_object->count_filesize = $job_object->count_filesize + @filesize( BackWPup::get_plugin_data( 'TEMP' ) . $job_object->temp[ 'dbdumpfile' ] );
-			$job_object->log( sprintf( __( 'Added database dump "%1$s" with %2$s to backup file list', 'backwpup' ), $job_object->temp[ 'dbdumpfile' ], size_format( filesize( BackWPup::get_plugin_data( 'TEMP' ) . $job_object->temp[ 'dbdumpfile' ] ), 2 ) ) );
+			$job_object->count_filesize = $job_object->count_filesize + @filesize( BackWPup::get_plugin_data( 'TEMP' ) . $job_object->steps_data[ $job_object->step_working ][ 'dbdumpfile' ] );
+			$job_object->log( sprintf( __( 'Added database dump "%1$s" with %2$s to backup file list', 'backwpup' ), $job_object->steps_data[ $job_object->step_working ][ 'dbdumpfile' ], size_format( filesize( BackWPup::get_plugin_data( 'TEMP' ) . $job_object->steps_data[ $job_object->step_working ][ 'dbdumpfile' ] ), 2 ) ) );
 		}
 
-		$job_object->log( __( 'Database dump done!', 'backwpup' ) );
+		//cleanups
+		unset( $job_object->steps_data[ $job_object->step_working ][ 'tables' ] );
+
+		$job_object->log( __( 'Database backup done!', 'backwpup' ) );
 
 		return TRUE;
 	}
@@ -219,9 +261,9 @@ class BackWPup_JobType_DBDump extends BackWPup_JobTypes {
 	public function admin_print_scripts() {
 
 		if ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) {
-			wp_enqueue_script( 'backwpupjobtypedbdump', BackWPup::get_plugin_data( 'URL' ) . '/js/page_edit_jobtype_dbdump.dev.js', array('jquery'), time(), TRUE );
+			wp_enqueue_script( 'backwpupjobtypedbdump', BackWPup::get_plugin_data( 'URL' ) . '/assets/js/page_edit_jobtype_dbdump.js', array('jquery'), time(), TRUE );
 		} else {
-			wp_enqueue_script( 'backwpupjobtypedbdump', BackWPup::get_plugin_data( 'URL' ) . '/js/page_edit_jobtype_dbdump.js', array('jquery'), BackWPup::get_plugin_data( 'Version' ), TRUE );
+			wp_enqueue_script( 'backwpupjobtypedbdump', BackWPup::get_plugin_data( 'URL' ) . '/assets/js/page_edit_jobtype_dbdump.min.js', array('jquery'), BackWPup::get_plugin_data( 'Version' ), TRUE );
 		}
 	}
 

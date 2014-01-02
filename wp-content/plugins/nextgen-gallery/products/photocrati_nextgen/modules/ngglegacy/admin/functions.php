@@ -578,7 +578,7 @@ class nggAdmin{
 	 * @param array|int $imagesIds
 	 * @return string result code
 	 */
-	function import_MetaData($imagesIds) {
+	static function import_MetaData($imagesIds) {
 
 		global $wpdb;
 

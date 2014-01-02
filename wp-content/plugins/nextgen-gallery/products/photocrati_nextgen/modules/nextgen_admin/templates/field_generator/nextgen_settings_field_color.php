@@ -11,7 +11,6 @@
                id='<?php print esc_attr("{$display_type_name}_{$name}"); ?>'
                name='<?php print esc_attr("{$display_type_name}[{$name}]"); ?>'
                class='<?php print esc_attr("{$display_type_name}_{$name}"); ?> nextgen_settings_field_colorpicker'
-               value='<?php print esc_attr($value); ?>'
-               data-default-color='<?php print esc_attr($value); ?>'/>
+               value='<?php print esc_attr($value); ?>'/>
     </td>
 </tr>

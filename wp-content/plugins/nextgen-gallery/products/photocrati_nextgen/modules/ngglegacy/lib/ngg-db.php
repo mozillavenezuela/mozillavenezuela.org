@@ -540,7 +540,7 @@ class nggdb {
      * @param  int|string The image ID or Slug
      * @return object A nggImage object representing the image (false if not found)
      */
-    function find_image( $id ) {
+    static function find_image( $id ) {
         global $wpdb;
 
         if( is_numeric($id) ) {
@@ -1040,7 +1040,7 @@ class nggdb {
      * @param array $values An array with existing or new values
      * @return bool result of query
      */
-    function update_image_meta( $id, $new_values ) {
+    static function update_image_meta( $id, $new_values ) {
         global $wpdb;
 
         // XXX nggdb is used statically, cannot inherit from Ngg_Serializable
@@ -1070,7 +1070,7 @@ class nggdb {
      * @param int (optional) $id of the object, so that it's not checked against itself
      * @return string unique slug for the object, based on $slug (with a -1, -2, etc. suffix)
      */
-    function get_unique_slug( $slug, $type, $id = 0 ) {
+    static function get_unique_slug( $slug, $type, $id = 0 ) {
 
     	global $wpdb;
 

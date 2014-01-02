@@ -94,7 +94,8 @@ class C_Gallery_Display_Installer
 		$this->install_displayed_gallery_source('random_images', array(
 			'title'		=>	'Random Images',
 			'returns'	=>	array('image'),
-			'aliases'	=>	array('random', 'random_image')
+			'aliases'	=>	array('random', 'random_image'),
+			'has_variations'	=>	TRUE
 		));
 
 		$this->install_displayed_gallery_source('recent_images', array(
@@ -121,6 +122,7 @@ class C_Gallery_Display_Installer
 		// Flush displayed gallery cache
 		C_Photocrati_Cache::flush();
 		C_Photocrati_Cache::flush('displayed_galleries');
+		C_Photocrati_Cache::flush('displayed_gallery_rendering');
 
 		$this->uninstall_display_types();
 		$this->uninstall_displayed_gallery_sources();

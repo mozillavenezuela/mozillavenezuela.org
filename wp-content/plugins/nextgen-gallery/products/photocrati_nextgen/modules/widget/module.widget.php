@@ -15,7 +15,7 @@ class M_Widget extends C_Base_Module
             'photocrati-widget',
             'Widget',
             'Handles clearing of NextGen Widgets',
-            '0.1',
+            '0.3',
             'http://www.nextgen-gallery.com',
             'Photocrati Media',
             'http://www.photocrati.com'

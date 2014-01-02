@@ -33,7 +33,7 @@ abstract class C_Base_Module extends C_Component
     /**
      * Defines the module
      */
-    function define($id, $name, $description='', $version='', $uri='', $author='', $author_uri='', $context=FALSE)
+    function define($id='pope-module', $name='Pope Module', $description='', $version='', $uri='', $author='', $author_uri='', $context=FALSE)
     {
 		parent::define($context);
 		$this->implement('I_Pope_Module');

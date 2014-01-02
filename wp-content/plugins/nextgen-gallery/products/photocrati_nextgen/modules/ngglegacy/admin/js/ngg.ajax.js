@@ -26,7 +26,7 @@ nggAjax = {
 			   	url: s.url,
 			   	data:"action=" + s.action + "&operation=" + s.operation + "&_wpnonce=" + s.nonce + "&image=" + s.ids[index],
 			   	cache: false,
-			   	timeout: 10000,
+			   	timeout: 30000,
 			   	success: function(msg){
 			   		switch ( parseInt(msg) ) {
 			   			case -1:
@@ -73,7 +73,7 @@ nggAjax = {
 			   	data:"action=" + s.action + "&operation=" + s.operation + "&_wpnonce=" + s.nonce + "&image=" + s.ids[index],
 			   	dataType: "json",
 	   			cache: false,
-			   	timeout: 10000,
+			   	timeout: 30000,
 			   	success: function(msg){
   					// join the array
 			 		imageIDS = imageIDS.concat(msg);

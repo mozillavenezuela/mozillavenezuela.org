@@ -111,6 +111,12 @@ if (!class_exists('C_Photocrati_Installer'))
 				update_option('photocrati_auto_update_admin_update_list', null);
 				update_option('photocrati_auto_update_admin_check_date', '');
 
+				// Other Pope applications might be loaded, and therefore
+				// all singletons should be destroyed, so that they can be
+				// adapted as necessary. For now, we'll just assume that the factory
+				// is the only singleton that will be used by other Pope applications
+				C_Component_Factory::$_instances = array();
+
 				foreach ($modules as $module_name) {
 					if (($handler = self::get_handler_instance(array_shift(explode('|', $module_name))))) {
 						if (method_exists($handler, 'install'))

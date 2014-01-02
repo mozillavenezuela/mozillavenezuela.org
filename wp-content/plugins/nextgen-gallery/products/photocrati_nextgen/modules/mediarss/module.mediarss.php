@@ -13,7 +13,7 @@ class M_MediaRss extends C_Base_Module
 			'photocrati-mediarss',
 			'MediaRss',
 			'Generates MediaRSS feeds of image collections',
-			'0.1',
+			'0.2',
 			'http://www.nextgen-gallery.com',
 			'Photocrati Media',
 			'http://www.photocrati.com'

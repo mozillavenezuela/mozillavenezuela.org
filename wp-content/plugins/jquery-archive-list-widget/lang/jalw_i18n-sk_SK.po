@@ -75,8 +75,16 @@ msgid "All"
 msgstr "Všetko"
 
 #: jquery-archive-list-widget.php:208
-msgid "Current year"
-msgstr "Bežný rok"
+msgid "Current or post date"
+msgstr "Aktuálny dátum alebo dátum príspevok"
+
+#: jquery-archive-list-widget.php:208
+msgid "Only post date"
+msgstr "Iba Dátum príspevok"
+
+#: jquery-archive-list-widget.php:208
+msgid "Only current date"
+msgstr "Iba aktuálny dátum"
 
 #: jquery-archive-list-widget.php:208
 msgid "Current month"
@@ -89,6 +97,10 @@ msgstr "Ďalšie nastavenia"
 #: jquery-archive-list-widget.php:280
 msgid "Show number of posts"
 msgstr "Zobraziť počet príspevkov"
+
+#: jquery-archive-list-widget.php:233
+msgid "Show only post from selected category in a category page"
+msgstr "Zobraziť len príspevok z vybranej kategórie v kategórii stránku"
 
 #: jquery-archive-list-widget.php:284
 msgid "Show posts under months"

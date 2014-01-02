@@ -3,15 +3,7 @@
  * Class in that the BackWPup job runs
  */
 final class BackWPup_Job {
-	/**
-	 * @var object The instance
-	 */
-	private static $instance = NULL;
 
-	/**
-	 * @var string The job start type
-	 */
-	private $jobstarttype = '';
 	/**
 	 * @var array of the job settings
 	 */
@@ -47,9 +39,13 @@ final class BackWPup_Job {
 	 */
 	public $pid = 0;
 	/**
-	 * @var int Timestamp of last update off .running file
+	 * @var float Timestamp of last update off .running file
 	 */
 	public $timestamp_last_update = 0;
+	/**
+	 * @var float Timestamp of script start
+	 */
+	private $timestamp_script_start = 0;
 	/**
 	 * @var int Number of warnings
 	 */
@@ -64,12 +60,12 @@ final class BackWPup_Job {
 	public $lastmsg = '';
 	/**
 	 * @var string the last log error/waring message
-	 */	
+	 */
 	public $lasterrormsg = '';
 	/**
 	 * @var array of steps to do
 	 */
-	public $steps_todo = array( 'START' );
+	public $steps_todo = array( 'CREATE' );
 	/**
 	 * @var array of done steps
 	 */
@@ -81,7 +77,7 @@ final class BackWPup_Job {
 	/**
 	 * @var string working on step
 	 */
-	public $step_working = 'START';
+	public $step_working = 'CREATE';
 	/**
 	 * @var int Number of sub steps must do in step
 	 */
@@ -102,10 +98,6 @@ final class BackWPup_Job {
 	 * @var array of files to additional to backup
 	 */
 	public $additional_files_to_backup = array();
-	/**
-	 * @var string file where folders listed for backup
-	 */
-	public $folder_list_file = '';
 	/**
 	 * @var array of files/folder to exclude from backup
 	 */
@@ -136,16 +128,49 @@ final class BackWPup_Job {
 	public $remove_path = '';
 
 	/**
+	 * If job aborted from user
+	 * @var bool
+	 */
+	public $user_abort = FALSE;
+
+	/**
+	 * Setting Working data
+	 * @param $working_data array
+	 */
+	private function __construct( $working_data = array() ) {
+
+		if ( is_array( $working_data ) && ! empty( $working_data ) ) {
+			//restore object properties from working data
+			foreach ( $working_data as $var => $value )
+				$this->{$var} = $value;
+			//delete Temp
+			$this->temp = array();
+		}
+
+	}
+
+	/**
+	 * Create Job object from state
+	 *
+	 * @param array $working_data
+	 * @return \BackWPup_Job
+	 */
+	private static function __set_state( $working_data = array() ) {
+
+		return new self( $working_data );
+	}
+
+	/**
 	 *
 	 * This starts or restarts the job working
 	 *
-	 * @param string $start_type Start types are 'runnow', 'runnowalt', 'cronrun', 'runext', 'runcli'         
+	 * @param string $start_type Start types are 'runnow', 'runnowalt', 'cronrun', 'runext', 'runcli'
 	 * @param array|int $job_settings The id of job or the settings of a job to start
 	 */
-	private function __construct( $start_type, $job_settings = 0 ) {
+	private function create( $start_type, $job_settings = 0 ) {
 		global $wpdb;
 		/* @var wpdb $wpdb */
-	
+
 		//check startype
 		if ( ! in_array( $start_type, array( 'runnow', 'runnowalt', 'cronrun', 'runext', 'runcli' ) ) )
 			return;
@@ -156,11 +181,10 @@ final class BackWPup_Job {
 			$this->job		= $job_settings;
 		else
 			return;
-		$this->jobstarttype = $start_type;
 		$this->start_time   =  current_time( 'timestamp' );
 		$this->lastmsg		= '<samp>' . __( 'Starting job', 'backwpup' ) . '</samp>';
 		//set Logfile
-		$this->logfile = BackWPup_Option::get( 'cfg', 'logfolder' ) . 'backwpup_log_' . substr( md5( md5( SECURE_AUTH_KEY ) ), 10, 6 ). '_' . date_i18n( 'Y-m-d_H-i-s' ) . '.html';
+		$this->logfile = get_site_option( 'backwpup_cfg_logfolder' ) . 'backwpup_log_' . BackWPup::get_plugin_data( 'hash' ) . '_' . date_i18n( 'Y-m-d_H-i-s' ) . '.html';
 		//write settings to job
 		if ( ! empty( $this->job[ 'jobid' ] ) ) {
 			BackWPup_Option::update( $this->job[ 'jobid' ], 'lastrun', $this->start_time );
@@ -171,12 +195,14 @@ final class BackWPup_Job {
 		$this->timestamp_last_update = microtime( TRUE );
 		$this->exclude_from_backup 	= explode( ',', trim( $this->job[ 'fileexclude' ] ) );
 		$this->exclude_from_backup 	= array_unique( $this->exclude_from_backup );
-		if ( trailingslashit( str_replace( '\\', '/', ABSPATH ) ) != '/' and trailingslashit( str_replace( '\\', '/', ABSPATH ) ) != '' ) //create path to remove
-			$this->remove_path 		= trailingslashit( str_replace( '\\', '/', ABSPATH ) );
+		//create path to remove
+		$this->remove_path 		= trailingslashit( str_replace( '\\', '/', realpath( ABSPATH ) ) );
+		if ( $this->remove_path == '/' )
+			$this->remove_path = '';
 		//setup job steps
-		$this->steps_data[ 'START' ][ 'CALLBACK' ] = '';
-		$this->steps_data[ 'START' ][ 'NAME' ]     = __( 'Job Start', 'backwpup' );
-		$this->steps_data[ 'START' ][ 'STEP_TRY' ] = 0;
+		$this->steps_data[ 'CREATE' ][ 'CALLBACK' ] = '';
+		$this->steps_data[ 'CREATE' ][ 'NAME' ]     = __( 'Job Start', 'backwpup' );
+		$this->steps_data[ 'CREATE' ][ 'STEP_TRY' ] = 0;
 		//ADD Job types file
 		/* @var $job_type_class BackWPup_JobTypes */
 		$job_need_dest = FALSE;
@@ -186,24 +212,29 @@ final class BackWPup_Job {
 					$this->steps_todo[ ]                            = 'JOB_' . $id;
 					$this->steps_data[ 'JOB_' . $id ][ 'NAME' ]     = $job_type_class->info[ 'description' ];
 					$this->steps_data[ 'JOB_' . $id ][ 'STEP_TRY' ] = 0;
+					$this->steps_data[ 'JOB_' . $id ][ 'SAVE_STEP_TRY' ] = 0;
 					$job_need_dest                                  = TRUE;
 				}
 			}
 		}
 		//add destinations and create archive if a job where files to backup
 		if ( $job_need_dest ) {
-			//Set file for folder list
-			$this->folder_list_file = BackWPup::get_plugin_data( 'temp' ) . 'backwpup-' . substr( md5( NONCE_SALT ), 19, 6 ) . '-folders.php';
+			//Create manifest file
+			$this->steps_todo[ ]                                	  = 'CREATE_MANIFEST';
+			$this->steps_data[ 'CREATE_MANIFEST' ][ 'NAME' ]     	  = __( 'Creates manifest file', 'backwpup' );
+			$this->steps_data[ 'CREATE_MANIFEST' ][ 'STEP_TRY' ] 	  = 0;
+			$this->steps_data[ 'CREATE_MANIFEST' ][ 'SAVE_STEP_TRY' ] = 0;
 			//Add archive creation and backup filename on backup type archive
 			if ( $this->job[ 'backuptype' ] == 'archive' ) {
-				//set Backup folder to temp folder if not set
-				if ( in_array( 'FOLDER', $this->job[ 'destinations' ] ) )
+				//get Backup folder if destination folder set
+				if ( in_array( 'FOLDER', $this->job[ 'destinations' ] ) ) {
 					$this->backup_folder = $this->job[ 'backupdir' ];
-				//check backups folder
-				if ( ! empty( $this->backup_folder ) )
-					self::check_folder( $this->backup_folder );
-				//set temp folder to backup folder if not set
-				if ( ! $this->backup_folder or $this->backup_folder == '/' )
+					//check backup folder
+					if ( ! empty( $this->backup_folder ) )
+						self::check_folder( $this->backup_folder );
+				}
+				//set temp folder to backup folder if not set because we need one
+				if ( ! $this->backup_folder || $this->backup_folder == '/' )
 					$this->backup_folder = BackWPup::get_plugin_data( 'TEMP' );
 				//Create backup archive full file name
 				$this->backup_file = $this->generate_filename( $this->job[ 'archivename' ], $this->job[ 'archiveformat' ] );
@@ -211,21 +242,27 @@ final class BackWPup_Job {
 				$this->steps_todo[ ]                                = 'CREATE_ARCHIVE';
 				$this->steps_data[ 'CREATE_ARCHIVE' ][ 'NAME' ]     = __( 'Creates archive', 'backwpup' );
 				$this->steps_data[ 'CREATE_ARCHIVE' ][ 'STEP_TRY' ] = 0;
+				$this->steps_data[ 'CREATE_ARCHIVE' ][ 'SAVE_STEP_TRY' ] = 0;
 			}
 			//ADD Destinations
 			/* @var BackWPup_Destinations $dest_class */
-			foreach ( BackWPup::get_destinations() as $id => $dest_class ) {
-				if ( in_array( $id, $this->job[ 'destinations' ] ) && $dest_class->can_run( $this ) ) {
+			foreach ( BackWPup::get_registered_destinations() as $id => $dest ) {
+				if ( ! in_array( $id, $this->job[ 'destinations' ] ) || empty( $dest[ 'class' ] ) )
+					continue;
+				$dest_class = BackWPup::get_destination( $id );
+				if ( $dest_class->can_run( $this ) ) {
 					if ( $this->job[ 'backuptype' ] == 'sync' ) {
-						if ( call_user_func( array( $dest_class, 'can_sync' ) ) ) {
+						if ( $dest[ 'can_sync' ] ) {
 							$this->steps_todo[]                                   = 'DEST_SYNC_' . $id;
-							$this->steps_data[ 'DEST_SYNC_' . $id ][ 'NAME' ]     = $dest_class->info[ 'description' ];
+							$this->steps_data[ 'DEST_SYNC_' . $id ][ 'NAME' ]     = $dest[ 'info' ][ 'description' ];
 							$this->steps_data[ 'DEST_SYNC_' . $id ][ 'STEP_TRY' ] = 0;
+							$this->steps_data[ 'DEST_SYNC_' . $id ][ 'SAVE_STEP_TRY' ] = 0;
 						}
 					} else {
 						$this->steps_todo[]                              = 'DEST_' . $id;
-						$this->steps_data[ 'DEST_' . $id ][ 'NAME' ]     = $dest_class->info[ 'description' ];
+						$this->steps_data[ 'DEST_' . $id ][ 'NAME' ]     = $dest[ 'info' ][ 'description' ];
 						$this->steps_data[ 'DEST_' . $id ][ 'STEP_TRY' ] = 0;
+						$this->steps_data[ 'DEST_' . $id ][ 'SAVE_STEP_TRY' ] = 0;
 					}
 				}
 			}
@@ -237,66 +274,90 @@ final class BackWPup_Job {
 					$this->steps_todo[ ]                            = 'JOB_' . $id;
 					$this->steps_data[ 'JOB_' . $id ][ 'NAME' ]     = $job_type_class->info[ 'description' ];
 					$this->steps_data[ 'JOB_' . $id ][ 'STEP_TRY' ] = 0;
+					$this->steps_data[ 'JOB_' . $id ][ 'SAVE_STEP_TRY' ] = 0;
 				}
 			}
 		}
 		$this->steps_todo[]                      = 'END';
-		$this->steps_data[ 'END' ][ 'NAME' ]     = __( 'Job End', 'backwpup' );
+		$this->steps_data[ 'END' ][ 'NAME' ]     = __( 'End of Job', 'backwpup' );
 		$this->steps_data[ 'END' ][ 'STEP_TRY' ] = 0;
 		//create log file
-		$fd = fopen( $this->logfile, 'w' );
-		fwrite( $fd, "<!DOCTYPE html>" . PHP_EOL . "<html lang=\"" . str_replace( '_', '-', get_locale() ) . "\">" . PHP_EOL . "<head>" . PHP_EOL );
-		fwrite( $fd, "<meta charset=\"" . get_bloginfo( 'charset' ) . "\" />" . PHP_EOL );
-		fwrite( $fd, "<title>" . sprintf( __( 'BackWPup log for %1$s from %2$s at %3$s', 'backwpup' ), $this->job[ 'name' ], date_i18n( get_option( 'date_format' ) ), date_i18n( get_option( 'time_format' ) ) ) . "</title>" . PHP_EOL );
-		fwrite( $fd, "<meta name=\"robots\" content=\"noindex, nofollow\" />" . PHP_EOL );
-		fwrite( $fd, "<meta name=\"copyright\" content=\"Copyright &copy; 2012 - " . date_i18n( 'Y' ) . " Inpsyde GmbH\" />" . PHP_EOL );
-		fwrite( $fd, "<meta name=\"author\" content=\"Daniel H&uuml;sken\" />" . PHP_EOL );
-		fwrite( $fd, "<meta name=\"generator\" content=\"BackWPup " . BackWPup::get_plugin_data( 'Version' ) . "\" />" . PHP_EOL );
-		fwrite( $fd, "<meta http-equiv=\"cache-control\" content=\"no-cache\" />" . PHP_EOL );
-		fwrite( $fd, "<meta http-equiv=\"pragma\" content=\"no-cache\" />" . PHP_EOL );
-		fwrite( $fd, "<meta name=\"date\" content=\"" . date( 'c' ) . "\" />" . PHP_EOL );
-		fwrite( $fd, str_pad( "<meta name=\"backwpup_errors\" content=\"0\" />", 100 ) . PHP_EOL );
-		fwrite( $fd, str_pad( "<meta name=\"backwpup_warnings\" content=\"0\" />", 100 ) . PHP_EOL );
+		$head = '';
+		$head .= "<!DOCTYPE html>" . PHP_EOL;
+		$head .= "<html lang=\"" . str_replace( '_', '-', get_locale() ) . "\">" . PHP_EOL;
+		$head .= "<head>" . PHP_EOL;
+		$head .= "<meta charset=\"" . get_bloginfo( 'charset' ) . "\" />" . PHP_EOL;
+		$head .= "<title>" . sprintf( __( 'BackWPup log for %1$s from %2$s at %3$s', 'backwpup' ), $this->job[ 'name' ], date_i18n( get_option( 'date_format' ) ), date_i18n( get_option( 'time_format' ) ) ) . "</title>" . PHP_EOL;
+		$head .= "<meta name=\"robots\" content=\"noindex, nofollow\" />" . PHP_EOL;
+		$head .= "<meta name=\"copyright\" content=\"Copyright &copy; 2012 - " . date_i18n( 'Y' ) . " Inpsyde GmbH\" />" . PHP_EOL;
+		$head .= "<meta name=\"author\" content=\"Inpsyde GmbH\" />" . PHP_EOL;
+		$head .= "<meta name=\"generator\" content=\"BackWPup " . BackWPup::get_plugin_data( 'Version' ) . "\" />" . PHP_EOL;
+		$head .= "<meta http-equiv=\"cache-control\" content=\"no-cache\" />" . PHP_EOL;
+		$head .= "<meta http-equiv=\"pragma\" content=\"no-cache\" />" . PHP_EOL;
+		$head .= "<meta name=\"date\" content=\"" . date( 'c' ) . "\" />" . PHP_EOL;
+		$head .= str_pad( '<meta name="backwpup_errors" content="0" />', 100 ) . PHP_EOL;
+		$head .= str_pad( '<meta name="backwpup_warnings" content="0" />', 100 ) . PHP_EOL;
 		if ( ! empty( $this->job[ 'jobid' ] ) )
-			fwrite( $fd, "<meta name=\"backwpup_jobid\" content=\"" . $this->job[ 'jobid' ] . "\" />" . PHP_EOL );
-		fwrite( $fd, "<meta name=\"backwpup_jobname\" content=\"" . esc_attr( $this->job[ 'name' ] ) . "\" />" . PHP_EOL );
-		fwrite( $fd, "<meta name=\"backwpup_jobtype\" content=\"" . implode( '+', $this->job[ 'type' ] ) . "\" />" . PHP_EOL );
-		fwrite( $fd, str_pad( "<meta name=\"backwpup_backupfilesize\" content=\"0\" />", 100 ) . PHP_EOL );
-		fwrite( $fd, str_pad( "<meta name=\"backwpup_jobruntime\" content=\"0\" />", 100 ) . PHP_EOL );
-		fwrite( $fd, "</head>" . PHP_EOL . "<body style=\"margin:0;padding:3px;font-family:Fixedsys,Courier,monospace;font-size:12px;line-height:15px;background-color:#000;color:#fff;white-space:pre;\">" );
-		$info = '';
-		$info .= sprintf( _x( '[INFO] %1$s version %2$s; WordPress version %3$s; A project of Inpsyde GmbH developed by Daniel Hüsken','Plugin name; Plugin Version; WordPress Version','backwpup' ), BackWPup::get_plugin_data( 'name' ) , BackWPup::get_plugin_data( 'Version' ), BackWPup::get_plugin_data( 'wp_version' ) ) . PHP_EOL;
-		$info .= __( '[INFO] This program comes with ABSOLUTELY NO WARRANTY. This is free software, and you are welcome to redistribute it under certain conditions.', 'backwpup' ) . PHP_EOL;
-		$info .= sprintf(__( '[INFO] Blog url: %s', 'backwpup' ) , esc_attr( site_url( '/' ) ) ). PHP_EOL;		
-		$info .= sprintf(__( '[INFO] BackWPup job: %1$s; %2$s', 'backwpup' ), esc_attr( $this->job[ 'name' ] ) , implode( '+', $this->job[ 'type' ] ) ) . PHP_EOL;
-		if ( $this->job[ 'activetype' ] != '' )
-			$info .= __( '[INFO] BackWPup cron:', 'backwpup' ) . ' ' . $this->job[ 'cron' ] . '; ' . date_i18n( 'D, j M Y @ H:i' ) . PHP_EOL;
-		if ( $this->jobstarttype == 'cronrun' )
-			$info .= __( '[INFO] BackWPup job started from wp-cron', 'backwpup' ) . PHP_EOL;
-		elseif ( $this->jobstarttype == 'runnow' or $this->jobstarttype == 'runnowalt' )
-			$info .= __( '[INFO] BackWPup job started manually', 'backwpup' ) . PHP_EOL;
-		elseif ( $this->jobstarttype == 'runext' )
-			$info .= __( '[INFO] BackWPup job started from external url', 'backwpup' ) . PHP_EOL;
-		elseif ( $this->jobstarttype == 'runcli' )
-			$info .= __( '[INFO] BackWPup job started form commandline interface', 'backwpup' ) . PHP_EOL;
-		$info .= __( '[INFO] PHP ver.:', 'backwpup' ) . ' ' . PHP_VERSION . '; ' . PHP_SAPI . '; ' . PHP_OS . PHP_EOL;
-		$info .= sprintf( __( '[INFO] Maximum script execution time is %1$d seconds', 'backwpup' ), ini_get( 'max_execution_time' ) ) . PHP_EOL;
-		$info .= sprintf( __( '[INFO] MySQL ver.: %s', 'backwpup' ), $wpdb->get_var( "SELECT VERSION() AS version" ) ) . PHP_EOL;
+			$head .= "<meta name=\"backwpup_jobid\" content=\"" . $this->job[ 'jobid' ] . "\" />" . PHP_EOL;
+		$head .= "<meta name=\"backwpup_jobname\" content=\"" . esc_attr( $this->job[ 'name' ] ) . "\" />" . PHP_EOL;
+		$head .= "<meta name=\"backwpup_jobtype\" content=\"" . implode( '+', $this->job[ 'type' ] ) . "\" />" . PHP_EOL;
+		$head .= str_pad( '<meta name="backwpup_backupfilesize" content="0" />', 100 ) . PHP_EOL;
+		$head .= str_pad( '<meta name="backwpup_jobruntime" content="0" />', 100 ) . PHP_EOL;
+		$head .= "</head>" . PHP_EOL;
+		$head .= "<body style=\"margin:0;padding:3px;font-family:Fixedsys,Courier,monospace;font-size:12px;line-height:15px;background-color:#000;color:#fff;white-space:pre;\">" . PHP_EOL;
+		$head .= sprintf( _x( '[INFO] %1$s version %2$s; A project of Inpsyde GmbH', 'Plugin name; Plugin Version','backwpup' ), BackWPup::get_plugin_data( 'name' ) , BackWPup::get_plugin_data( 'Version' ) ) . PHP_EOL;
+		$head .= sprintf( _x( '[INFO] WordPress version %s', 'WordPress Version', 'backwpup' ), BackWPup::get_plugin_data( 'wp_version' ) ) . PHP_EOL;
+		$head .= sprintf( __( '[INFO] Blog url: %s', 'backwpup' ), esc_attr( site_url( '/' ) ) ). PHP_EOL;
+		$head .= sprintf( __( '[INFO] BackWPup job: %1$s; %2$s', 'backwpup' ), esc_attr( $this->job[ 'name' ] ) , implode( '+', $this->job[ 'type' ] ) ) . PHP_EOL;
+		if ( $this->job[ 'activetype' ] == 'wpcron' ) {
+			//check next run
+			$cron_next = wp_next_scheduled( 'backwpup_cron', array( 'id' => $this->job[ 'jobid' ] ) );
+			if ( ! $cron_next || $cron_next < time() ) {
+				wp_unschedule_event( $cron_next, 'backwpup_cron', array( 'id' => $this->job[ 'jobid' ] ) );
+				$cron_next = BackWPup_Cron::cron_next( $this->job[ 'cron' ] );
+				wp_schedule_single_event( $cron_next, 'backwpup_cron', array( 'id' => $this->job[ 'jobid' ] ) );
+				$cron_next = wp_next_scheduled( 'backwpup_cron', array( 'id' => $this->job[ 'jobid' ] ) );
+			}
+			//output scheduling
+			if ( ! $cron_next )
+				$cron_next = __( 'Not scheduled!', 'backwpup' );
+			else
+				$cron_next = date_i18n( 'D, j M Y @ H:i', $cron_next + ( get_option( 'gmt_offset' ) * 3600 ) , TRUE ) ;
+			$head .= sprintf( __( '[INFO] BackWPup cron: %s; Next: %s ', 'backwpup' ), $this->job[ 'cron' ] , $cron_next ) . PHP_EOL;
+		}
+		elseif ( $this->job[ 'activetype' ] == 'link' )
+			$head .= __( '[INFO] BackWPup job start with link is active', 'backwpup' ) . PHP_EOL;
+		else
+			$head .= __( '[INFO] BackWPup no automatic job start configured', 'backwpup' ) . PHP_EOL;
+		if ( $start_type == 'cronrun' )
+			$head .= __( '[INFO] BackWPup job started from wp-cron', 'backwpup' ) . PHP_EOL;
+		elseif ( $start_type == 'runnow' or $start_type == 'runnowalt' )
+			$head .= __( '[INFO] BackWPup job started manually', 'backwpup' ) . PHP_EOL;
+		elseif ( $start_type == 'runext' )
+			$head .= __( '[INFO] BackWPup job started from external url', 'backwpup' ) . PHP_EOL;
+		elseif ( $start_type == 'runcli' )
+			$head .= __( '[INFO] BackWPup job started form commandline interface', 'backwpup' ) . PHP_EOL;
+		$head .= __( '[INFO] PHP ver.:', 'backwpup' ) . ' ' . PHP_VERSION . '; ' . PHP_SAPI . '; ' . PHP_OS . PHP_EOL;
+		$head .= sprintf( __( '[INFO] Maximum PHP script execution time is %1$d seconds', 'backwpup' ), ini_get( 'max_execution_time' ) ) . PHP_EOL;
+		$job_max_execution_time = get_site_option( 'backwpup_cfg_jobmaxexecutiontime' );
+		if ( ! empty( $job_max_execution_time ) )
+				$head .= sprintf( __( '[INFO] Script restart time is configured to %1$d seconds', 'backwpup' ), $job_max_execution_time ) . PHP_EOL;
+		if ( get_site_option( 'backwpup_cfg_jobsteprestart' ) )
+			$head .= __( '[INFO] Script restarts on every main step is activated', 'backwpup' ) . PHP_EOL;
+		$head .= sprintf( __( '[INFO] MySQL ver.: %s', 'backwpup' ), $wpdb->get_var( "SELECT VERSION() AS version" ) ) . PHP_EOL;
 		if ( function_exists( 'curl_init' ) ) {
 			$curlversion = curl_version();
-			$info .= sprintf( __( '[INFO] curl ver.: %1$s; %2$s', 'backwpup' ), $curlversion[ 'version' ], $curlversion[ 'ssl_version' ] ) . PHP_EOL;
+			$head .= sprintf( __( '[INFO] curl ver.: %1$s; %2$s', 'backwpup' ), $curlversion[ 'version' ], $curlversion[ 'ssl_version' ] ) . PHP_EOL;
 		}
-		$info .= sprintf( __( '[INFO] Temp folder is: %s', 'backwpup' ), BackWPup::get_plugin_data( 'TEMP' ) ) . PHP_EOL;
-		$info .= sprintf( __( '[INFO] Logfile folder is: %s', 'backwpup' ), BackWPup_Option::get( 'cfg', 'logfolder' ) ) . PHP_EOL;
-		$info .= sprintf( __( '[INFO] Backup type is: %s', 'backwpup' ), $this->job[ 'backuptype' ] ) . PHP_EOL;
+		$head .= sprintf( __( '[INFO] Temp folder is: %s', 'backwpup' ), BackWPup::get_plugin_data( 'TEMP' ) ) . PHP_EOL;
+		$head .= sprintf( __( '[INFO] Logfile is: %s', 'backwpup' ), $this->logfile ) . PHP_EOL;
+		$head .= sprintf( __( '[INFO] Backup type is: %s', 'backwpup' ), $this->job[ 'backuptype' ] ) . PHP_EOL;
 		if ( ! empty( $this->backup_file ) && $this->job[ 'backuptype' ] == 'archive' )
-			$info .= sprintf( __( '[INFO] Backup file is: %s', 'backwpup' ), $this->backup_folder . $this->backup_file ) . PHP_EOL;
-		fwrite( $fd, $info );
-		fwrite( $fd, '</header>' );
-		fclose( $fd );
+			$head .= sprintf( __( '[INFO] Backup file is: %s', 'backwpup' ), $this->backup_folder . $this->backup_file ) . PHP_EOL;
+		file_put_contents( $this->logfile, $head, FILE_APPEND );
 		//output info on cli
 		if ( defined( 'STDIN' ) && defined( 'STDOUT' ) )
-			fwrite( STDOUT, strip_tags( $info ) ) ;
+			fwrite( STDOUT, strip_tags( $head ) ) ;
 		//test for destinations
 		if ( $job_need_dest ) {
 			$desttest = FALSE;
@@ -310,35 +371,9 @@ final class BackWPup_Job {
 				$this->log( __( 'No destination correctly defined for backup! Please correct job settings.', 'backwpup' ), E_USER_ERROR );
 		}
 		//Set start as done
-		$this->steps_done[] = 'START';
+		$this->steps_done[] = 'CREATE';
 		//must write working data
-		$this->update_working_data( TRUE );
-	}
-
-	// prevent 'clone()' from external.
-	private function __clone() {}
-
-	/**
-	 *
-	 * @return array
-	 */
-	public function __sleep(){
-		//not saved:  'temp',
-		return array( 'jobstarttype', 'job', 'start_time', 'logfile', 'backup_folder', 'folder_list_file',
-					  'backup_file', 'backup_filesize', 'pid', 'timestamp_last_update', 'warnings', 'errors', 'lastmsg', 'lasterrormsg',
-					  'steps_todo', 'steps_done', 'steps_data', 'step_working', 'substeps_todo', 'substeps_done', 'step_percent',
-					  'substep_percent', 'additional_files_to_backup', 'exclude_from_backup', 'count_files',
-					  'count_filesize', 'count_folder', 'count_files_in_folder', 'count_filesize_in_folder', 'remove_path' );
-	}
-
-	/**
-	 * get instance
-	 *
-	 * @return null|object
-	 */
-	public static function getInstance() {
-
-		return self::$instance;
+		file_put_contents( BackWPup::get_plugin_data( 'running_file' ),'<?php return '. var_export( $this, true ) . ';' );
 	}
 
 
@@ -352,27 +387,27 @@ final class BackWPup_Job {
 	 */
 	public static function get_jobrun_url( $starttype, $jobid = 0 ) {
 
-		
-		$wp_admin_user 		= get_users( array( 'role' => 'administrator' ) );	//get a user for cookie auth	
+
+		$wp_admin_user 		= get_users( array( 'role' => 'administrator', 'number' => 1 ) );	//get a user for cookie auth
 		$url        		= site_url( 'wp-cron.php' );
 		$header				= array();
-		$header[ 'Cookie' ] = LOGGED_IN_COOKIE. '='. wp_generate_auth_cookie( $wp_admin_user[ 0 ]->ID, time() + 60, 'logged_in'); // add auth cookie to header
 		$authurl    		= '';
-		$query_args 		= array( '_nonce' => substr( wp_hash( wp_nonce_tick() . 'backwup_job_run-' . $starttype, 'nonce' ), - 12, 10 ) );
+		$query_args 		= array( '_nonce' => substr( wp_hash( wp_nonce_tick() . 'backwpup_job_run-' . $starttype, 'nonce' ), - 12, 10 ), 'doing_wp_cron' => sprintf( '%.22F', microtime( true ) ) );
 
-		if ( in_array( $starttype, array( 'restart', 'runnow', 'cronrun', 'runext' ) ) )
+		if ( in_array( $starttype, array( 'restart', 'runnow', 'cronrun', 'runext', 'test' ) ) )
 			$query_args[ 'backwpup_run' ] = $starttype;
 
 		if ( in_array( $starttype, array( 'runnowlink', 'runnow', 'cronrun', 'runext' ) ) && ! empty( $jobid ) )
 			$query_args[ 'jobid' ] = $jobid;
 
-		if ( BackWPup_Option::get( 'cfg', 'httpauthuser' ) && BackWPup_Option::get( 'cfg', 'httpauthpassword' ) ) {
-			$header[ 'Authorization' ] = 'Basic ' . base64_encode( BackWPup_Option::get( 'cfg', 'httpauthuser' ) . ':' . BackWPup_Encryption::decrypt( BackWPup_Option::get( 'cfg', 'httpauthpassword' ) ) );
-			$authurl = BackWPup_Option::get( 'cfg', 'httpauthuser' ) . ':' . BackWPup_Encryption::decrypt( BackWPup_Option::get( 'cfg', 'httpauthpassword' ) ) . '@';
-		}	
+		if ( get_site_option( 'backwpup_cfg_httpauthuser' ) && get_site_option( 'backwpup_cfg_httpauthpassword' ) ) {
+			$header[ 'Authorization' ] = 'Basic ' . base64_encode( get_site_option( 'backwpup_cfg_httpauthuser' ) . ':' . BackWPup_Encryption::decrypt( get_site_option( 'backwpup_cfg_httpauthpassword' ) ) );
+			$authurl = get_site_option( 'backwpup_cfg_httpauthuser' ) . ':' . BackWPup_Encryption::decrypt( get_site_option( 'backwpup_cfg_httpauthpassword' ) ) . '@';
+		}
 
 		if ( $starttype == 'runext' ) {
-			$query_args[ '_nonce' ] = BackWPup_Option::get( 'cfg', 'jobrunauthkey' );
+			$query_args[ '_nonce' ] = get_site_option( 'backwpup_cfg_jobrunauthkey' );
+			$query_args[ 'doing_wp_cron' ] = NULL;
 			if ( ! empty( $authurl ) ) {
 				$url = str_replace( 'https://', 'https://' . $authurl, $url );
 				$url = str_replace( 'http://', 'http://' . $authurl, $url );
@@ -380,118 +415,96 @@ final class BackWPup_Job {
 		}
 
 		if ( $starttype == 'runnowlink' && ( ! defined( 'ALTERNATE_WP_CRON' ) || ! ALTERNATE_WP_CRON ) ) {
-			$url                       	= wp_nonce_url( network_admin_url( 'admin.php' ), 'backwup_job_run-' . $starttype );
-			$query_args[ 'page' ]      	= 'backwpupjobs';
-			$query_args[ 'action' ] 	= 'runnow';
-			unset(  $query_args[ '_nonce' ] );
+			$url                       		= wp_nonce_url( network_admin_url( 'admin.php' ), 'backwpup_job_run-' . $starttype );
+			$query_args[ 'page' ]      		= 'backwpupjobs';
+			$query_args[ 'action' ] 		= 'runnow';
+			$query_args[ 'doing_wp_cron' ]  = NULL;
+			unset( $query_args[ '_nonce' ] );
 		}
 
 		if ( $starttype == 'runnowlink' && defined( 'ALTERNATE_WP_CRON' ) && ALTERNATE_WP_CRON ) {
 			$query_args[ 'backwpup_run' ] = 'runnowalt';
-			$query_args[ '_nonce' ]    = substr( wp_hash( wp_nonce_tick() . 'backwup_job_run-runnowalt', 'nonce' ), - 12, 10 );
+			$query_args[ '_nonce' ]    = substr( wp_hash( wp_nonce_tick() . 'backwpup_job_run-runnowalt', 'nonce' ), - 12, 10 );
+			$query_args[ 'doing_wp_cron' ] = NULL;
 		}
 
-		$url = array(
-			'url'    => add_query_arg( $query_args, $url ),
-			'header' => $header
-		);
+		$cron_request = apply_filters( 'cron_request', array(
+															'url' => add_query_arg( $query_args, $url ),
+															'key' => $query_args[ 'doing_wp_cron' ],
+															'args' => array(
+																'blocking'   	=> FALSE,
+																'sslverify'		=> apply_filters( 'https_local_ssl_verify', true ),
+																'timeout' 		=> 0.01,
+																'headers'    	=> $header,
+															    'cookies'    	=> array(
+																	new WP_Http_Cookie( array( 'name' => AUTH_COOKIE, 'value' => wp_generate_auth_cookie( $wp_admin_user[ 0 ]->ID, time() + 300, 'auth' ) ) ),
+																    new WP_Http_Cookie( array( 'name' => LOGGED_IN_COOKIE, 'value' => wp_generate_auth_cookie( $wp_admin_user[ 0 ]->ID, time() + 300, 'logged_in' ) ) )
+															    ),
+															   	'user-agent' 	=> BackWpup::get_plugin_data( 'User-Agent' )
+															  )
+													   ) );
+
+		if(  $starttype == 'test' ) {
+			$cron_request[ 'args' ][ 'timeout' ] = 15;
+			$cron_request[ 'args' ][ 'blocking' ] = TRUE;
+		}
 
 		if ( ! in_array( $starttype, array( 'runnowlink', 'runext' ) ) ) {
-			return @wp_remote_get( $url[ 'url' ], array(
-													   'blocking'   => FALSE,
-													   'sslverify' 	=> FALSE,
-													   'timeout' 	=> 0.01,
-													   'headers'    => $url[ 'header' ],
-													   'user-agent' => BackWpup::get_plugin_data( 'User-Agent' )
-												  ) );
+			set_transient( 'doing_cron', $query_args[ 'doing_wp_cron' ] );
+			return wp_remote_post( $cron_request['url'], $cron_request['args'] );
 		}
 
-		return $url;
+		return $cron_request;
 	}
 
 
 	/**
 	 *
 	 */
-	public static function start_http($starttype) {
-
-		//prevent W3TC object cache
-		define('DONOTCACHEOBJECT', TRUE);
+	public static function start_http( $starttype ) {
 
 		//load text domain if needed
-		if ( ! is_textdomain_loaded( 'backwpup' ) && ! BackWPup_Option::get( 'cfg', 'jobnotranslate') )
+		if ( ! is_textdomain_loaded( 'backwpup' ) && ! get_site_option( 'backwpup_cfg_jobnotranslate') )
 			load_plugin_textdomain( 'backwpup', FALSE, BackWPup::get_plugin_data( 'BaseName' ) . '/languages' );
 
-		//special header
-		@putenv( "nokeepalive=1" );
-		@header( 'Content-Type: text/html; charset=' . get_bloginfo( 'charset' ) );
-		@header( 'X-Robots-Tag: noindex, nofollow' );
-		send_nosniff_header();
-		nocache_headers();
+		if ( $starttype != 'restart' ) {
 
-		//check get vars
-		if ( isset( $_GET[ 'jobid' ] ) )
-			$jobid = (int)$_GET[ 'jobid' ];
-		else
-			$jobid = 0;
-		//check job id exists
-		if ( $starttype != 'restart' && $jobid != BackWPup_Option::get( $jobid, 'jobid' ) ) {
-			trigger_error( __( 'Wrong BackWPup JobID', 'backwpup' ) . ' ' . $jobid, E_USER_ERROR );
-			wp_die( __( 'Wrong BackWPup JobID', 'backwpup' ), __( 'Wrong BackWPup JobID', 'backwpup' ), array( 'response' => 400 ) );
+			//check get vars
+			if ( isset( $_GET[ 'jobid' ] ) )
+				$jobid = (int)$_GET[ 'jobid' ];
+			else
+				$jobid = 0;
+
+			//check job id exists
+			if ( $jobid != BackWPup_Option::get( $jobid, 'jobid' ) )
+				die( '-1' );
+
+			//check folders
+			if ( ! self::check_folder( get_site_option( 'backwpup_cfg_logfolder' ) )  || ! self::check_folder( BackWPup::get_plugin_data( 'TEMP' ) ) )
+				die( '-2' );
 		}
-		//check folders
-		if ( ! self::check_folder( BackWPup_Option::get( 'cfg', 'logfolder' ) ) ) {
-			trigger_error( __( 'Log folder does not exist or is not writable for BackWPup', 'backwpup' ), E_USER_ERROR );
-			wp_die( __( 'Log folder does not exist or is not writable for BackWPup', 'backwpup' ), __( 'Log folder does not exist or is not writable for BackWPup', 'backwpup' ), array( 'response' => 500 ) );
+
+		// redirect
+		if ( $starttype == 'runnowalt' ) {
+			ob_start();
+			wp_redirect( add_query_arg( array( 'page' => 'backwpupjobs' ), network_admin_url( 'admin.php' ) ) );
+			echo ' ';
+			while ( @ob_end_flush() );
+			flush();
 		}
-		if ( ! self::check_folder( BackWPup::get_plugin_data( 'TEMP' ) ) ) {
-			trigger_error( __( 'Temp folder does not exist or is not writable for BackWPup', 'backwpup' ), E_USER_ERROR );
-			wp_die( __( 'Temp folder does not exist or is not writable for BackWPup', 'backwpup' ), __( 'Temp folder does not exist or is not writable for BackWPup', 'backwpup' ), array( 'response' => 500 ) );
-		}
-		$backups_folder = BackWPup_Option::get( $jobid, 'backupdir' );
-		if ( ! empty( $backups_folder ) && ! self::check_folder( $backups_folder ) ) {
-			trigger_error( __( 'Backups folder does not exist or is not writable for BackWPup', 'backwpup' ), E_USER_ERROR );
-			wp_die( __( 'Backups folder does not exist or is not writable for BackWPup', 'backwpup' ), __( 'Backups folder does not exist or is not writable for BackWPup', 'backwpup' ), array( 'response' => 500 ) );
-		}
+
 		//check running job
 		$backwpup_job_object = self::get_working_data();
-		if ( $starttype == 'restart' && ! $backwpup_job_object ) {
-			trigger_error( __( 'No BackWPup job running', 'backwpup' ), E_USER_ERROR );
-			wp_die( __( 'No BackWPup job running', 'backwpup' ), __( 'No BackWPup job running', 'backwpup' ), array( 'response' => 400 ) );
-		}
-		if ( $starttype != 'restart' && ( is_object( $backwpup_job_object ) || is_int( $backwpup_job_object ) ) ) {
-			trigger_error( __( 'A BackWPup job is already running', 'backwpup' ), E_USER_ERROR );
-			wp_die( __( 'A BackWPup job is already running', 'backwpup' ), __( 'A BackWPup job is already running', 'backwpup' ), array( 'response' => 503 ) );
-		}
-		if ( $starttype == 'restart' && is_object( $backwpup_job_object ) ) {
-			self::$instance = $backwpup_job_object;
-		}
-		//early write working file to prevent double run
-		if ( in_array( $starttype, array( 'runnow', 'runnowalt', 'runext' ) ) && ! $backwpup_job_object ) {
-			update_site_option( 'backwpup_working_job', (int)$jobid );
-			file_put_contents( BackWPup::get_plugin_data( 'running_file' ), '<?php //'. serialize( (object) array() ), LOCK_EX );
-		}
-		// disable user abort. wp-cron.php set it now
-		//ignore_user_abort( TRUE );
-		//close session file on server side to avoid blocking other requests
-		session_write_close();
-		// disconnect or redirect
-		ob_start();
-		if ( $starttype == 'runnowalt' )
-			wp_redirect( add_query_arg( array( 'page' => 'backwpupjobs' ), network_admin_url( 'admin.php' ) ) );
-		header( "Content-Length: " . ob_get_length() );
-		header( "Connection: close" );
-		ob_end_flush();
-		flush();
 		//start class
-		if ( ! $backwpup_job_object && in_array( $starttype, array( 'runnow', 'runnowalt', 'runext' ) ) ) {
+		if ( ! $backwpup_job_object && in_array( $starttype, array( 'runnow', 'runnowalt', 'runext' ) ) && ! empty( $jobid ) ) {
 			//schedule restart event
 			wp_schedule_single_event( time() + 60, 'backwpup_cron', array( 'id' => 'restart' ) );
 			//start job
-			self::$instance = new self( $starttype, (int)$jobid );
+			$backwpup_job_object = new self();
+			$backwpup_job_object->create( $starttype, (int)$jobid );
 		}
-		if( is_object( self::$instance ) )
-			self::$instance->run();
+		if( is_object( $backwpup_job_object ) && $backwpup_job_object instanceof BackWPup_Job )
+			$backwpup_job_object->run();
 	}
 
 	/**
@@ -506,42 +519,29 @@ final class BackWPup_Job {
 		if( ! defined( 'DOING_CRON' ) )
 			define( 'DOING_CRON', TRUE );
 
-		//prevent W3TC object cache
-		define('DONOTCACHEOBJECT', TRUE);
-
 		//load text domain if needed
-		if ( ! is_textdomain_loaded( 'backwpup' ) && ! BackWPup_Option::get( 'cfg', 'jobnotranslate') )
+		if ( ! is_textdomain_loaded( 'backwpup' ) && ! get_site_option( 'backwpup_cfg_jobnotranslate') )
 			load_plugin_textdomain( 'backwpup', FALSE, BackWPup::get_plugin_data( 'BaseName' ) . '/languages' );
 
 		//check job id exists
 		$jobids = BackWPup_Option::get_job_ids();
-		if ( ! in_array( $jobid, $jobids ) ) {
-			trigger_error( __( 'Wrong BackWPup JobID', 'backwpup' ), E_USER_ERROR );
+		if ( ! in_array( $jobid, $jobids ) )
 			die( __( 'Wrong BackWPup JobID', 'backwpup' ) );
-		}
 		//check folders
-		if ( ! self::check_folder( BackWPup_Option::get( 'cfg', 'logfolder' ) ) ) {
-			trigger_error( __( 'Log folder does not exist or is not writable', 'backwpup' ), E_USER_ERROR );
+		if ( ! self::check_folder( get_site_option( 'backwpup_cfg_logfolder' ) ) )
 			die( __( 'Log folder does not exist or is not writable for BackWPup', 'backwpup' ) );
-		}
-		if ( ! self::check_folder( BackWPup::get_plugin_data( 'TEMP' ) ) ) {
-			trigger_error( __( 'Temp folder does not exist or is not writable', 'backwpup' ), E_USER_ERROR );
+		if ( ! self::check_folder( BackWPup::get_plugin_data( 'TEMP' ) ) )
 			die( __( 'Temp folder does not exist or is not writable for BackWPup', 'backwpup' ) );
-		}
 		//check running job
-		if ( self::get_working_data( FALSE ) ) {
-			trigger_error( __( 'A BackWPup job is already running', 'backwpup' ), E_USER_ERROR );
+		if ( file_exists( BackWPup::get_plugin_data( 'running_file' ) ) )
 			die( __( 'A BackWPup job is already running', 'backwpup' ) );
-		}			
-		//early write working file to prevent double run
-		update_site_option( 'backwpup_working_job', (int)$jobid );
-		file_put_contents( BackWPup::get_plugin_data( 'running_file' ), '<?php //'. serialize( (object) array() ), LOCK_EX );
+
 		//start/restart class
 		fwrite( STDOUT, __( 'Job Started' ) . PHP_EOL );
 		fwrite( STDOUT, '----------------------------------------------------------------------' . PHP_EOL );
-		self::$instance = new self( 'runcli', (int)$jobid );
-		if( is_object( self::$instance ) )
-			self::$instance->run();
+		$backwpup_job_object = new self();
+		$backwpup_job_object->create( 'runcli', (int)$jobid );
+		$backwpup_job_object->run();
 	}
 
 	/**
@@ -552,56 +552,44 @@ final class BackWPup_Job {
 		if ( ! defined( 'DOING_CRON' ) || ! DOING_CRON )
 			return;
 
-		//prevent W3TC object cache
-		define('DONOTCACHEOBJECT', TRUE);
-
 		//load text domain if needed
-		if ( ! is_textdomain_loaded( 'backwpup' ) && ! BackWPup_Option::get( 'cfg', 'jobnotranslate') )
+		if ( ! is_textdomain_loaded( 'backwpup' ) && ! get_site_option( 'backwpup_cfg_jobnotranslate') )
 			load_plugin_textdomain( 'backwpup', FALSE, BackWPup::get_plugin_data( 'BaseName' ) . '/languages' );
 
-		//special header
-		@putenv( "nokeepalive=1" );
-		@header( 'Content-Type: text/html; charset=' . get_bloginfo( 'charset' ) );
-		@header( 'X-Robots-Tag: noindex, nofollow' );
-		send_nosniff_header();
-		nocache_headers();
-
-		//check job id exists
-		if ( $jobid != BackWPup_Option::get( $jobid, 'jobid' ) && $jobid != 0 ) {
-			trigger_error( __( 'Wrong BackWPup JobID', 'backwpup' ), E_USER_ERROR );
-
-			return;
+		if ( ! empty( $jobid ) ) {
+			//check folders
+			if ( ! self::check_folder( get_site_option( 'backwpup_cfg_logfolder' ) ) ||  ! self::check_folder( BackWPup::get_plugin_data( 'TEMP' ) ) )
+				return;
 		}
-		//check folders
-		if ( ! self::check_folder( BackWPup_Option::get( 'cfg', 'logfolder' ) ) ) {
-			trigger_error( __( 'Log folder does not exist or is not writable for BackWPup', 'backwpup' ), E_USER_ERROR );
 
-			return;
-		}
-		if ( ! self::check_folder( BackWPup::get_plugin_data( 'TEMP' ) ) ) {
-			trigger_error( __( 'Temp folder does not exist or is not writable for BackWPup', 'backwpup' ), E_USER_ERROR);
-
-			return;
-		}
-		//check running job
-		self::$instance = self::get_working_data();
-		if ( $jobid != 0 && is_object( self::$instance ) ) {
-			trigger_error( __( 'A BackWPup job is already running', 'backwpup' ), E_USER_ERROR );
-
-			return;
-		}
+		//get running job
+		$backwpup_job_object = self::get_working_data();
 		//start/restart class
-		if ( ! self::$instance && $jobid != 0 ) {
-			//early write working file to prevent double run
-			update_site_option( 'backwpup_working_job', (int)$jobid );
-			file_put_contents( BackWPup::get_plugin_data( 'running_file' ), '<?php //'. serialize( (object) array() ), LOCK_EX );
+		if ( empty( $backwpup_job_object ) && ! empty( $jobid ) ) {
 			//schedule restart event
 			wp_schedule_single_event( time() + 60, 'backwpup_cron', array( 'id' => 'restart' ) );
 			//start job
-			self::$instance = new self( 'cronrun', (int)$jobid );
+			$backwpup_job_object = new self();
+			$backwpup_job_object->create( 'cronrun', (int)$jobid );
 		}
-		if( is_object( self::$instance ) )
-			self::$instance->run();
+		if( is_object( $backwpup_job_object ) && $backwpup_job_object instanceof BackWPup_Job )
+			$backwpup_job_object->run();
+	}
+
+	/**
+	 * disable caches
+	 */
+	public static function disable_caches() {
+
+		//Special settings
+		@putenv( 'nokeepalive=1' );
+		@ini_set( 'zlib.output_compression', 'Off' );
+
+		// deactivate caches
+		if ( ! defined( 'DONOTCACHEOBJECT' ) )
+			define( 'DONOTCACHEOBJECT', TRUE );
+		if ( ! defined( 'DONOTCACHEPAGE' ) )
+			define( 'DONOTCACHEPAGE', TRUE );
 	}
 
 
@@ -611,30 +599,43 @@ final class BackWPup_Job {
 	public function run() {
 		global $wpdb;
 		/* @var wpdb $wpdb */
-		
+
+		// Job can't run it is not created
+		if ( empty( $this->steps_todo ) )
+			return;
+
 		//Check double running and inactivity
-		$job_object = self::get_working_data();
-		if ( ! $job_object )
-			return;
-		$last_update = microtime( TRUE ) - $job_object->timestamp_last_update;
-		if ( $job_object->pid != 0 && $last_update > 300) {
-			$this->log( __( 'Job restart due to inactivity for more than 5 minutes.', 'backwpup' ), E_USER_WARNING );
+		$last_update = microtime( TRUE ) - $this->timestamp_last_update;
+		if ( ! empty( $this->pid ) && $last_update > 300 ) {
+			$this->log( __( 'Job restarts due to inactivity for more than 5 minutes.', 'backwpup' ), E_USER_WARNING );
 		}
-		elseif ( $this->pid != 0 && $job_object->pid != self::get_pid() ) {
-			$this->log( __( 'Second process start terminated, because a other job is already running!', 'backwpup' ), E_USER_WARNING );
+		elseif ( ! empty( $this->pid ) ) {
 			return;
 		}
-		unset( $job_object );
+		// set timestamp of script start
+		$this->timestamp_script_start = microtime( TRUE );
 		//set Pid
 		$this->pid = self::get_pid();
-		$this->update_working_data( TRUE );
 		//set function for PHP user defined error handling
 		$this->temp[ 'PHP' ][ 'INI' ][ 'ERROR_LOG' ]      = ini_get( 'error_log' );
+		$this->temp[ 'PHP' ][ 'INI' ][ 'ERROR_REPORTING' ]= ini_get( 'error_reporting' );
 		$this->temp[ 'PHP' ][ 'INI' ][ 'LOG_ERRORS' ]     = ini_get( 'log_errors' );
 		$this->temp[ 'PHP' ][ 'INI' ][ 'DISPLAY_ERRORS' ] = ini_get( 'display_errors' );
+		$this->temp[ 'PHP' ][ 'INI' ][ 'HTML_ERRORS' ] 	  = ini_get( 'html_errors' );
+		$this->temp[ 'PHP' ][ 'INI' ][ 'REPORT_MEMLEAKS' ]= ini_get( 'report_memleaks' );
+		$this->temp[ 'PHP' ][ 'INI' ][ 'ZLIB_OUTPUT_COMPRESSION' ] 	  = ini_get( 'zlib.output_compression' );
+		$this->temp[ 'PHP' ][ 'INI' ][ 'IMPLICIT_FLUSH' ] = ini_get( 'implicit_flush' );
 		@ini_set( 'error_log', $this->logfile );
+		error_reporting( E_ALL ^ E_STRICT );
 		@ini_set( 'display_errors', 'Off' );
 		@ini_set( 'log_errors', 'On' );
+		@ini_set( 'html_errors', 'Off' );
+		@ini_set( 'report_memleaks', 'On' );
+		@ini_set( 'zlib.output_compression', 'Off' );
+		@ini_set( 'implicit_flush', 'Off' );
+		//increase MySQL timeout
+		@ini_set( 'mysql.connect_timeout', '300' );
+		$wpdb->query( "SET session wait_timeout = 300" );
 		//set temp folder
 		$can_set_temp_env = TRUE;
 		$protected_env_vars = explode( ',', ini_get( 'safe_mode_protected_env_vars') );
@@ -645,25 +646,17 @@ final class BackWPup_Job {
 		if ( $can_set_temp_env ) {
 			$this->temp[ 'PHP' ][ 'ENV' ][ 'TEMPDIR' ] = getenv( 'TMPDIR' );
 			@putenv( 'TMPDIR='.BackWPup::get_plugin_data( 'TEMP') );
-		}		
-		//increase MySQL timeout
-		@ini_set( 'mysql.connect_timeout', '300' );
-		$wpdb->query( "SET session wait_timeout = 300" );
+		}
 		//Write Wordpress DB errors to log
 		$wpdb->suppress_errors( FALSE );
 		$wpdb->hide_errors();
-		//set php execution time
-		@set_time_limit( 0 );
 		//set wp max memory limit
 		@ini_set( 'memory_limit', apply_filters( 'admin_memory_limit', WP_MAX_MEMORY_LIMIT ) );
 		//set error handler
-		if ( defined( 'WP_DEBUG') && WP_DEBUG ) //on debug display all errors
-			set_error_handler( array( $this, 'log' ) );
-		else  //on normal display all errors without notices
-			set_error_handler( array( $this, 'log' ), E_ALL ^ E_NOTICE ^ E_STRICT );
+		set_error_handler( array( $this, 'log' ), E_ALL ^ E_STRICT );
 		set_exception_handler( array( $this, 'exception_handler' ) );
 		//not loading Textdomains and unload loaded
-		if ( BackWPup_Option::get( 'cfg', 'jobnotranslate') ) {
+		if ( get_site_option( 'backwpup_cfg_jobnotranslate' ) ) {
 			add_filter( 'override_load_textdomain', create_function( '','return TRUE;') );
 			$GLOBALS[ 'l10n' ] = array();
 		}
@@ -672,15 +665,13 @@ final class BackWPup_Job {
 			apc_clear_cache();
 		}
 		if ( class_exists('W3_Plugin_TotalCacheAdmin')  ) { //W3TC
-			$totalcacheadmin = & w3_instance('W3_Plugin_TotalCacheAdmin');			
+			$totalcacheadmin = & w3_instance('W3_Plugin_TotalCacheAdmin');
 			$totalcacheadmin->flush_all();
 		} elseif ( function_exists('wp_cache_clear_cache') ) { //WP Super Cache
 			wp_cache_clear_cache();
 		} elseif ( has_action('cachify_flush_cache') ) { //Cachify
 			do_action('cachify_flush_cache');
 		}
-		$job_types = BackWPup::get_job_types();
-		$destinations = BackWPup::get_destinations();
 		// execute function on job shutdown  register_shutdown_function( array( $this, 'shutdown' ) );
 		add_action( 'shutdown', array( $this, 'shutdown' ) );
 		//remove_action('shutdown', array( $this, 'shutdown' ));
@@ -690,122 +681,178 @@ final class BackWPup_Job {
 			//pcntl_signal(9, array($this,'shutdown')); //SIGKILL
 			pcntl_signal( 2, array( $this, 'shutdown' ) ); //SIGINT
 		}
+		//clear output buffer
+		while( @ob_end_clean() );
+		@flush();
+		$job_types = BackWPup::get_job_types();
+		//go step by step
 		foreach ( $this->steps_todo as $this->step_working ) {
-			//Run next step
-			if ( ! in_array( $this->step_working, $this->steps_done ) ) {
-				//calc step percent
-				if ( count( $this->steps_done ) > 0 )
-					$this->step_percent = round( count( $this->steps_done ) / count( $this->steps_todo ) * 100 );
-				else
-					$this->step_percent = 1;
-				while ( $this->steps_data[ $this->step_working ][ 'STEP_TRY' ] < BackWPup_Option::get( 'cfg', 'jobstepretry' ) ) {
-					if ( in_array( $this->step_working, $this->steps_done ) )
-						break;
-					$this->steps_data[ $this->step_working ][ 'STEP_TRY' ] ++;
-					$this->update_working_data( TRUE );
-					$done = FALSE;
-					//executes the methods of job process
-					if ( $this->step_working == 'CREATE_ARCHIVE')
-						$done = $this->create_archive();
-					elseif ( $this->step_working == 'END')
-						$this->end();
-					elseif ( strstr( $this->step_working, 'JOB_' ) )
-						$done = call_user_func( array( $job_types[ str_replace( 'JOB_', '', $this->step_working ) ], 'job_run' ), $this );
-					elseif ( strstr( $this->step_working, 'DEST_SYNC_' ) )
-						$done = call_user_func( array( $destinations[ str_replace( 'DEST_SYNC_', '', $this->step_working ) ], 'job_run_sync' ), $this );
-					elseif ( strstr( $this->step_working, 'DEST_' ) )
-						$done = call_user_func( array( $destinations[ str_replace( 'DEST_', '', $this->step_working ) ], 'job_run_archive' ), $this );
-					elseif ( ! empty( $this->steps_data[ $this->step_working ][ 'CALLBACK' ] ) )
-						$done = call_user_func( $this->steps_data[ $this->step_working ][ 'CALLBACK' ], $this );
-					//set step as done
-					if ( $done == TRUE ) {
-						unset( $this->temp ); //Clean temp
-						$this->steps_done[ ] = $this->step_working;
-						$this->substeps_done = 0;
-						$this->substeps_todo = 0;
-					}
-					//restart on every job step expect end and only on http connection
-					if ( BackWPup_Option::get( 'cfg', 'jobsteprestart' ) )
-						$this->do_restart();
+			//Check if step already done
+			if ( in_array( $this->step_working, $this->steps_done ) )
+				continue;
+			//calc step percent
+			if ( count( $this->steps_done ) > 0 )
+				$this->step_percent = round( count( $this->steps_done ) / count( $this->steps_todo ) * 100 );
+			else
+				$this->step_percent = 1;
+			// do step tries
+			while ( $this->steps_data[ $this->step_working ][ 'STEP_TRY' ] < get_site_option( 'backwpup_cfg_jobstepretry' ) ) {
+				// break if try has marked as done for no more tries
+				if ( in_array( $this->step_working, $this->steps_done ) )
+					break;
+				$this->steps_data[ $this->step_working ][ 'STEP_TRY' ] ++;
+				$this->update_working_data( TRUE );
+				$done = FALSE;
+				//executes the methods of job process
+				if ( $this->step_working == 'CREATE_ARCHIVE')
+					$done = $this->create_archive();
+				elseif ( $this->step_working == 'CREATE_MANIFEST')
+					$done = $this->create_manifest();
+				elseif ( $this->step_working == 'END' ) {
+					$this->end();
+					break 2;
 				}
-				if ( $this->steps_data[ $this->step_working ][ 'STEP_TRY' ] > BackWPup_Option::get( 'cfg', 'jobstepretry' ) )
+				elseif ( strstr( $this->step_working, 'JOB_' ) )
+					$done = $job_types[ str_replace( 'JOB_', '', $this->step_working ) ]->job_run( $this );
+				elseif ( strstr( $this->step_working, 'DEST_SYNC_' ) )
+					$done = BackWPup::get_destination( str_replace( 'DEST_SYNC_', '', $this->step_working ) )->job_run_sync( $this );
+				elseif ( strstr( $this->step_working, 'DEST_' ) )
+					$done = BackWPup::get_destination( str_replace( 'DEST_', '', $this->step_working ) )->job_run_archive( $this );
+				elseif ( ! empty( $this->steps_data[ $this->step_working ][ 'CALLBACK' ] ) )
+					$done = $this->steps_data[ $this->step_working ][ 'CALLBACK' ]( $this );
+				// set step as done or  if step has too many tries
+				if ( $done === TRUE ) {
+					$this->temp 		 = array(); //Clean temp
+					$this->steps_done[]  = $this->step_working;
+					$this->substeps_done = 0;
+					$this->substeps_todo = 0;
+				}
+				if ( ! $done && $this->steps_data[ $this->step_working ][ 'STEP_TRY' ] >= get_site_option( 'backwpup_cfg_jobstepretry' ) ) {
 					$this->log( __( 'Step aborted: too many attempts!', 'backwpup' ), E_USER_ERROR );
+					$this->temp 		 = array(); //Clean temp
+					$this->steps_done[]  = $this->step_working;
+					$this->substeps_done = 0;
+					$this->substeps_todo = 0;
+				}
+				//restart on every job step expect end and only on http connection
+				if ( get_site_option( 'backwpup_cfg_jobsteprestart' ) )
+					$this->do_restart();
 			}
 		}
 	}
 
 	/**
 	 * Do a job restart
+	 *
+	 * @param bool $must Restart must done
+	 * @param bool $msg Log restart message
 	 */
-	public function do_restart() {
-		
-		//no restart if no working job
-		if ( ! self::get_working_data( FALSE ) )
-			exit();
-		
+	public function do_restart( $must = FALSE, $msg = TRUE ) {
+
 		//no restart if in end step
-		if ( $this->step_working == 'END' )
+		if ( $this->step_working == 'END' || ( count( $this->steps_done ) + 1 ) >= count( $this->steps_todo ) )
 			return;
-		
+
 		//no restart on cli usage
 		if ( defined( 'STDIN' ) )
-			$this->end();
-		
+			return;
+
+		//no restart when restart was 3 Seconds before
+		$execution_time = microtime( TRUE ) - $this->timestamp_script_start;
+		if ( ! $must  && $execution_time < 3 )
+			return;
+
+		//no restart if no working job
+		if ( ! file_exists( BackWPup::get_plugin_data( 'running_file' ) ) )
+			return;
+
+		//print message
+		if ( $msg )
+			$this->log( __( 'Restart will be executed now.', 'backwpup' ) );
+
 		//do things for a clean restart
 		$this->pid = 0;
-		$this->jobstarttype = 'restart';
 		$this->update_working_data( TRUE );
 		remove_action( 'shutdown', array( $this, 'shutdown' ) );
 		//do restart
-		if ( defined( 'ALTERNATE_WP_CRON' ) && ALTERNATE_WP_CRON ) {
-			//schedule restart for now
-			wp_clear_scheduled_hook( 'backwpup_cron', array( 'id' => 'restart' ) );
-			wp_schedule_single_event( time(), 'backwpup_cron', array( 'id' => 'restart' ) );
-		} else {
-			self::get_jobrun_url( 'restart' );
+		wp_clear_scheduled_hook( 'backwpup_cron', array( 'id' => 'restart' ) );
+		wp_schedule_single_event( time() + 10, 'backwpup_cron', array( 'id' => 'restart' ) );
+		self::get_jobrun_url( 'restart' );
+
+		exit();
+	}
+
+	/**
+	 * Do a job restart
+	 *
+	 * @param bool $do_restart_now should time restart now be done
+	 * @return int remaining time
+	 */
+	public function do_restart_time( $do_restart_now = FALSE ) {
+
+		$job_max_execution_time = get_site_option( 'backwpup_cfg_jobmaxexecutiontime' );
+
+		if ( empty( $job_max_execution_time ) )
+			return 300;
+
+		$execution_time = microtime( TRUE ) - $this->timestamp_script_start;
+
+		// do restart 3 sec. before max. execution time
+		if ( $do_restart_now || $execution_time >= ( $job_max_execution_time - 3 ) ) {
+			$this->steps_data[ $this->step_working ][ 'SAVE_STEP_TRY' ] = $this->steps_data[ $this->step_working ][ 'STEP_TRY' ];
+			$this->steps_data[ $this->step_working ][ 'STEP_TRY' ] -= 1;
+			$this->log( sprintf( __( 'Restart after %1$d seconds.', 'backwpup' ), ceil( $execution_time ), $job_max_execution_time ) );
+			$this->do_restart( TRUE, FALSE );
 		}
-		exit();		
+
+		return $job_max_execution_time - $execution_time;
+
+	}
+
+	/**
+	 * Get job restart time
+	 *
+	 * @return int remaining time
+	 */
+	public function get_restart_time() {
+		$job_max_execution_time = get_site_option( 'backwpup_cfg_jobmaxexecutiontime' );
+
+		if ( empty( $job_max_execution_time ) )
+			return 300;
+
+		$execution_time = microtime( TRUE ) - $this->timestamp_script_start;
+		return $job_max_execution_time - $execution_time - 3;
 	}
 
 	/**
 	 *
 	 * Get data off a working job
 	 *
-	 * @param bool $get_object is full object needed or only that it working
-	 *
-	 * @return bool|object|int BackWPup_Job Object or Bool if file not exits or job id if file cant read
+	 * @return bool|object BackWPup_Job Object or Bool if file not exits
 	 */
-	public static function get_working_data( $get_object = TRUE ) {
+		public static function get_working_data() {
 
-		if ( ! is_file( BackWPup::get_plugin_data( 'running_file' ) ) )
+			if ( ! file_exists( BackWPup::get_plugin_data( 'running_file' ) ) )
+				return FALSE;
+
+			if ( $job_object = include BackWPup::get_plugin_data( 'running_file' ) ) {
+				if ( $job_object instanceof BackWPup_Job )
+					return $job_object;
+			}
+
 			return FALSE;
 
-		if ( ! $get_object )
-			return TRUE;
-
-		if ( $running_data = file_get_contents( BackWPup::get_plugin_data( 'running_file' ), FALSE, NULL, 8 ) ) {
-			$job_object = unserialize( $running_data );
-			if ( is_object( $job_object ) ) {
-				return $job_object;
-			} else {
-				//on defect return job id
-				return get_site_option( 'backwpup_working_job', 0 );
-			}
-				
 		}
 
-		return FALSE;
-	}
-
-	/**
-	 *
-	 * Reads a BackWPup logfile header and gives back a array of information
-	 *
-	 * @param string $logfile full logfile path
-	 *
-	 * @return array|bool
-	 */
-	public static function read_logheader( $logfile ) {
+		/**
+		 *
+		 * Reads a BackWPup logfile header and gives back a array of information
+		 *
+		 * @param string $logfile full logfile path
+		 *
+		 * @return array|bool
+		 */
+		public static function read_logheader( $logfile ) {
 
 		$usedmetas = array(
 			"date"                    => "logtime",
@@ -821,11 +868,9 @@ final class BackWPup_Job {
 
 		//get metadata of logfile
 		$metas = array();
-		if ( is_file( $logfile ) ) {
+		if ( is_readable( $logfile ) ) {
 			if (  '.gz' == substr( $logfile, -3 )  )
 				$metas = (array)get_meta_tags( 'compress.zlib://' . $logfile );
-			elseif (  '.bz2' == substr( $logfile, -4 )  )
-				$metas = (array)get_meta_tags( 'compress.bzip2://' . $logfile );
 			else
 				$metas = (array)get_meta_tags( $logfile );
 		}
@@ -875,11 +920,7 @@ final class BackWPup_Job {
 		if ( ! empty( $args[ 0 ] ) )
 			$this->log( sprintf( __( 'Signal %d is sent to script!', 'backwpup' ), $args[ 0 ] ), E_USER_ERROR );
 
-		//Restart on http job
-		if ( ! defined( 'STDIN' ) )
-			$this->log( __( 'Script stopped! Will start again.', 'backwpup' ) );
-		
-		$this->do_restart();
+		$this->do_restart( TRUE, TRUE );
 	}
 
 
@@ -902,35 +943,28 @@ final class BackWPup_Job {
 			$folder == untrailingslashit( str_replace( '\\', '/', WP_PLUGIN_DIR ) ) ||
 			$folder == untrailingslashit( str_replace( '\\', '/', WP_CONTENT_DIR ) )
 		) {
-			trigger_error( sprintf( __( 'Please use another folder: %1$s', 'backwpup' ), $folder ), E_USER_WARNING );
-
+			BackWPup_Admin::message( sprintf( __( 'Folder %1$s not allowed, please use another folder.', 'backwpup' ), $folder ), TRUE );
 			return FALSE;
 		}
 		//create folder if it not exists
 		if ( ! is_dir( $folder ) ) {
 			if ( ! wp_mkdir_p( $folder ) ) {
-				trigger_error( sprintf( __( 'Cannot create folder: %1$s', 'backwpup' ), $folder ), E_USER_WARNING );
-
+				BackWPup_Admin::message( sprintf( __( 'Cannot create folder: %1$s', 'backwpup' ), $folder ), TRUE );
 				return FALSE;
 			}
 		}
 
 		//check is writable dir
 		if ( ! is_writable( $folder ) ) {
-			trigger_error( sprintf( __( 'Folder "%1$s" is not writable', 'backwpup' ), $folder ), E_USER_WARNING );
-
+			BackWPup_Admin::message( sprintf( __( 'Folder "%1$s" is not writable', 'backwpup' ), $folder ), TRUE );
 			return FALSE;
 		}
 
 		//create .htaccess for apache and index.php for folder security
-		if ( BackWPup_Option::get( 'cfg', 'protectfolders') && ! is_file( $folder . '/.htaccess' ) )
+		if ( get_site_option( 'backwpup_cfg_protectfolders') && ! file_exists( $folder . '/.htaccess' ) )
 			file_put_contents( $folder . '/.htaccess', "<Files \"*\">" . PHP_EOL . "<IfModule mod_access.c>" . PHP_EOL . "Deny from all" . PHP_EOL . "</IfModule>" . PHP_EOL . "<IfModule !mod_access_compat>" . PHP_EOL . "<IfModule mod_authz_host.c>" . PHP_EOL . "Deny from all" . PHP_EOL . "</IfModule>" . PHP_EOL . "</IfModule>" . PHP_EOL . "<IfModule mod_access_compat>" . PHP_EOL . "Deny from all" . PHP_EOL . "</IfModule>" . PHP_EOL . "</Files>" );
-		if ( BackWPup_Option::get( 'cfg', 'protectfolders') && ! is_file( $folder . '/index.php' ) )
+		if ( get_site_option( 'backwpup_cfg_protectfolders') && ! file_exists( $folder . '/index.php' ) )
 			file_put_contents( $folder . '/index.php', "<?php" . PHP_EOL . "header( \$_SERVER['SERVER_PROTOCOL'] . ' 404 Not Found' );" . PHP_EOL . "header( 'Status: 404 Not Found' );" . PHP_EOL );
-		if ( ! BackWPup_Option::get( 'cfg', 'protectfolders') && is_file( $folder . '/.htaccess' ) )
-			unlink( $folder . '/.htaccess' );
-		if ( ! BackWPup_Option::get( 'cfg', 'protectfolders') && is_file( $folder . '/index.php' ) )
-			unlink( $folder . '/index.php' );
 
 		return TRUE;
 	}
@@ -1018,7 +1052,9 @@ final class BackWPup_Job {
 				$messagetype = '<samp>' . __( 'STRICT NOTICE:', 'backwpup' ) . ' ';
 				break;
 			case E_RECOVERABLE_ERROR:
-				$messagetype = '<samp>' . __( 'RECOVERABLE ERROR:', 'backwpup' ) . ' ';
+				$this->errors ++;
+				$error_or_warning = TRUE;
+				$messagetype = '<samp style="background-color:red;color:#fff">' . __( 'RECOVERABLE ERROR:', 'backwpup' ) . ' ';
 				break;
 			default:
 				$messagetype = '<samp>' . $args[ 0 ] . ": ";
@@ -1033,12 +1069,13 @@ final class BackWPup_Job {
 		//log line
 		$timestamp = '<span datetime="' . date_i18n( 'c' ) . '" title="[Type: ' . $args[ 0 ] . '|Line: ' . $args[ 3 ] . '|File: ' . $in_file . '|Mem: ' . size_format( @memory_get_usage( TRUE ), 2 ) . '|Mem Max: ' . size_format( @memory_get_peak_usage( TRUE ), 2 ) . '|Mem Limit: ' . ini_get( 'memory_limit' ) . '|PID: ' . self::get_pid() . '|Query\'s: ' . get_num_queries() . ']">[' . date_i18n( 'd-M-Y H:i:s' ) . ']</span> ';
 		//ste last Message
+		$message = htmlentities( $args[ 1 ], ENT_COMPAT , get_bloginfo( 'charset' ), FALSE );
 		if ( $args[ 0 ] == E_NOTICE || $args[ 0 ] == E_USER_NOTICE )
-			$this->lastmsg = $messagetype . htmlentities( $args[ 1 ], ENT_COMPAT , get_bloginfo( 'charset' ), FALSE ) . '</samp>';
+			$this->lastmsg = $messagetype . $message . '</samp>';
 		if ( $error_or_warning )
-			$this->lasterrormsg = $messagetype . htmlentities( $args[ 1 ], ENT_COMPAT , get_bloginfo( 'charset' ), FALSE ) . '</samp>';
+			$this->lasterrormsg = $messagetype . $message . '</samp>';
 		//write log file
-		file_put_contents( $this->logfile, $timestamp . $messagetype . htmlentities( $args[ 1 ], ENT_COMPAT , get_bloginfo( 'charset' ), FALSE ) . '</samp>' . PHP_EOL, FILE_APPEND );
+		file_put_contents( $this->logfile, $timestamp . $messagetype . $message . '</samp>' . PHP_EOL, FILE_APPEND  );
 
 		//write new log header
 		if ( $error_or_warning ) {
@@ -1047,14 +1084,14 @@ final class BackWPup_Job {
 			$file_pos = ftell( $fd );
 			while ( ! feof( $fd ) ) {
 				$line = fgets( $fd );
-				if ( stripos( $line, "<meta name=\"backwpup_errors\" content=\"" ) !== FALSE ) {
+				if ( stripos( $line, '<meta name="backwpup_errors" content="' ) !== FALSE ) {
 					fseek( $fd, $file_pos );
-					fwrite( $fd, str_pad( "<meta name=\"backwpup_errors\" content=\"" . $this->errors . "\" />", 100 ) . PHP_EOL );
+					fwrite( $fd, str_pad( '<meta name="backwpup_errors" content="' . $this->errors . '" />', 100 ) . PHP_EOL );
 					$found ++;
 				}
-				if ( stripos( $line, "<meta name=\"backwpup_warnings\" content=\"" ) !== FALSE ) {
+				if ( stripos( $line, '<meta name="backwpup_warnings" content="' ) !== FALSE ) {
 					fseek( $fd, $file_pos );
-					fwrite( $fd, str_pad( "<meta name=\"backwpup_warnings\" content=\"" . $this->warnings . "\" />", 100 ) . PHP_EOL );
+					fwrite( $fd, str_pad( '<meta name="backwpup_warnings" content="' . $this->warnings . '" />', 100 ) . PHP_EOL );
 					$found ++;
 				}
 				if ( $found >= 2 )
@@ -1077,24 +1114,32 @@ final class BackWPup_Job {
 	 *
 	 * @global wpdb $wpdb
 	 * @param bool $must_write overwrite the only ever 1 sec writing
-	 * @return bool true if working date written
 	 */
 	public function update_working_data( $must_write = FALSE ) {
 		global $wpdb;
-		/*  @var wpdb $wpdb */
-		
+		/* @var wpdb $wpdb */
+
 		//to reduce server load
-		if ( BackWPup_Option::get( 'cfg', 'jobwaittimems' ) > 0 && BackWPup_Option::get( 'cfg', 'jobwaittimems') <= 500000 )
-			usleep( BackWPup_Option::get( 'cfg', 'jobwaittimems' ) );
+		if ( get_site_option( 'backwpup_cfg_jobwaittimems' ) > 0 && get_site_option( 'backwpup_cfg_jobwaittimems') <= 500000 )
+			usleep( get_site_option( 'backwpup_cfg_jobwaittimems' ) );
 
 		//only run every 1 sec.
 		$time_to_update = microtime( TRUE ) - $this->timestamp_last_update;
 		if ( ! $must_write && $time_to_update < 1 )
-			return TRUE;
+			return;
 
-		//set execution time again
-		@set_time_limit( 0 );
-		
+		//FCGI must have a permanent output so that it not broke
+		if ( stristr( PHP_SAPI, 'fcgi' ) || stristr( PHP_SAPI, 'litespeed' ) ) {
+			//inly if no output buffering is active
+			if ( ob_get_level() == 0 ) {
+				echo '          ';
+				flush();
+			}
+		}
+
+		//set execution time again for 5 min
+		@set_time_limit( 300 );
+
 		//check free memory
 		$this->need_free_memory( '10M' );
 
@@ -1103,26 +1148,20 @@ final class BackWPup_Job {
 		if ( $res === FALSE )
 			$wpdb->db_connect();
 
-		//check if job already aborted
-		if ( ! self::get_working_data( FALSE ) ) {
-			//run job end if aborted
-			if ( $this->step_working != 'END' )
-				$this->end();
-
-			return FALSE;
-		}
-
 		//calc sub step percent
 		if ( $this->substeps_todo > 0 && $this->substeps_done > 0 )
 			$this->substep_percent = round( $this->substeps_done / $this->substeps_todo * 100 );
 		else
 			$this->substep_percent = 1;
-		$this->timestamp_last_update = microtime( TRUE );
 
-		//write data to file
-		file_put_contents( BackWPup::get_plugin_data( 'running_file' ), '<?php //'. serialize( $this ), LOCK_EX );
-
-		return TRUE;
+		//check if job aborted
+		if ( ! file_exists( BackWPup::get_plugin_data( 'running_file' ) ) ) {
+			if ( $this->step_working != 'END' )
+				$this->end();
+		} else {
+			$this->timestamp_last_update = microtime( TRUE ); //last update of working file
+			file_put_contents( BackWPup::get_plugin_data( 'running_file' ),'<?php return '. var_export( $this, true ) . ';' );
+		}
 	}
 
 	/**
@@ -1134,52 +1173,47 @@ final class BackWPup_Job {
 
 		$this->step_working = 'END';
 		$this->substeps_todo = 1;
+		$abort = FALSE;
+
+		if ( ! file_exists( BackWPup::get_plugin_data( 'running_file' ) ) ) {
+			if ( ! $this->user_abort )
+				$abort = TRUE;
+			$this->log( __( 'Aborted by user!', 'backwpup' ), E_USER_ERROR );
+		}
 
 		//delete old logs
-		if ( BackWPup_Option::get( 'cfg', 'maxlogs' ) ) {
-			$logfilelist = array();
-			if ( $dir = opendir( BackWPup_Option::get( 'cfg', 'logfolder' ) ) ) { //make file list
+		if ( get_site_option( 'backwpup_cfg_maxlogs' ) ) {
+			$log_file_list = array();
+			if ( $dir = opendir( get_site_option( 'backwpup_cfg_logfolder' ) ) ) { //make file list
 				while ( ( $file = readdir( $dir ) ) !== FALSE ) {
-					if ( strstr( $file, 'backwpup_log_' ) && ( strstr( $file, '.html' ) ||  strstr( $file, '.html.gz' ) ) )
-						$logfilelist[ ] = $file;
+					if ( strpos( $file, 'backwpup_log_' ) == 0 && FALSE !== strpos( $file, '.html' ) )
+						$log_file_list[ filemtime( get_site_option( 'backwpup_cfg_logfolder' ) . '/' . $file ) ] = $file;
 				}
 				closedir( $dir );
 			}
-			if ( sizeof( $logfilelist ) > 0 ) {
-				rsort( $logfilelist );
-				$numdeltefiles = 0;
-				for ( $i = BackWPup_Option::get( 'cfg', 'maxlogs' ); $i < sizeof( $logfilelist ); $i ++ ) {
-					unlink( BackWPup_Option::get( 'cfg', 'logfolder' ) . $logfilelist[ $i ] );
-					$numdeltefiles ++;
+			if ( sizeof( $log_file_list ) > 0 ) {
+				krsort( $log_file_list, SORT_NUMERIC );
+				$num_delete_files = 0;
+				$i = -1;
+				foreach ( $log_file_list AS $log_file ) {
+					$i ++;
+					if ( $i <  get_site_option( 'backwpup_cfg_maxlogs' ) )
+						continue;
+					unlink( get_site_option( 'backwpup_cfg_logfolder' ) . $log_file );
+					$num_delete_files ++;
 				}
-				if ( $numdeltefiles > 0 )
-					$this->log( sprintf( _n( 'One old log deleted', '%d old logs deleted', $numdeltefiles, 'backwpup' ), $numdeltefiles ), E_USER_NOTICE );
+				if ( $num_delete_files > 0 )
+					$this->log( sprintf( _n( 'One old log deleted', '%d old logs deleted', $num_delete_files, 'backwpup' ), $num_delete_files ) );
 			}
 		}
 
 		//Display job working time
 		if ( $this->errors > 0 )
-			$this->log( sprintf( __( 'Job has ended with errors in %s seconds. You must resolve the errors for correct execution.', 'backwpup' ), current_time( 'timestamp' ) - $this->start_time, E_USER_ERROR ) );
+			$this->log( sprintf( __( 'Job has ended with errors in %s seconds. You must resolve the errors for correct execution.', 'backwpup' ), current_time( 'timestamp' ) - $this->start_time ), E_USER_ERROR );
 		elseif ( $this->warnings > 0 )
-			$this->log( sprintf( __( 'Job has done with warnings in %s seconds. Please resolve them for correct execution.', 'backwpup' ), current_time( 'timestamp' ) - $this->start_time, E_USER_WARNING ) );
+			$this->log( sprintf( __( 'Job finished with warnings in %s seconds. Please resolve them for correct execution.', 'backwpup' ), current_time( 'timestamp' ) - $this->start_time ), E_USER_WARNING );
 		else
 			$this->log( sprintf( __( 'Job done in %s seconds.', 'backwpup' ), current_time( 'timestamp' ) - $this->start_time, E_USER_NOTICE ) );
-
-		//clean up temp
-		if ( ! empty( $this->backup_file ) && is_file( BackWPup::get_plugin_data( 'TEMP' ) . $this->backup_file ) )
-			unlink( BackWPup::get_plugin_data( 'TEMP' ) . $this->backup_file );
-		if ( ! empty( $this->folder_list_file ) && is_file( $this->folder_list_file ) )
-			unlink( $this->folder_list_file );
-		if ( ! empty( $this->additional_files_to_backup ) ) {
-			foreach ( $this->additional_files_to_backup as $additional_file ) {
-				if ( $additional_file == BackWPup::get_plugin_data( 'TEMP' ) . basename( $additional_file ) && is_file( $additional_file ) )
-					unlink( $additional_file );
-			}
-		}
-		//delete running file
-		delete_site_option( 'backwpup_working_job' );
-		if ( is_file( BackWPup::get_plugin_data( 'running_file' ) ) )
-			unlink( BackWPup::get_plugin_data( 'running_file' ) );
 
 		//Update job options
 		if ( ! empty( $this->job[ 'jobid' ] ) ) {
@@ -1194,14 +1228,14 @@ final class BackWPup_Job {
 			$found   = 0;
 			while ( ! feof( $fd ) ) {
 				$line = fgets( $fd );
-				if ( stripos( $line, "<meta name=\"backwpup_jobruntime\"" ) !== FALSE ) {
+				if ( stripos( $line, '<meta name="backwpup_jobruntime"' ) !== FALSE ) {
 					fseek( $fd, $filepos );
-					fwrite( $fd, str_pad( "<meta name=\"backwpup_jobruntime\" content=\"" . $this->job[ 'lastruntime' ] . "\" />", 100 ) . PHP_EOL );
+					fwrite( $fd, str_pad( '<meta name="backwpup_jobruntime" content="' . $this->job[ 'lastruntime' ] . '" />', 100 ) . PHP_EOL );
 					$found ++;
 				}
-				if ( stripos( $line, "<meta name=\"backwpup_backupfilesize\"" ) !== FALSE ) {
+				if ( stripos( $line, '<meta name="backwpup_backupfilesize"' ) !== FALSE ) {
 					fseek( $fd, $filepos );
-					fwrite( $fd, str_pad( "<meta name=\"backwpup_backupfilesize\" content=\"" . $this->backup_filesize . "\" />", 100 ) . PHP_EOL );
+					fwrite( $fd, str_pad( '<meta name="backwpup_backupfilesize" content="' . $this->backup_filesize . '" />', 100 ) . PHP_EOL );
 					$found ++;
 				}
 				if ( $found >= 2 )
@@ -1210,22 +1244,15 @@ final class BackWPup_Job {
 			}
 			fclose( $fd );
 		}
-		//Restore error handler
-		restore_exception_handler();
-		restore_error_handler();
-		@ini_set( 'log_errors', $this->temp[ 'PHP' ][ 'INI' ][ 'LOG_ERRORS' ] );
-		@ini_set( 'error_log', $this->temp[ 'PHP' ][ 'INI' ][ 'ERROR_LOG' ] );
-		@ini_set( 'display_errors', $this->temp[ 'PHP' ][ 'INI' ][ 'DISPLAY_ERRORS' ] );
-		if ( $this->temp[ 'PHP' ][ 'ENV' ][ 'TEMPDIR' ] )
-			@putenv('TMPDIR=' . $this->temp[ 'PHP' ][ 'ENV' ][ 'TEMPDIR' ] );
+
 		//logfile end
 		file_put_contents( $this->logfile, "</body>" . PHP_EOL . "</html>", FILE_APPEND );
 
 		//Send mail with log
 		$sendmail = FALSE;
-		if ( $this->errors > 0 && $this->job[ 'mailerroronly' ] && $this->job[ 'mailaddresslog' ] )
+		if ( $this->errors > 0 && ! empty( $this->job[ 'mailerroronly' ] ) && ! empty( $this->job[ 'mailaddresslog' ] ) )
 			$sendmail = TRUE;
-		if ( ! $this->job[ 'mailerroronly' ] && $this->job[ 'mailaddresslog' ] )
+		if ( empty( $this->job[ 'mailerroronly' ] ) && ! empty( $this->job[ 'mailaddresslog' ] ) )
 			$sendmail = TRUE;
 		if ( $sendmail ) {
 			//special subject
@@ -1244,26 +1271,68 @@ final class BackWPup_Job {
 			$headers = array();
 			$headers[] = 'Content-Type: text/html; charset='. get_bloginfo( 'charset' );
 			$headers[] = 'X-Priority: '.$priority;
-			if ( ! empty( $this->job[ 'mailaddresssenderlog' ] ) )
+			if ( ! empty( $this->job[ 'mailaddresssenderlog' ] ) ) {
+				if ( FALSE === $start_mail = strpos( $this->job[ 'mailaddresssenderlog' ], '<' ) ) {
+					if ( FALSE === strpos( $this->job[ 'mailaddresssenderlog' ], '@' ) ) {
+						$this->job[ 'mailaddresssenderlog' ] = '"' . str_replace( array( '<','>','@' ), '', $this->job[ 'mailaddresssenderlog' ] ) . '" <' . get_bloginfo( 'admin_email' ). '>';
+					}
+				}
+				elseif ( FALSE === strpos( $this->job[ 'mailaddresssenderlog' ], '>', $start_mail ) ) {
+					$this->job[ 'mailaddresssenderlog' ] = '"' . str_replace( array( '<','>','@' ), '', substr( $this->job[ 'mailaddresssenderlog' ], 0, $start_mail ) ) . '" <' . get_bloginfo( 'admin_email' ). '>';
+				}
+
 				$headers[] = 'From: ' . $this->job[ 'mailaddresssenderlog' ];
+			}
 
 			wp_mail( $this->job[ 'mailaddresslog' ], $subject, file_get_contents( $this->logfile ), $headers );
 		}
-
-		//remove restart cron
-		wp_clear_scheduled_hook( 'backwpup_cron', array( 'id' => 'restart' ) );
-
-		//remove shutdown action
-		remove_action( 'shutdown', array( $this, 'shutdown' ) );
 
 		//set done
 		$this->substeps_done = 1;
 		$this->steps_done[ ] = 'END';
 
-		//run cleanup and check
+		//clean up temp
+		self::clean_temp_folder();
+
+		//remove shutdown action
+		remove_action( 'shutdown', array( $this, 'shutdown' ) );
+		restore_exception_handler();
+		restore_error_handler();
+		@ini_set( 'log_errors', $this->temp[ 'PHP' ][ 'INI' ][ 'LOG_ERRORS' ] );
+		@ini_set( 'error_log', $this->temp[ 'PHP' ][ 'INI' ][ 'ERROR_LOG' ] );
+		@ini_set( 'display_errors', $this->temp[ 'PHP' ][ 'INI' ][ 'DISPLAY_ERRORS' ] );
+		@ini_set( 'html_errors', $this->temp[ 'PHP' ][ 'INI' ][ 'HTML_ERRORS' ] );
+		@ini_set( 'zlib.output_compression', $this->temp[ 'PHP' ][ 'INI' ][ 'ZLIB_OUTPUT_COMPRESSION' ] );
+		@ini_set( 'implicit_flush', $this->temp[ 'PHP' ][ 'INI' ][ 'IMPLICIT_FLUSH' ] );
+		@ini_set( 'error_reporting', $this->temp[ 'PHP' ][ 'INI' ][ 'ERROR_REPORTING' ] );
+		@ini_set( 'report_memleaks', $this->temp[ 'PHP' ][ 'INI' ][ 'REPORT_MEMLEAKS' ] );
+		if ( $this->temp[ 'PHP' ][ 'ENV' ][ 'TEMPDIR' ] )
+			@putenv('TMPDIR=' . $this->temp[ 'PHP' ][ 'ENV' ][ 'TEMPDIR' ] );
+
 		BackWPup_Cron::check_cleanup();
 
-		exit();
+		if ( $abort )
+			exit();
+	}
+
+
+	public static function user_abort() {
+
+		/* @var $job_object BackWPup_Job */
+		$job_object = BackWPup_Job::get_working_data();
+
+		unlink( BackWPup::get_plugin_data( 'running_file' ) );
+
+		//if job not working currently abort it this way for message
+		$not_worked_time = microtime( TRUE ) - $job_object->timestamp_last_update;
+		$restart_time = get_site_option( 'backwpup_cfg_jobmaxexecutiontime' );
+		if ( empty( $restart_time ) )
+			$restart_time = 60;
+		if ( empty( $job_object->pid ) || $not_worked_time > $restart_time ) {
+			$job_object->user_abort = TRUE;
+			$job_object->update_working_data();
+		}
+
 	}
 
 	/**
@@ -1321,12 +1390,12 @@ final class BackWPup_Job {
 		$data = NULL;
 		if ( ! empty( $file_handle ) && is_numeric( $read_count ) )
 			$data = fread( $file_handle, $read_count );
-		
+
 		if (  $this->job[ 'backuptype' ] == 'sync'  )
 			return $data;
-		
+
 		$length = ( is_numeric( $read_count ) ) ? $read_count : strlen( $read_count );
-		$this->substeps_done = $this->substeps_done + $length;				
+		$this->substeps_done = $this->substeps_done + $length;
 		$this->update_working_data();
 
 		return $data;
@@ -1343,7 +1412,7 @@ final class BackWPup_Job {
 	 */
 	public function get_mime_type( $file ) {
 
-		if ( ! is_file( $file ) )
+		if ( ! is_readable( $file ) || is_dir( $file ) )
 			return FALSE;
 
 		if ( function_exists( 'fileinfo' ) ) {
@@ -1553,7 +1622,7 @@ final class BackWPup_Job {
 	 * @return array files to backup
 	 */
 	public function get_files_in_folder( $folder ) {
-		
+
 		$files = array();
 
 		if ( ! is_dir( $folder ) ) {
@@ -1576,11 +1645,11 @@ final class BackWPup_Job {
 				}
 				if ( $this->job[ 'backupexcludethumbs' ] && strpos( $folder, BackWPup_File::get_upload_dir() ) !== FALSE && preg_match( "/\-[0-9]{2,4}x[0-9]{2,4}\.(jpg|png|gif)$/i", $file ) )
 					continue;
-				if ( ! is_dir( $folder . $file ) && ! is_readable( $folder . $file ) )
+				if ( ! is_readable( $folder . $file ) )
 					$this->log( sprintf( __( 'File "%s" is not readable!', 'backwpup' ), $folder . $file ), E_USER_WARNING );
 				elseif ( is_link( $folder . $file ) )
-					$this->log( sprintf( __( 'Link "%s" not followed.', 'backwpup' ), $folder . $file ), E_USER_WARNING );
-				elseif ( is_file( $folder . $file ) ) {
+					$this->log( sprintf( __( 'Link "%s" not following.', 'backwpup' ), $folder . $file ), E_USER_WARNING );
+				elseif ( ! is_dir( $folder . $file ) ) {
 					$files[ ] = $folder . $file;
 					$this->count_files_in_folder ++;
 					$this->count_filesize_in_folder = $this->count_filesize_in_folder + @filesize( $folder . $file );
@@ -1593,6 +1662,86 @@ final class BackWPup_Job {
 	}
 
 	/**
+	 * @param create manifest file
+	 * @return bool
+	 */
+	public function create_manifest( ) {
+
+		$this->substeps_todo = 3;
+
+		$this->log( sprintf( __( '%d. Trying to generate a manifest file&#160;&hellip;', 'backwpup' ), $this->steps_data[ $this->step_working ][ 'STEP_TRY' ] ) );
+
+		//build manifest
+		$manifest = array();
+		// add blog information
+		$manifest[ 'blog_info' ][ 'url' ] = home_url();
+		$manifest[ 'blog_info' ][ 'wpurl' ] = site_url();
+		$manifest[ 'blog_info' ][ 'prefix' ] = $GLOBALS[ 'wpdb' ]->prefix;
+		$manifest[ 'blog_info' ][ 'description' ] = get_option('blogdescription');
+		$manifest[ 'blog_info' ][ 'stylesheet_directory' ] =  get_template_directory_uri();
+		$manifest[ 'blog_info' ][ 'activate_plugins' ] = wp_get_active_and_valid_plugins();
+		$manifest[ 'blog_info' ][ 'activate_theme' ] = wp_get_theme()->get('Name');
+		$manifest[ 'blog_info' ][ 'admin_email' ] = get_option('admin_email');
+		$manifest[ 'blog_info' ][ 'charset' ] = get_bloginfo( 'charset' );
+		$manifest[ 'blog_info' ][ 'version' ] = BackWPup::get_plugin_data( 'wp_version' );
+		$manifest[ 'blog_info' ][ 'backwpup_version' ] = BackWPup::get_plugin_data( 'version' );
+		$manifest[ 'blog_info' ][ 'language' ] = get_bloginfo( 'language' );
+		$manifest[ 'blog_info' ][ 'name' ] = get_bloginfo( 'name' );
+		$manifest[ 'blog_info' ][ 'abspath' ] = ABSPATH;
+		$manifest[ 'blog_info' ][ 'uploads' ] = wp_upload_dir();
+		$manifest[ 'blog_info' ][ 'contents' ][ 'basedir' ] = WP_CONTENT_DIR;
+		$manifest[ 'blog_info' ][ 'contents' ][ 'baseurl' ] = WP_CONTENT_URL;
+		$manifest[ 'blog_info' ][ 'plugins' ][ 'basedir' ] = WP_PLUGIN_DIR;
+		$manifest[ 'blog_info' ][ 'plugins' ][ 'baseurl' ] = WP_PLUGIN_URL;
+		$manifest[ 'blog_info' ][ 'themes' ][ 'basedir' ] = get_theme_root();
+		$manifest[ 'blog_info' ][ 'themes' ][ 'baseurl' ] = get_theme_root_uri();
+		// add job settings
+		$manifest[ 'job_settings' ] = $this->job;
+		// add archive info
+		foreach( $this->additional_files_to_backup as $file ) {
+			$manifest[ 'archive' ][ 'extra_files' ][] = basename( $file );
+		}
+		if ( isset( $this->steps_data[ 'JOB_FILE' ] ) ) {
+			if ( $this->job[ 'backuproot'] )
+				$manifest[ 'archive' ][ 'abspath' ] = trailingslashit( str_replace( $this->remove_path, '', str_replace( '\\', '/',ABSPATH) ) );
+			if ( $this->job[ 'backupuploads'] )
+				$manifest[ 'archive' ][ 'uploads' ] = trailingslashit( str_replace( $this->remove_path, '',  BackWPup_File::get_upload_dir() ) );
+			if ( $this->job[ 'backupcontent'] )
+				$manifest[ 'archive' ][ 'contents' ] = trailingslashit( str_replace( $this->remove_path, '', str_replace( '\\', '/',WP_CONTENT_DIR ) ) );
+			if ( $this->job[ 'backupplugins'])
+				$manifest[ 'archive' ][ 'plugins' ] = trailingslashit( str_replace( $this->remove_path, '', str_replace( '\\', '/', WP_PLUGIN_DIR ) ) );
+			if ( $this->job[ 'backupthemes'] )
+				$manifest[ 'archive' ][ 'themes' ] = trailingslashit( str_replace( $this->remove_path, '', str_replace( '\\', '/', get_theme_root() ) ) );
+		}
+
+		if ( ! file_put_contents( BackWPup::get_plugin_data( 'TEMP' ) . 'manifest.json', json_encode( $manifest ) ) )
+			return FALSE;
+		$this->substeps_done = 1;
+
+		//Create backwpup_readme.txt
+		$readme_text  = __( 'You may have noticed the manifest.json file in this archive.', 'backwpup' ) . PHP_EOL;
+		$readme_text .= __( 'manifest.json might be needed for later restoring a backup from this archive.', 'backwpup' ) . PHP_EOL;
+		$readme_text .= __( 'Please leave manifest.json untouched and in place. Otherwise it is safe to be ignored.', 'backwpup' ) . PHP_EOL;
+		if ( ! file_put_contents( BackWPup::get_plugin_data( 'TEMP' ) . 'backwpup_readme.txt', $readme_text ) )
+			return FALSE;
+		$this->substeps_done = 2;
+
+		//add file to backup files
+		if ( is_readable( BackWPup::get_plugin_data( 'TEMP' ) . 'manifest.json' ) ) {
+			$this->additional_files_to_backup[ ] = BackWPup::get_plugin_data( 'TEMP' ) . 'manifest.json';
+			$this->count_files ++;
+			$this->additional_files_to_backup[ ] = BackWPup::get_plugin_data( 'TEMP' ) . 'backwpup_readme.txt';
+			$this->count_files ++;
+			$this->count_filesize = $this->count_filesize + @filesize( BackWPup::get_plugin_data( 'TEMP' ) . 'manifest.json' );
+			$this->count_filesize = $this->count_filesize + @filesize( BackWPup::get_plugin_data( 'TEMP' ) . 'backwpup_readme.txt' );
+			$this->log( sprintf( __( 'Added manifest.json file with %1$s to backup file list.', 'backwpup' ), size_format( filesize( BackWPup::get_plugin_data( 'TEMP' ) . 'manifest.json' ), 2 ) ) );
+		}
+		$this->substeps_done = 3;
+
+		return TRUE;
+	}
+
+	/**
 	 * Creates the backup archive
 	 */
 	private function create_archive() {
@@ -1601,16 +1750,14 @@ final class BackWPup_Job {
 		$folders_to_backup = $this->get_folders_to_backup();
 
 		$this->substeps_todo = $this->count_folder  + 1;
-		
-		//initial settings for restarts in archiving
-		if ( ! isset( $this->steps_data[ $this->step_working ]['step_size'] ) )
-			$this->steps_data[ $this->step_working ]['step_size'] = 0;
-		if ( ! isset( $this->steps_data[ $this->step_working ]['done_files'] ) )
-			$this->steps_data[ $this->step_working ]['done_files'] = array();
-		if ( ! isset( $this->steps_data[ $this->step_working ]['folder_files'] ) )
-			$this->steps_data[ $this->step_working ]['folder_files'] = array();
 
-		if ( $this->substeps_done == 0 )
+		//initial settings for restarts in archiving
+		if ( ! isset( $this->steps_data[ $this->step_working ]['on_file'] ) )
+			$this->steps_data[ $this->step_working ]['on_file'] = '';
+		if ( ! isset( $this->steps_data[ $this->step_working ]['on_folder'] ) )
+			$this->steps_data[ $this->step_working ]['on_folder'] = '';
+
+		if ( $this->steps_data[ $this->step_working ]['SAVE_STEP_TRY'] != $this->steps_data[ $this->step_working ][ 'STEP_TRY' ] )
 			$this->log( sprintf( __( '%d. Trying to create backup archive &hellip;', 'backwpup' ), $this->steps_data[ $this->step_working ][ 'STEP_TRY' ] ), E_USER_NOTICE );
 
 		try {
@@ -1618,7 +1765,7 @@ final class BackWPup_Job {
 
 			//show method for creation
 			if ( $this->substeps_done == 0 )
-				$this->log( sprintf( _x( 'Compression method is %s', 'Archive compression method', 'backwpup'), $backup_archive->get_method() ) );
+				$this->log( sprintf( _x( 'Compressing files as %s. Please be patient, this may take a moment.', 'Archive compression method', 'backwpup'), $backup_archive->get_method() ) );
 
 			//add extra files
 			if ( $this->substeps_done == 0 ) {
@@ -1627,48 +1774,52 @@ final class BackWPup_Job {
 						$backup_archive->add_file( $file, basename( $file ) );
 						$this->count_files ++;
 						$this->count_filesize = filesize( $file );
-						$this->steps_data[ $this->step_working ]['step_size'] += filesize( $file );
 						$this->update_working_data();
 					}
 				}
 				$this->substeps_done ++;
 			}
-			
+
 			//add normal files
-			$jobrestartarchivesize = BackWPup_Option::get( 'cfg', 'jobrestartarchivesize' );
-			for ( $i = $this->substeps_done - 1; $i < $this->substeps_todo - 1; $i ++ ) {
-				$this->steps_data[ $this->step_working ]['folder_files'] = $this->get_files_in_folder( $folders_to_backup[ $i ] );
+			while ( $folder = array_shift( $folders_to_backup ) ) {
+				//jump over already done folders
+				if ( in_array( $this->steps_data[ $this->step_working ]['on_folder'], $folders_to_backup ) )
+					continue;
+				$this->steps_data[ $this->step_working ]['on_folder'] = $folder;
+				$files_in_folder = $this->get_files_in_folder( $folder );
 				//add empty folders
-				if ( empty( $this->steps_data[ $this->step_working ]['done_files'] ) && empty( $this->steps_data[ $this->step_working ]['folder_files'] ) ) {
-					$folder_name_in_archive = trim( ltrim( str_replace( $this->remove_path, '', $folders_to_backup[ $i ] ), '/' ) );
+				if ( empty( $files_in_folder ) ) {
+					$folder_name_in_archive = trim( ltrim( str_replace( $this->remove_path, '', $folder ), '/' ) );
 					if ( ! empty ( $folder_name_in_archive ) )
-						$backup_archive->add_empty_folder( $folders_to_backup[ $i ], $folder_name_in_archive );
+						$backup_archive->add_empty_folder( $folder, $folder_name_in_archive );
+					continue;
 				}
 				//add files
-				if ( count( $this->steps_data[ $this->step_working ]['folder_files'] ) > 0 ) {
-					foreach ( $this->steps_data[ $this->step_working ]['folder_files'] as $file ) {
-						//restart if size reached in MB
-						if ( ! empty( $jobrestartarchivesize ) && ! defined( 'STDIN' ) && $this->steps_data[ $this->step_working ]['step_size'] > $jobrestartarchivesize * 1024 * 1024 ) {
-							$this->steps_data[ $this->step_working ]['step_size'] = 0;
-							$this->steps_data[ $this->step_working ][ 'STEP_TRY' ] -= 1; //reduce step try because normal restart
-							unset( $backup_archive );
-							$this->do_restart();
-						}
-						//jump over files that are already archived
-						if ( in_array( $file, $this->steps_data[ $this->step_working ]['done_files'] ) )
-							continue;
-						//generate filename in archive
-						$in_archive_filename = ltrim( str_replace( $this->remove_path, '', $file ), '/' );
-						//add file to archive
-						$backup_archive->add_file( $file, $in_archive_filename );
-						//count settings					
-						$this->steps_data[ $this->step_working ]['done_files'][] = $file;
-						$this->steps_data[ $this->step_working ]['step_size'] += filesize( $file );
-						$this->update_working_data();
+				while ( $file = array_shift( $files_in_folder ) ) {
+					//jump over already done files
+					if ( in_array( $this->steps_data[ $this->step_working ]['on_file'], $files_in_folder ) )
+						continue;
+					$this->steps_data[ $this->step_working ]['on_file'] = $file;
+					//close archive before restart
+					$restart_time = $this->get_restart_time();
+					if ( $restart_time < 0 ) {
+						unset( $backup_archive );
+						$this->do_restart_time( TRUE );
 					}
+					//generate filename in archive
+					$in_archive_filename = ltrim( str_replace( $this->remove_path, '', $file ), '/' );
+					//add file to archive
+					$backup_archive->add_file( $file, $in_archive_filename );
+					$this->update_working_data();
 				}
+				$this->steps_data[ $this->step_working ]['on_file'] = '';
 				$this->substeps_done ++;
-				$this->steps_data[ $this->step_working ]['done_files'] = array();
+			}
+			//restart if needed
+			$restart_time = $this->get_restart_time();
+			if ( $restart_time < 5 ) {
+				unset( $backup_archive );
+				$this->do_restart_time( TRUE );
 			}
 			$backup_archive->close();
 			unset( $backup_archive );
@@ -1695,15 +1846,15 @@ final class BackWPup_Job {
 	 */
 	public function generate_filename( $name, $suffix = '', $delete_temp_file = TRUE ) {
 
-		$datevars   = array( '%d', '%j', '%m', '%n', '%Y', '%y', '%a', '%A', '%B', '%g', '%G', '%h', '%H', '%i', '%s', '%u', '%U' );
-		$datevalues = array( date_i18n( 'd' ), date_i18n( 'j' ), date_i18n( 'm' ), date_i18n( 'n' ), date_i18n( 'Y' ), date_i18n( 'y' ), date_i18n( 'a' ), date_i18n( 'A' ), date_i18n( 'B' ), date_i18n( 'g' ), date_i18n( 'G' ), date_i18n( 'h' ), date_i18n( 'H' ), date_i18n( 'i' ), date_i18n( 's' ), date_i18n( 'u' ), date_i18n( 'U' ) );
+		$datevars   = array( '%d', '%j', '%m', '%n', '%Y', '%y', '%a', '%A', '%B', '%g', '%G', '%h', '%H', '%i', '%s' );
+		$datevalues = array( date_i18n( 'd' ), date_i18n( 'j' ), date_i18n( 'm' ), date_i18n( 'n' ), date_i18n( 'Y' ), date_i18n( 'y' ), date_i18n( 'a' ), date_i18n( 'A' ), date_i18n( 'B' ), date_i18n( 'g' ), date_i18n( 'G' ), date_i18n( 'h' ), date_i18n( 'H' ), date_i18n( 'i' ), date_i18n( 's' ) );
 
 		if ( ! empty( $suffix ) && substr( $suffix, 0, 1 ) != '.' )
 			$suffix = '.' . $suffix;
 
 		$name = str_replace( $datevars, $datevalues, $name );
 		$name = sanitize_file_name( $name ) . $suffix; //prevent _ in extension name that sanitize_file_name add.
-		if ( $delete_temp_file && is_file( BackWPup::get_plugin_data( 'TEMP' ) . $name ) )
+		if ( $delete_temp_file && is_writeable( BackWPup::get_plugin_data( 'TEMP' ) . $name ) && !is_dir( BackWPup::get_plugin_data( 'TEMP' ) . $name ) && !is_link( BackWPup::get_plugin_data( 'TEMP' ) . $name ) )
 			unlink( BackWPup::get_plugin_data( 'TEMP' ) . $name );
 
 		return $name;
@@ -1716,12 +1867,12 @@ final class BackWPup_Job {
 	public function is_backup_archive( $filename ) {
 
 		$filename  = basename( $filename );
-		
+
 		if ( ! substr( $filename, -3 ) == '.gz' ||  ! substr( $filename, -4 ) == '.bz2' ||  ! substr( $filename, -4 ) == '.tar' ||  ! substr( $filename, -4 ) == '.zip' )
 			return FALSE;
-		
-		$datevars  = array( '%d', '%j', '%m', '%n', '%Y', '%y', '%a', '%A', '%B', '%g', '%G', '%h', '%H', '%i', '%s', '%u', '%U' );
-		$dateregex = array( '(0[1-9]|[12][0-9]|3[01])', '([1-9]|[12][0-9]|3[01])', '(0[1-9]|1[0-2])', '([1-9]|1[0-2])', '((19|20|21)[0-9]{2})', '([0-9]{2})', '(am|pm)', '(AM|PM)', '([0-9]{3})', '([0-9]|1[0-1])', '([0-9]|1[0-9]|2[0-3])', '(0[0-9]|1[0-1])', '(0[0-9]|1[0-9]|2[0-3])', '(0[0-9]|[1-5][0-9])', '(0[0-9]|[1-5][0-9])', '\d', '\d' );
+
+		$datevars  = array( '%d', '%j', '%m', '%n', '%Y', '%y', '%a', '%A', '%B', '%g', '%G', '%h', '%H', '%i', '%s' );
+		$dateregex = array( '(0[1-9]|[12][0-9]|3[01])', '([1-9]|[12][0-9]|3[01])', '(0[1-9]|1[012])', '([1-9]|1[012])', '((19|20|21)[0-9]{2})', '([0-9]{2})', '(am|pm)', '(AM|PM)', '([0-9]{3})', '([1-9]|1[012])', '([0-9]|1[0-9]|2[0-3])', '(0[1-9]|1[012])', '(0[0-9]|1[0-9]|2[0-3])', '([0-5][0-9])', '([0-5][0-9])' );
 
 		$regex = "/^" . str_replace( $datevars, $dateregex, str_replace( "\/", "/", $this->job[ 'archivename' ] ) . $this->job[ 'archiveformat' ] ) . "$/";
 
@@ -1751,24 +1902,30 @@ final class BackWPup_Job {
 	}
 
 	/**
-	 * Add a Folder to list of Folders to Backup
+	 * For storing and getting data in/from a extra temp file
 	 *
-	 * @param $folder
+	 * @param 	string $storage The name of the storage
+	 * @param  	array  $data data to save in storage
+	 * @return 	array|mixed|null data from storage
 	 */
-	public function add_folder_to_backup( $folder ) {
+	public function data_storage( $storage = NULL, $data = NULL ) {
 
-		if ( empty( $folder ) || empty( $this->folder_list_file ) || ! is_dir( $folder ) )
-			return;
+		if ( empty( $storage ) )
+			return $data;
 
-		if ( empty( $this->count_folder ) ) {
-			if ( is_file( $this->folder_list_file ) )
-				unlink( $this->folder_list_file );
-			file_put_contents( $this->folder_list_file ,'<?php' . PHP_EOL .'$folders = array();', FILE_APPEND );
+		$storage = strtolower( $storage );
+
+		$file = BackWPup::get_plugin_data( 'temp' ) . 'backwpup-' . BackWPup::get_plugin_data( 'hash' ) . '-'.$storage.'.json';
+
+		if ( ! empty( $data ) ) {
+			file_put_contents( $file, json_encode( $data ) );
+		}
+		elseif ( is_readable( $file ) ) {
+			$json = file_get_contents( $file );
+			$data = json_decode( $json, TRUE );
 		}
 
-		file_put_contents( $this->folder_list_file , PHP_EOL . '$folders[] = utf8_decode( \'' . addslashes( utf8_encode( $folder ) ) .'\' );', FILE_APPEND );
-
-		$this->count_folder ++;
+		return $data;
 	}
 
 	/**
@@ -1778,24 +1935,10 @@ final class BackWPup_Job {
 	 */
 	public function get_folders_to_backup( ) {
 
-		$folders = array();
+		if ( empty( $this->count_folder ) )
+			return array();
 
-		if ( empty( $this->count_folder ) || empty( $this->folder_list_file ) || ! is_file( $this->folder_list_file ) )
-			return $folders;
-
-		//add memory if needed
-		$this->need_free_memory( filesize( $this->folder_list_file ) * 2 );
-
-		//get folders from file
-		include $this->folder_list_file;
-
-		//all folders only one time in list and sort
-		$folders = array_unique( $folders );
-		sort( $folders );
-		//save count of folders again
-		$this->count_folder = count( $folders );
-
-		return $folders;
+		return $this->data_storage( 'folder' );
 	}
 
 	/**
@@ -1821,5 +1964,24 @@ final class BackWPup_Job {
 
 		return TRUE;
 
+	}
+
+	/**
+	 * Cleanup Temp Folder
+	 */
+	public static function clean_temp_folder() {
+
+		$temp_dir = BackWPup::get_plugin_data( 'TEMP' );
+		$do_not_delete_files = array( '.htaccess', 'index.php', '.', '..' );
+
+		if ( $dir = opendir( $temp_dir ) ) {
+			while ( FALSE !== ( $file = readdir( $dir ) ) ) {
+				if ( in_array( $file, $do_not_delete_files ) || is_dir( $temp_dir . $file ) || is_link( $temp_dir . $file ) )
+					continue;
+				if ( is_writeable( $temp_dir . $file ) )
+					unlink( $temp_dir . $file );
+			}
+			closedir( $dir );
+		}
 	}
 }

@@ -750,7 +750,7 @@ class ExtensibleObject extends PopeHelpers
      */
     function __call($method, $args)
     {
-        $this->clear_method_properties($method, $args);
+        $this->reset_method_properties($method, $args);
 
         // Run pre hooks?
         if ($this->are_pre_hooks_enabled($method) && $this->get_method_property($method, self::METHOD_PROPERTY_RUN_PRE_HOOKS)) {
@@ -833,7 +833,10 @@ class ExtensibleObject extends PopeHelpers
             }
         }
 
-        return $this->get_method_property($method, self::METHOD_PROPERTY_RETURN_VALUE);
+		// Get return value, clear all method properties, and then return
+        $retval = $this->get_method_property($method, self::METHOD_PROPERTY_RETURN_VALUE);
+		$this->remove_method_properties($method);
+		return $retval;
     }
 
 
@@ -1181,7 +1184,7 @@ class ExtensibleObject extends PopeHelpers
      * before every method call (before pre-hooks)
      * @param string $method
      */
-    function clear_method_properties($method, $args=array())
+    function reset_method_properties($method, $args=array())
     {
         $this->_method_properties[$method] = array(
             'run'               => TRUE,
@@ -1191,6 +1194,35 @@ class ExtensibleObject extends PopeHelpers
         );
     }
 
+	/**
+	 * Removes the cache of the method properties
+	 * @param $method
+	 */
+	function remove_method_properties($method)
+	{
+		unset($this->_method_properties[$method]);
+	}
+
+	/**
+	 * Gets all method properties
+	 * @return array
+	 */
+	function get_method_properties($method)
+	{
+		return $this->_method_properties[$method];
+	}
+
+	/**
+	 * Sets all method properties
+	 * @param $method
+	 * @param $props
+	 */
+	function set_method_properties($method, $props)
+	{
+		foreach ($props as $key => $value) {
+			$this->set_method_property($method, $key, $value);
+		}
+	}
 
     /**
      * Returns TRUE if the ExtensibleObject has decided to implement a
@@ -1291,6 +1323,9 @@ class Mixin extends PopeHelpers
         $backtrace = debug_backtrace();
         $klass = get_class($backtrace[0]['object']);
 
+		// Get the method properties. We'll store this afterwards.
+		$props = $this->object->get_method_properties($method);
+
 		// Perform the routine described above...
 		$this->object->disable_pre_hooks($method);
 		$this->object->disable_post_hooks($method);
@@ -1307,6 +1342,9 @@ class Mixin extends PopeHelpers
 		$this->object->enable_pre_hooks($method);
 		$this->object->enable_post_hooks($method);
 		$this->object->enable_mixin($method, $klass);
+
+		// Re-set all method properties
+		$this->object->set_method_properties($method, $props);
 
         return $retval;
     }
@@ -1366,7 +1404,7 @@ class Hook extends Mixin
      * Provides an alias for call_anchor, as there's no parent
      * to call in the context of a hook.
      */
-    function call_parent()
+    function call_parent($method)
     {
         $args = func_get_args();
         return call_user_func_array(

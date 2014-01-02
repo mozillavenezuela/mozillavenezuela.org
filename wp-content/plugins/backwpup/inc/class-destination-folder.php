@@ -4,21 +4,6 @@
  */
 class BackWPup_Destination_Folder extends BackWPup_Destinations {
 
-	/**
-	 * @return mixed
-	 */
-	public function __construct() {
-
-		$this->info[ 'ID' ]        	 = 'FOLDER';
-		$this->info[ 'name' ]        = __( 'Folder', 'backwpup' );
-		$this->info[ 'description' ] = __( 'Backup to Folder', 'backwpup' );
-		$this->info[ 'URI' ]         = translate( BackWPup::get_plugin_data( 'PluginURI' ), 'backwpup' );
-		$this->info[ 'author' ]      = BackWPup::get_plugin_data( 'Author' );
-		$this->info[ 'authorURI' ]   = translate( BackWPup::get_plugin_data( 'AuthorURI' ), 'backwpup' );
-		$this->info[ 'version' ]     = BackWPup::get_plugin_data( 'Version' );
-
-	}
-
 
 	/**
 	 * @return array
@@ -27,7 +12,7 @@ class BackWPup_Destination_Folder extends BackWPup_Destinations {
 
 		$upload_dir = wp_upload_dir();
 
-		return array( 'maxbackups' => 15, 'backupdir' => trailingslashit( str_replace( '\\', '/',$upload_dir[ 'basedir' ] ) ) . 'backwpup-' . substr( md5( md5( NONCE_SALT ) ),12 ,5 ) . '-backups/', 'backupsyncnodelete' => TRUE );
+		return array( 'maxbackups' => 15, 'backupdir' => trailingslashit( str_replace( '\\', '/',$upload_dir[ 'basedir' ] ) ) . 'backwpup-' . BackWPup::get_plugin_data( 'hash' ) . '-backups/', 'backupsyncnodelete' => TRUE );
 	}
 
 
@@ -53,8 +38,8 @@ class BackWPup_Destination_Folder extends BackWPup_Destinations {
 				<?php
 				if ( BackWPup_Option::get( $jobid, 'backuptype' ) == 'archive' ) {
 					?>
-                    <label for="idmaxbackups"><input name="maxbackups" id="idmaxbackups" type="text" size="3" value="<?php echo esc_attr( BackWPup_Option::get( $jobid, 'maxbackups' ) ) ;?>" class="small-text" />&nbsp;
-					<?php  _e( 'Number of files to keep in folder.', 'backwpup' ); BackWPup_Help::tip( __( 'Oldest files will be deleted first. 0 = no deletion', 'backwpup' ) ); ?></label>
+                    <label for="idmaxbackups"><input name="maxbackups" id="idmaxbackups" type="text" size="3" value="<?php echo esc_attr( BackWPup_Option::get( $jobid, 'maxbackups' ) ) ;?>" class="small-text help-tip" title="<?php esc_attr_e( 'Oldest files will be deleted first. 0 = no deletion', 'backwpup' ); ?>" />&nbsp;
+					<?php  _e( 'Number of files to keep in folder.', 'backwpup' ); ?></label>
 					<?php } else { ?>
                     <label for="idbackupsyncnodelete"><input class="checkbox" value="1"
                            type="checkbox" <?php checked( BackWPup_Option::get( $jobid, 'backupsyncnodelete' ), TRUE ); ?>
@@ -89,7 +74,7 @@ class BackWPup_Destination_Folder extends BackWPup_Destinations {
 	 */
 	public function file_delete( $jobdest, $backupfile ) {
 
-		if ( is_file( $backupfile ) )
+		if ( is_writeable( $backupfile ) && !is_dir( $backupfile ) && !is_link( $backupfile ) )
 			 unlink( $backupfile );
 
 	}
@@ -100,7 +85,7 @@ class BackWPup_Destination_Folder extends BackWPup_Destinations {
 	 */
 	public function file_download( $jobid, $get_file ) {
 
-		if ( is_file( $get_file ) ) {
+		if ( is_readable( $get_file ) ) {
 			header( "Pragma: public" );
 			header( "Expires: 0" );
 			header( "Cache-Control: must-revalidate, post-check=0, pre-check=0" );
@@ -134,16 +119,16 @@ class BackWPup_Destination_Folder extends BackWPup_Destinations {
 	 * @return mixed
 	 */
 	public function file_get_list( $jobdest ) {
-		
+
 		list( $jobid, $dest ) = explode( '_', $jobdest );
 		$filecounter    = 0;
 		$files          = array();
 		$backup_folder  = BackWPup_Option::get( $jobid, 'backupdir' );
-		if ( $dir = opendir( $backup_folder ) ) { //make file list
+		if ( is_dir( $backup_folder ) && $dir = opendir( $backup_folder ) ) { //make file list
 			while ( FALSE !== ( $file = readdir( $dir ) ) ) {
-				if ( in_array( $file, array( '.', '..', 'index.php', '.htaccess' ) ) )
+				if ( in_array( $file, array( '.', '..', 'index.php', '.htaccess' ) ) || is_dir( $backup_folder . $file ) || is_link( $backup_folder . $file ) )
 					continue;
-				if ( is_file( $backup_folder . $file ) ) {
+				if ( is_readable( $backup_folder . $file ) ) {
 					//file list for backups
 					$files[ $filecounter ][ 'folder' ]      = $backup_folder;
 					$files[ $filecounter ][ 'file' ]        = $backup_folder . $file;
@@ -169,7 +154,7 @@ class BackWPup_Destination_Folder extends BackWPup_Destinations {
 	 * @param $job_object
 	 * @return bool
 	 */
-	public function job_run_archive( $job_object ) {
+	public function job_run_archive( &$job_object ) {
 
 		$job_object->substeps_todo = 1;
 		if ( ! empty( $job_object->job[ 'jobid' ] ) )
@@ -183,7 +168,7 @@ class BackWPup_Destination_Folder extends BackWPup_Destinations {
 		$files          = array();
 		if ( $dir = opendir( $job_object->backup_folder ) ) { //make file list
 			while ( FALSE !== ( $file = readdir( $dir ) ) ) {
-				if ( is_file( $job_object->backup_folder . $file ) ) {
+				if ( is_writeable( $job_object->backup_folder . $file ) && ! is_dir( $job_object->backup_folder . $file ) && ! is_link( $job_object->backup_folder . $file ) ) {
 					//list for deletion
 					if ( $job_object->is_backup_archive( $file ) )
 						$backupfilelist[ filemtime( $job_object->backup_folder . $file ) ] = $file;

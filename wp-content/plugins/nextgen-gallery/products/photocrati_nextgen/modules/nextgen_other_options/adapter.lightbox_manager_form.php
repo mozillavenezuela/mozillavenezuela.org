@@ -40,7 +40,8 @@ class A_Lightbox_Manager_Form extends Mixin
                 'id_field'   => $mapper->get_primary_key_column(),
                 'selected'   => $this->object->get_model()->thumbEffect,
                 'sub_fields' => $sub_fields,
-                'adv_fields' => $advanced_fields
+                'adv_fields' => $advanced_fields,
+                'lightbox_global'   => $this->object->get_model()->thumbEffectContext,
             ),
             TRUE
         );
@@ -93,6 +94,11 @@ class A_Lightbox_Manager_Form extends Mixin
 					$settings->save();
 				}
 			}
+		}
+		
+		if (($thumbEffectContext = $this->object->param('thumbEffectContext'))) {
+			$settings->thumbEffectContext = $thumbEffectContext;
+			$settings->save();
 		}
 	}
 }

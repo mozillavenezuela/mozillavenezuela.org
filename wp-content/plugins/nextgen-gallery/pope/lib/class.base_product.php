@@ -12,9 +12,9 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('You 
  */
 abstract class C_Base_Product extends C_Base_Module
 {
-	function define($id, $name, $description='', $version='', $uri='', $author='', $author_uri='')
+	function define($id='pope-product', $name='Pope Product', $description='', $version='', $uri='', $author='', $author_uri='', $context=FALSE)
 	{
-		parent::define($id, $name, $description, $version, $uri, $author, $author_uri);
+		parent::define($id, $name, $description, $version, $uri, $author, $author_uri, $context);
 
 		$this->get_registry()->add_product($this->module_id, $this);
 	}

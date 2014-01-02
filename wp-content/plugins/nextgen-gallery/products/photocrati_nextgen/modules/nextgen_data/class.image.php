@@ -21,7 +21,7 @@ class C_Image extends C_DataMapper_Model
 {
 	var $_mapper_interface = 'I_Image_Mapper';
 
-    function define($properties=FALSE, $mapper=FALSE, $context=FALSE)
+    function define($properties=array(), $mapper=FALSE, $context=FALSE)
     {
         parent::define($mapper, $properties, $context);
 		$this->add_mixin('Mixin_NextGen_Gallery_Image_Validation');
@@ -34,7 +34,8 @@ class C_Image extends C_DataMapper_Model
 	 * @param C_DataMapper $mapper
 	 * @param string $context
 	 */
-	function initialize($properties = FALSE, $mapper=FALSE, $context=FALSE) {
+	function initialize($properties=array(), $mapper=FALSE, $context=FALSE)
+	{
 
 		// Get the mapper is not specified
 		if (!$mapper) {

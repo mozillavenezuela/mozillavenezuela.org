@@ -19,12 +19,12 @@ class A_NextGen_Basic_Thumbnails_Controller extends Mixin_NextGen_Basic_Gallery_
 	function index_action($displayed_gallery, $return=FALSE)
     {  
         $display_settings = $displayed_gallery->display_settings;
-
+        $gallery_id = $displayed_gallery->id();
+        $transient_id = $displayed_gallery->transient_id;
+        
         // If these options are on we must use the transient_id to identify the gallery
         if ($display_settings['show_piclens_link'] || $display_settings['ajax_pagination'])
-            $gallery_id = $displayed_gallery->transient_id;
-        else
-            $gallery_id = $displayed_gallery->id();
+            $gallery_id = $transient_id;
 
         if (!$display_settings['disable_pagination'])
             $current_page = (int)$this->param('page', $gallery_id, 1);
@@ -117,9 +117,9 @@ class A_NextGen_Basic_Thumbnails_Controller extends Mixin_NextGen_Basic_Gallery_
             // Generate a slideshow link
             $slideshow_link = '';
             if ($display_settings['show_slideshow_link'])
-            {
+           {
                 // origin_url is necessary for ajax operations. slideshow_link_origin will NOT always exist.
-                $origin_url = (empty($display_settings['slideshow_link_origin']) ? FALSE : $display_settings['slideshow_link_origin']);
+                $origin_url = $this->object->param('ajax_pagination_referrer');
                 $slideshow_link = $this->object->get_url_for_alternate_display_type(
                     $displayed_gallery, NEXTGEN_GALLERY_BASIC_SLIDESHOW, $origin_url
                 );

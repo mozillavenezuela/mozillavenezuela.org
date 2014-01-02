@@ -4,9 +4,18 @@ class A_WordPress_Routing_App extends Mixin
 {
     function remove_parameter($key, $id=NULL, $url=FALSE)
     {
-        $generated_url = $this->call_parent('remove_parameter', $key, $id, $url);
+		$generated_url = '';
 
-        if ($this->is_postname_required_in_url()) {
+		if ($this->is_blog_page()) {
+			if (preg_match("#(/{$this->object->_settings->router_param_slug}/.*)#", $url, $match)) {
+				$generated_url = home_url($match[1]);
+			}
+			else $generated_url = home_url();
+		}
+		else
+			$generated_url = $this->call_parent('remove_parameter', $key, $id, $url);
+
+        if ($this->is_postname_required_in_url() && $generated_url) {
             $generated_url = $this->object->add_post_permalink_to_url($generated_url);
         }
 
@@ -16,8 +25,13 @@ class A_WordPress_Routing_App extends Mixin
     function is_postname_required_in_url()
     {
         global $wp_query;
-        return !$wp_query->is_single() && in_the_loop();
+        return (!$wp_query->is_single() && in_the_loop()) OR $this->is_blog_page();
     }
+
+	function is_blog_page()
+	{
+		return is_home() OR is_archive();
+	}
 
     function parse_url($url)
     {

@@ -2,30 +2,12 @@
 // Windows Azure SDK v0.3.1_2011-08
 // http://www.windowsazure.com/en-us/develop/php/
 // https://github.com/WindowsAzure/azure-sdk-for-php
-include __DIR__ . '/../sdk/WindowsAzure/WindowsAzure.php';
-// Pear libs include
-// http://www.pear.com/
-set_include_path( get_include_path() . PATH_SEPARATOR . BackWPup::get_plugin_data( 'PluginDir' ) . '/sdk/PEAR/');
+include_once BackWPup::get_plugin_data( 'PluginDir' ) . '/vendor/autoloader.php';
 
 /**
  * Documentation: http://www.windowsazure.com/en-us/develop/php/how-to-guides/blob-service/
  */
 class BackWPup_Destination_MSAzure extends BackWPup_Destinations {
-
-	/**
-	 * @return mixed
-	 */
-	public function __construct() {
-
-		$this->info[ 'ID' ]          = 'MSAZURE';
-		$this->info[ 'name' ]        = __( 'MS Azure', 'backwpup' );
-		$this->info[ 'description' ] = __( 'Backup to Microsoft Azure (Blob)', 'backwpup' );
-		$this->info[ 'URI' ]         = translate( BackWPup::get_plugin_data( 'PluginURI' ), 'backwpup' );
-		$this->info[ 'author' ]      = BackWPup::get_plugin_data( 'Author' );
-		$this->info[ 'authorURI' ]   = translate( BackWPup::get_plugin_data( 'AuthorURI' ), 'backwpup' );
-		$this->info[ 'version' ]     = BackWPup::get_plugin_data( 'Version' );
-
-	}
 
 	/**
 	 * @return array
@@ -98,8 +80,8 @@ class BackWPup_Destination_MSAzure extends BackWPup_Destinations {
 					<?php
 					if ( BackWPup_Option::get( $jobid, 'backuptype' ) == 'archive' ) {
 						?>
-                        <label for="idmsazuremaxbackups"><input id="idmsazuremaxbackups" name="msazuremaxbackups" type="text" size="3" value="<?php echo esc_attr( BackWPup_Option::get( $jobid, 'msazuremaxbackups' ) );?>" class="small-text" />&nbsp;
-						<?php  _e( 'Number of files to keep in folder.', 'backwpup' ); BackWPup_Help::tip( __( 'Oldest files will be deleted first. 0 = no deletion', 'backwpup' ) ); ?></label>
+                        <label for="idmsazuremaxbackups"><input id="idmsazuremaxbackups" name="msazuremaxbackups" type="text" size="3" value="<?php echo esc_attr( BackWPup_Option::get( $jobid, 'msazuremaxbackups' ) );?>" class="small-text help-tip" title="<?php esc_attr_e( 'Oldest files will be deleted first. 0 = no deletion', 'backwpup' );?>" />&nbsp;
+						<?php  _e( 'Number of files to keep in folder.', 'backwpup' ); ?></label>
 						<?php } else { ?>
 						<label for="idmsazuresyncnodelete"><input class="checkbox" value="1"
 							   type="checkbox" <?php checked( BackWPup_Option::get( $jobid, 'msazuresyncnodelete' ), TRUE ); ?>
@@ -117,7 +99,6 @@ class BackWPup_Destination_MSAzure extends BackWPup_Destinations {
 	 * @return string
 	 */
 	public function edit_form_post_save( $jobid ) {
-		$message="";
 
 		BackWPup_Option::update( $jobid, 'msazureaccname', isset( $_POST[ 'msazureaccname' ] ) ? $_POST[ 'msazureaccname' ] : '' );
 		BackWPup_Option::update( $jobid, 'msazurekey', isset( $_POST[ 'msazurekey' ] ) ? BackWPup_Encryption::encrypt( $_POST[ 'msazurekey' ] ) : '' );
@@ -141,14 +122,12 @@ class BackWPup_Destination_MSAzure extends BackWPup_Destinations {
 				$container_options->setPublicAccess( WindowsAzure\Blob\Models\PublicAccessType::NONE );
 				$blobRestProxy->createContainer( $_POST[ 'newmsazurecontainer' ], $container_options );
 				BackWPup_Option::update( $jobid, 'msazurecontainer', $_POST[ 'newmsazurecontainer' ] );
-				$message .= sprintf( __( 'MS Azure container "%s" created.', 'backwpup' ), $_POST[ 'newmsazurecontainer' ] ) . '<br />';
+				BackWPup_Admin::message( sprintf( __( 'MS Azure container "%s" created.', 'backwpup' ), $_POST[ 'newmsazurecontainer' ] ) );
 			}
 			catch ( Exception $e ) {
-				$message .= sprintf( __( 'MS Azure container create: %s', 'backwpup' ), $e->getMessage() ) . '<br />';
+				BackWPup_Admin::message( sprintf( __( 'MS Azure container create: %s', 'backwpup' ), $e->getMessage() ), TRUE );
 			}
 		}
-
-		return $message;
 	}
 
 
@@ -172,7 +151,7 @@ class BackWPup_Destination_MSAzure extends BackWPup_Destinations {
 				}
 			}
 			catch ( Exception $e ) {
-				BackWPup_Admin::message( 'MS AZURE: ' . $e->getMessage() );
+				BackWPup_Admin::message( 'MS AZURE: ' . $e->getMessage(), TRUE );
 			}
 		}
 
@@ -215,42 +194,91 @@ class BackWPup_Destination_MSAzure extends BackWPup_Destinations {
 	 * @param $job_object
 	 * @return bool
 	 */
-	public function job_run_archive( $job_object ) {
+	public function job_run_archive( &$job_object ) {
 
-		$job_object->substeps_todo = 2;
+		$job_object->substeps_todo = $job_object->backup_filesize + 2;
 
-		$job_object->log( sprintf( __( '%d. Try sending backup to a Microsoft Azure (Blob)&#160;&hellip;', 'backwpup' ), $job_object->steps_data[ $job_object->step_working ][ 'STEP_TRY' ] ), E_USER_NOTICE );
+		if ( $job_object->steps_data[ $job_object->step_working ]['SAVE_STEP_TRY'] != $job_object->steps_data[ $job_object->step_working ][ 'STEP_TRY' ] )
+			$job_object->log( sprintf( __( '%d. Try sending backup to a Microsoft Azure (Blob)&#160;&hellip;', 'backwpup' ), $job_object->steps_data[ $job_object->step_working ][ 'STEP_TRY' ] ), E_USER_NOTICE );
+
 		try {
 
-			$blobRestProxy = WindowsAzure\Common\ServicesBuilder::getInstance()->createBlobService('DefaultEndpointsProtocol=https;AccountName=' . $job_object->job[ 'msazureaccname' ] . ';AccountKey=' . BackWPup_Encryption::decrypt( $job_object->job[ 'msazurekey' ] ) );
+			/* @var $blobRestProxy   WindowsAzure\Blob\BlobRestProxy */ //https causes an error SSL: Connection reset by peer that is why http
+			$blobRestProxy = WindowsAzure\Common\ServicesBuilder::getInstance()->createBlobService('DefaultEndpointsProtocol=http;AccountName=' . $job_object->job[ 'msazureaccname' ] . ';AccountKey=' . BackWPup_Encryption::decrypt( $job_object->job[ 'msazurekey' ] ) );
 
-			//test vor existing container
-			$containers    = $blobRestProxy->listContainers()->getContainers();
 
-			$container_url = '';
-			foreach( $containers as $container ) {
-				if ( $container->getName() == $job_object->job[ 'msazurecontainer' ] ) {
-					$container_url = $container->getUrl();
-					break;
+			if ( $job_object->steps_data[ $job_object->step_working ]['SAVE_STEP_TRY'] != $job_object->steps_data[ $job_object->step_working ][ 'STEP_TRY' ] ) {
+
+				//test vor existing container
+				$containers    = $blobRestProxy->listContainers()->getContainers();
+
+				$container_url = '';
+				foreach( $containers as $container ) {
+					if ( $container->getName() == $job_object->job[ 'msazurecontainer' ] ) {
+						$container_url = $container->getUrl();
+						break;
+					}
 				}
+
+				if ( empty( $container_url ) ) {
+					$job_object->log( sprintf( __( 'MS Azure container "%s" does not exist!', 'backwpup'), $job_object->job[ 'msazurecontainer' ] ), E_USER_ERROR );
+
+					return TRUE;
+				} else {
+					$job_object->log( sprintf( __( 'Connected to MS Azure container "%s".', 'backwpup'), $job_object->job[ 'msazurecontainer' ] ), E_USER_NOTICE );
+				}
+
+				$job_object->log( __( 'Starting upload to MS Azure&#160;&hellip;', 'backwpup' ), E_USER_NOTICE );
 			}
 
-			if ( empty( $container_url ) ) {
-				$job_object->log( sprintf( __( 'MS Azure container "%s" does not exist!', 'backwpup'), $job_object->job[ 'msazurecontainer' ] ), E_USER_ERROR );
+			//Prepare Upload
+			$file_handel = fopen( $job_object->backup_folder . $job_object->backup_file, 'rb' );
+			fseek( $file_handel, $job_object->substeps_done );
 
-				return TRUE;
-			} else {
-				$job_object->log( sprintf( __( 'Connected to MS Azure container "%s".', 'backwpup'), $job_object->job[ 'msazurecontainer' ] ), E_USER_NOTICE );
+			if ( empty( $job_object->steps_data[ $job_object->step_working ][ 'BlockList' ] ) )
+				$job_object->steps_data[ $job_object->step_working ][ 'BlockList' ] = array();
+
+			while ( ! feof( $file_handel ) ) {
+				$chunk_upload_start = microtime( TRUE );
+				$block_count = count( $job_object->steps_data[ $job_object->step_working ][ 'BlockList' ] ) + 1;
+				$data = fread( $file_handel, 1048576 * 4 ); //4MB
+				$block_id = md5( $data ) . str_pad( $block_count, 6, "0", STR_PAD_LEFT );
+				$blobRestProxy->createBlobBlock( $job_object->job[ 'msazurecontainer' ], $job_object->job[ 'msazuredir'  ] . $job_object->backup_file, $block_id, $data );
+				$job_object->steps_data[ $job_object->step_working ][ 'BlockList' ][] =  $block_id;
+				$chunk_upload_time = microtime( TRUE ) - $chunk_upload_start;
+				$job_object->substeps_done = $job_object->substeps_done + strlen( $data );
+				$time_remaining = $job_object->do_restart_time();
+				if ( $time_remaining < $chunk_upload_time )
+					$job_object->do_restart_time( TRUE );
+				$job_object->update_working_data();
 			}
+			fclose( $file_handel );
 
+			//crate blog list
+			$blocklist = new WindowsAzure\Blob\Models\BlockList();
+			foreach( $job_object->steps_data[ $job_object->step_working ][ 'BlockList' ] as $block_id )
+				$blocklist->addUncommittedEntry( $block_id );
+			unset( $job_object->steps_data[ $job_object->step_working ][ 'BlockList' ] );
+			//Commit Blocks
+			$blobRestProxy->commitBlobBlocks( $job_object->job[ 'msazurecontainer' ], $job_object->job[ 'msazuredir'  ] . $job_object->backup_file, $blocklist->getEntries() );
 
-			$job_object->log( __( 'Starting upload to MS Azure&#160;&hellip;', 'backwpup' ), E_USER_NOTICE );
-			$blobRestProxy->createBlockBlob( $job_object->job[ 'msazurecontainer' ], $job_object->job[ 'msazuredir'  ] . $job_object->backup_file,  fopen( $job_object->backup_folder . $job_object->backup_file, 'r' ) );
-			$job_object->substeps_done = 1;
+			$job_object->substeps_done ++;
 			$job_object->log( sprintf( __( 'Backup transferred to %s', 'backwpup' ), $container_url . '/' . $job_object->job[ 'msazuredir'  ] . $job_object->backup_file ), E_USER_NOTICE );
 			if ( !empty( $job_object->job[ 'jobid' ] ) )
 				BackWPup_Option::update( $job_object->job[ 'jobid' ] , 'lastbackupdownloadurl', network_admin_url( 'admin.php' ) . '?page=backwpupbackups&action=downloadmsazure&file=' . $job_object->job[ 'msazuredir'  ] . $job_object->backup_file . '&jobid=' . $job_object->job[ 'jobid' ] );
+		}
+		catch ( Exception $e ) {
+			$job_object->log( E_USER_ERROR, sprintf( __( 'Microsoft Azure API: %s', 'backwpup' ), htmlentities( $e->getMessage() ) ), $e->getFile(), $e->getLine() );
+			$job_object->substeps_done = 0;
+			unset( $job_object->steps_data[ $job_object->step_working ][ 'BlockList' ] );
+			if ( is_resource( $file_handel ) )
+				fclose( $file_handel );
 
+			return FALSE;
+		}
+
+
+		try {
 
 			$backupfilelist = array();
 			$filecounter    = 0;
@@ -290,14 +318,18 @@ class BackWPup_Destination_MSAzure extends BackWPup_Destinations {
 					}
 					if ( $numdeltefiles > 0 )
 						$job_object->log( sprintf( _n( 'One file deleted on Microsoft Azure container.', '%d files deleted on Microsoft Azure container.', $numdeltefiles, 'backwpup' ), $numdeltefiles ), E_USER_NOTICE );
+
 				}
 			}
 			set_site_transient( 'backwpup_' . $job_object->job[ 'jobid' ] . '_msazure', $files, 60 * 60 * 24 * 7 );
 		}
 		catch ( Exception $e ) {
 			$job_object->log( E_USER_ERROR, sprintf( __( 'Microsoft Azure API: %s', 'backwpup' ), htmlentities( $e->getMessage() ) ), $e->getFile(), $e->getLine() );
+
+			return FALSE;
 		}
-		$job_object->substeps_done = 2;
+
+		$job_object->substeps_done = $job_object->backup_filesize + 2;
 
 		return TRUE;
 	}

@@ -202,11 +202,13 @@ class C_NextGen_Style_Manager
 	}
 
 
-	function find_all_stylesheets()
+	function find_all_stylesheets($dir = FALSE)
 	{
 		$retval = array();
+        if (!$dir)
+            $dir = $this->directories;
 
-		foreach (array_reverse($this->directories) as $dir) {
+		foreach (array_reverse($dir) as $dir) {
 			$path = implode(DIRECTORY_SEPARATOR, array(
 				untrailingslashit($dir),
 				'*.css'

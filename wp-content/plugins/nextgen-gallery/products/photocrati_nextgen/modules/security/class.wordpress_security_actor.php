@@ -107,6 +107,19 @@ class Mixin_WordPress_Security_Action_Converter extends Mixin
 				
 				break;
 			}
+			case 'nextgen_edit_album_settings':
+			{
+				$capability_name = 'NextGEN Edit album settings';
+
+				break;
+			}
+
+			case 'nextgen_edit_album':
+			{
+				$capability_name = 'NextGEN Edit album';
+
+				break;
+			}
 		}
 		
 		return $capability_name;

@@ -23,10 +23,10 @@ class C_Image_Wrapper
      * @param bool $legacy Whether the image source is from NextGen Legacy or NextGen
      * @return void
      */
-    public function __construct($image, $displayed_gallery, $legacy = FALSE)
+    public function __construct($image, $displayed_gallery=NULL, $legacy = FALSE)
     {
         // for clarity
-        if (isset($displayed_gallery->display_settings['number_of_columns']))
+        if ($displayed_gallery && isset($displayed_gallery->display_settings['number_of_columns']))
         {
             $columns = $displayed_gallery->display_settings['number_of_columns'];
         }
@@ -274,8 +274,13 @@ class C_Image_Wrapper
 						$this->_orig_image->meta_data
 					);
 				}
-                $w = $this->_orig_image->meta_data['thumbnail']['width'];
-                $h = $this->_orig_image->meta_data['thumbnail']['height'];
+				if (!isset($this->_orig_image->meta_data['thumbnail'])) {
+					$storage = $this->get_storage();
+					$storage->generate_thumbnail($this->_orig_image);
+				}
+				$w = $this->_orig_image->meta_data['thumbnail']['width'];
+				$h = $this->_orig_image->meta_data['thumbnail']['height'];
+
                 return "width='{$w}' height='{$h}'";
 
             case 'slug':
@@ -408,7 +413,6 @@ class C_Image_Wrapper
             $effect_code = C_NextGen_Settings::get_instance()->thumbCode;
             $effect_code = str_replace('%GALLERY_ID%', $gallery_name, $effect_code);
             $effect_code = str_replace('%GALLERY_NAME%', $gallery_name, $effect_code);
-            $effect_code = apply_filters('ngg_get_thumbcode', $effect_code, $this);
             $retval = $effect_code;
         }
         else {
@@ -420,6 +424,16 @@ class C_Image_Wrapper
             if (isset($ds['use_imagebrowser_effect']) && $ds['use_imagebrowser_effect'])
                 $retval = '';
         }
+
+        $retval = apply_filters('ngg_get_thumbcode', $retval, $this);
+
+        // ensure some additional data- fields are added; provides Pro-Lightbox compatibility
+        $retval .= ' data-image-id="'    . $this->__get('id')           . '"';
+        $retval .= ' data-src="'         . $this->__get('imageURL')     . '"';
+        $retval .= ' data-thumbnail="'   . $this->__get('thumbnailURL') . '"';
+        $retval .= ' data-image-id="'    . $this->__get('pid')          . '"';
+        $retval .= ' data-title="'       . $this->__get('alttext')      . '"';
+        $retval .= ' data-description="' . $this->__get('description')  . '"';
 
         $this->_cache['thumbcode'] = $retval;
         return $retval;

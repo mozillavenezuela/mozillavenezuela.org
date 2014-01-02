@@ -19,7 +19,7 @@ class M_NextGen_Basic_ImageBrowser extends C_Base_Module
 			'photocrati-nextgen_basic_imagebrowser',
 			'NextGEN Basic ImageBrowser',
 			'Provides the NextGEN Basic ImageBrowser Display Type',
-            '0.3',
+            '0.5',
 			'http://www.nextgen-gallery.com',
 			'Photocrati Media',
 			'http://www.photocrati.com'
@@ -59,18 +59,19 @@ class M_NextGen_Basic_ImageBrowser extends C_Base_Module
 			'I_Routing_App',			'A_NextGen_Basic_ImageBrowser_Urls'
 		);
 
-		// Provide the imagebrowser form
-		$this->get_registry()->add_adapter(
-			'I_Form',
-			'A_NextGen_Basic_ImageBrowser_Form',
-			$this->module_id
-		);
-
-        // Provides the setting forms
-        $this->get_registry()->add_adapter(
-            'I_Form_Manager',
-            'A_NextGen_Basic_ImageBrowser_Forms'
-        );
+        if (is_admin()) {
+            // Provide the imagebrowser form
+            $this->get_registry()->add_adapter(
+                'I_Form',
+                'A_NextGen_Basic_ImageBrowser_Form',
+                $this->module_id
+            );
+            // Provides the setting forms
+            $this->get_registry()->add_adapter(
+                'I_Form_Manager',
+                'A_NextGen_Basic_ImageBrowser_Forms'
+            );
+        }
 	}
 
 	function _register_hooks()

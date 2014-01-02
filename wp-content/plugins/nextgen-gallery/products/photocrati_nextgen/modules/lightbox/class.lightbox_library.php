@@ -11,11 +11,22 @@
  */
 class C_Lightbox_Library extends C_DataMapper_Model
 {
-	function define($mapper, $properties, $context=FALSE)
+	function define($properties=array(), $mapper=FALSE, $context=FALSE)
 	{
 		parent::define($mapper, $properties, $context);
 		$this->add_mixin('Mixin_Lightbox_Library_Validation');
 		$this->implement('I_Lightbox_Library');
+	}
+
+	function initialize($properties=array(), $mapper=FALSE, $context=FALSE)
+	{
+		// Get the mapper is not specified
+		if (!$mapper) {
+			$mapper = $this->get_registry()->get_utility($this->_mapper_interface);
+		}
+
+		// Initialize
+		parent::initialize($mapper, $properties);
 	}
 }
 

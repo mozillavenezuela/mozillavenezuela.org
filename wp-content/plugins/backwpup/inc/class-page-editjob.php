@@ -13,14 +13,16 @@ class BackWPup_Page_Editjob {
 		if ( isset($_GET[ 'tab' ] ) ) {
 			$_GET[ 'tab' ] = sanitize_title_with_dashes( $_GET[ 'tab' ] );
 			if ( substr( $_GET[ 'tab' ], 0, 5 ) != 'dest-' && substr( $_GET[ 'tab' ], 0, 8 ) != 'jobtype-'  && ! in_array( $_GET[ 'tab' ], array( 'job','cron' ) ) )
-				$_GET[ 'tab' ] = 'job';			
+				$_GET[ 'tab' ] = 'job';
+		} else {
+			$_GET[ 'tab' ] = 'job';
 		}
 
 		if ( substr( $_GET[ 'tab' ], 0, 5 ) == 'dest-' ) {
-			$destinations = BackWPup::get_destinations();
 			$jobid        = (int)$_GET[ 'jobid' ];
 			$id = strtoupper( str_replace( 'dest-', '', $_GET[ 'tab' ] ) );
-			$destinations[ $id ]->edit_auth( $jobid );
+			$dest_class = BackWPup::get_destination( $id );
+			$dest_class->edit_auth( $jobid );
 		}
 	}
 
@@ -38,8 +40,8 @@ class BackWPup_Page_Editjob {
 								) );
 
 	}
+
 	/**
-	 *
 	 * Save Form data
 	 */
 	public static function save_post_form($tab, $jobid) {
@@ -47,8 +49,7 @@ class BackWPup_Page_Editjob {
 		if ( ! current_user_can( 'backwpup_jobs_edit' ) )
 			return __( 'Sorry, you don\'t have permissions to do that.', 'backwpup');
 
-		$message="";
-		$destinations = BackWPup::get_destinations();
+		$destinations = BackWPup::get_registered_destinations();
 		$job_types    = BackWPup::get_job_types();
 
 		switch ( $tab ) {
@@ -84,8 +85,8 @@ class BackWPup_Page_Editjob {
 					foreach ( (array)$_POST[ 'destinations' ] as $key => $destid ) {
 						if ( empty( $destinations[ $destid ] ) ) //remove all destinations that not exists
 							unset( $_POST[ 'destinations' ][ $key ] );
-						if ( class_exists( 'BackWPup_Features', FALSE ) && $_POST[ 'backuptype' ] == 'sync' ) { //if sync remove all not sync destinations
-							if ( ! $destinations[ $destid ]->can_sync() )
+						if ( class_exists( 'BackWPup_Pro', FALSE ) && $_POST[ 'backuptype' ] == 'sync' ) { //if sync remove all not sync destinations
+							if ( ! $destinations[ $destid ][ 'can_sync' ] )
 								unset( $_POST[ 'destinations' ][ $key ] );
 						}
 					}
@@ -98,20 +99,20 @@ class BackWPup_Page_Editjob {
 
 				BackWPup_Option::update( $jobid, 'name', esc_html( $_POST[ 'name' ] ) );
 				BackWPup_Option::update( $jobid, 'mailaddresslog', sanitize_email( $_POST[ 'mailaddresslog' ] ) );
-				
+
 				$_POST[ 'mailaddresssenderlog' ] = trim( $_POST[ 'mailaddresssenderlog' ] );
 				if ( empty($_POST[ 'mailaddresssenderlog' ] ) )
 					BackWPup_Option::delete( $jobid, 'mailaddresssenderlog');
 				else
 					BackWPup_Option::update( $jobid, 'mailaddresssenderlog', $_POST[ 'mailaddresssenderlog' ] );
-				
+
 				BackWPup_Option::update( $jobid, 'mailerroronly', ( isset( $_POST[ 'mailerroronly' ] ) && $_POST[ 'mailerroronly' ] == 1 ) ? TRUE : FALSE );
-				if ( class_exists( 'BackWPup_Features', FALSE ) )
+				if ( class_exists( 'BackWPup_Pro', FALSE ) )
 					BackWPup_Option::update( $jobid, 'backuptype', $_POST[ 'backuptype' ] );
 				else
 					BackWPup_Option::update( $jobid, 'backuptype', 'archive' );
 				BackWPup_Option::update( $jobid, 'archiveformat', $_POST[ 'archiveformat' ] );
-				BackWPup_Option::update( $jobid, 'archivename', $_POST[ 'archivename' ] );
+				BackWPup_Option::update( $jobid, 'archivename', esc_html( $_POST[ 'archivename' ] ) );
 				break;
 			case 'cron':
 				if ( $_POST[ 'activetype' ] == '' || $_POST[ 'activetype' ] == 'wpcron' || $_POST[ 'activetype' ] == 'link' )
@@ -171,19 +172,22 @@ class BackWPup_Page_Editjob {
 				break;
 			default:
 				if ( strstr( $tab, 'dest-' ) ) {
-					$id = strtoupper( str_replace( 'dest-', '', $tab ) );
-					$message.=call_user_func( array( $destinations[ $id ], 'edit_form_post_save'), $jobid  );
+					$dest_class = BackWPup::get_destination( str_replace( 'dest-', '', $tab ) );
+					$dest_class->edit_form_post_save( $jobid );
 				}
 				if ( strstr( $tab, 'jobtype-' ) ) {
 					$id = strtoupper( str_replace( 'jobtype-', '', $tab ) );
-					$message.=call_user_func( array( $job_types[ $id ], 'edit_form_post_save' ), $jobid );
+					$job_types[ $id ]->edit_form_post_save( $jobid );
 				}
 		}
+
 		//saved message
-		$message .= sprintf( __( 'Changes for job <i>%s</i> saved.', 'backwpup' ), BackWPup_Option::get( $jobid, 'name' ) );
-
-		return $message;
-
+		$messages = BackWPup_Admin::get_messages();
+		if ( empty( $messages[ 'error' ] ) ) {
+			$url = BackWPup_Job::get_jobrun_url( 'runnowlink', $jobid );
+			BackWPup_Admin::message( sprintf( __( 'Changes for job <i>%s</i> saved.', 'backwpup' ), BackWPup_Option::get( $jobid, 'name' ) ) .
+									 ' <a href="' . network_admin_url( 'admin.php' ) . '?page=backwpupjobs">' . __( 'Jobs overview', 'backwpup' ) . '</a> | <a href="' . $url[ 'url' ] . '">' . __( 'Run now', 'backwpup' ) . '</a>' );
+		}
 	}
 
 	/**
@@ -194,21 +198,35 @@ class BackWPup_Page_Editjob {
 	 */
 	public static function admin_print_styles() {
 
-		wp_enqueue_style('backwpupgeneral');
-
-		//add css for the first tabs
-		if ( $_GET[ 'tab' ] == 'cron' ) {
-			if ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) {
-				wp_enqueue_style( 'backwpuptabcron', BackWPup::get_plugin_data( 'URL' ) . '/css/page_edit_tab_cron.dev.css', '', time(), 'screen' );
-			} else {
-				wp_enqueue_style( 'backwpuptabcron', BackWPup::get_plugin_data( 'URL' ) . '/css/page_edit_tab_cron.css', '', BackWPup::get_plugin_data( 'Version' ), 'screen' );
+		?>
+		<style type="text/css" media="screen">
+			#cron-min, #cron-hour, #cron-day, #cron-month, #cron-weekday {
+				overflow: auto;
+				white-space: nowrap;
+				height: 7em;
 			}
-		}
+			#cron-min-box, #cron-hour-box, #cron-day-box, #cron-month-box, #cron-weekday-box {
+				border-color: gray;
+				border-style: solid;
+				border-width: 1px;
+				margin: 10px 0px 10px 10px;
+				padding: 2px 2px;
+				width: 100px;
+				float: left;
+			}
+			#wpcronbasic {
+				border-collapse: collapse;
+			}
+			#wpcronbasic th, #wpcronbasic td {
+				width:80px;
+				border-bottom: 1px solid gray;
+			}
+		</style>
+		<?php
 		//add css for all other tabs
-		elseif ( substr( $_GET[ 'tab' ], 0, 5 ) == 'dest-' ) {
-			$destinations = BackWPup::get_destinations();
-			$id    = strtoupper( str_replace( 'dest-', '', $_GET[ 'tab' ] ) );
-			$destinations[ $id ]->admin_print_styles();
+		if ( substr( $_GET[ 'tab' ], 0, 5 ) == 'dest-' ) {
+			$dest_object = BackWPup::get_destination( str_replace( 'dest-', '', $_GET[ 'tab' ] ) );
+			$dest_object->admin_print_styles();
 		}
 		elseif ( substr( $_GET[ 'tab' ], 0, 8 ) == 'jobtype-' ) {
 			$job_type = BackWPup::get_job_types();
@@ -230,25 +248,22 @@ class BackWPup_Page_Editjob {
 		//add js for the first tabs
 		if ( $_GET[ 'tab' ] == 'job' ) {
 			if ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) {
-				wp_enqueue_script( 'backwpuptabjob', BackWPup::get_plugin_data( 'URL' ) . '/js/page_edit_tab_job.dev.js', array('jquery'), time(), TRUE );
+				wp_enqueue_script( 'backwpuptabjob', BackWPup::get_plugin_data( 'URL' ) . '/assets/js/page_edit_tab_job.js', array('jquery'), time(), TRUE );
 			} else {
-				wp_enqueue_script( 'backwpuptabjob', BackWPup::get_plugin_data( 'URL' ) . '/js/page_edit_tab_job.js', array('jquery'), BackWPup::get_plugin_data( 'Version' ), TRUE );
+				wp_enqueue_script( 'backwpuptabjob', BackWPup::get_plugin_data( 'URL' ) . '/assets/js/page_edit_tab_job.min.js', array('jquery'), BackWPup::get_plugin_data( 'Version' ), TRUE );
 			}
 		}
  		elseif ( $_GET[ 'tab' ] == 'cron' ) {
 			if ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) {
-				wp_enqueue_script( 'backwpuptabcron', BackWPup::get_plugin_data( 'URL' ) . '/js/page_edit_tab_cron.dev.js', array('jquery'), time(), TRUE );
-				wp_enqueue_style( 'backwpuptabcron', BackWPup::get_plugin_data( 'URL' ) . '/css/page_edit_tab_cron.dev.css', '', time(), 'screen' );
+				wp_enqueue_script( 'backwpuptabcron', BackWPup::get_plugin_data( 'URL' ) . '/assets/js/page_edit_tab_cron.js', array('jquery'), time(), TRUE );
 			} else {
-				wp_enqueue_script( 'backwpuptabcron', BackWPup::get_plugin_data( 'URL' ) . '/js/page_edit_tab_cron.js', array('jquery'), BackWPup::get_plugin_data( 'Version' ), TRUE );
-				wp_enqueue_style( 'backwpuptabcron', BackWPup::get_plugin_data( 'URL' ) . '/css/page_edit_tab_cron.css', '', BackWPup::get_plugin_data( 'Version' ), 'screen' );
+				wp_enqueue_script( 'backwpuptabcron', BackWPup::get_plugin_data( 'URL' ) . '/assets/js/page_edit_tab_cron.min.js', array('jquery'), BackWPup::get_plugin_data( 'Version' ), TRUE );
 			}
 		}
 		//add js for all other tabs
 		elseif ( strstr( $_GET[ 'tab' ], 'dest-' ) ) {
-			$destinations = BackWPup::get_destinations();
-			$id    = strtoupper( str_replace( 'dest-', '', $_GET[ 'tab' ] ) );
-			$destinations[ $id ]->admin_print_scripts( );
+			$dest_object = BackWPup::get_destination( str_replace( 'dest-', '', $_GET[ 'tab' ] ) );
+			$dest_object->admin_print_scripts();
 		}
 		elseif (  strstr( $_GET[ 'tab' ], 'jobtype-' ) ) {
 			$job_type = BackWPup::get_job_types();
@@ -311,7 +326,7 @@ class BackWPup_Page_Editjob {
 
 		if ( $crontype == 'advanced' ) {
 			echo str_replace( '\"','"', __( 'Working as <a href="http://wikipedia.org/wiki/Cron">Cron</a> schedule:', 'backwpup' ) );
-			echo ' <i><b>' . $cronstamp . '</b></i><br />';
+			echo ' <i><b>' . esc_attr( $cronstamp ). '</b></i><br />';
 		}
 
 		list( $cronstr[ 'minutes' ], $cronstr[ 'hours' ], $cronstr[ 'mday' ], $cronstr[ 'mon' ], $cronstr[ 'wday' ] ) = explode( ' ', $cronstamp, 5 );
@@ -358,14 +373,12 @@ class BackWPup_Page_Editjob {
 			$jobid = end( $newjobid ) + 1;
 		}
 
-		$destinations = BackWPup::get_destinations();
+		$destinations = BackWPup::get_registered_destinations();
 		$job_types    = BackWPup::get_job_types();
 
 		?>
-    <div class="wrap">
+    <div class="wrap" id="backwpup-page">
 		<?php
-		screen_icon();
-
 		//default tabs
 		$tabs = array( 'job' => array( 'name' => __( 'General', 'backwpup' ), 'display' => TRUE ), 'cron' => array( 'name' => __( 'Schedule', 'backwpup' ), 'display' => TRUE ) );
 		//add jobtypes to tabs
@@ -380,16 +393,16 @@ class BackWPup_Page_Editjob {
 		}
 		//add destinations to tabs
 		$jobdests = BackWPup_Option::get( $jobid, 'destinations' );
-		foreach ( $destinations as $destid => $destclass ) {
+		foreach ( $destinations as $destid => $dest ) {
 			$tabid          = 'dest-' . strtolower( $destid );
-			$tabs[ $tabid ][ 'name' ] = sprintf(__( 'To: %s', 'backwpup' ), $destclass->info[ 'name' ]);
+			$tabs[ $tabid ][ 'name' ] = sprintf( __( 'To: %s', 'backwpup' ), $dest[ 'info' ][ 'name' ] );
 			$tabs[ $tabid ][ 'display' ] = TRUE;
 			if ( ! in_array( $destid, $jobdests ) )
 				$tabs[ $tabid ][ 'display' ] = FALSE;
 		}
 		//display tabs
-		echo '<h2 class="nav-tab-wrapper">' . sprintf( __( '%s Job:', 'backwpup' ), BackWPup::get_plugin_data( 'name' ) ). '&nbsp;';
-		echo '<span id="h2jobtitle">' .htmlspecialchars( BackWPup_Option::get( $jobid, 'name' ) ) . '</span><br /><br />';
+		echo '<h2 class="nav-tab-wrapper"><span id="backwpup-page-icon">&nbsp;</span>' . sprintf( __( '%s Job:', 'backwpup' ), BackWPup::get_plugin_data( 'name' ) ). '&nbsp;';
+		echo '<span id="h2jobtitle">' . esc_html( BackWPup_Option::get( $jobid, 'name' ) ) . '</span><br /><br />';
 		foreach ( $tabs as $id => $tab ) {
 			$addclass = '';
 			if ( $id == $_GET[ 'tab' ] )
@@ -437,13 +450,15 @@ class BackWPup_Page_Editjob {
 								<legend class="screen-reader-text"><span><?php _e( 'Job tasks', 'backwpup' ) ?></span>
 								</legend><?php
 								foreach ( $job_types as $id => $typeclass ) {
-									$fileclass = '';
-									if ( call_user_func( array( $typeclass, 'creates_file' ) ) )
-										$fileclass = ' filetype';
-									echo '<label for="jobtype-select-' . strtolower( $id ) . '"><input class="jobtype-select checkbox' . $fileclass . '" id="jobtype-select-' . strtolower( $id ) . '" type="checkbox" ' . checked( TRUE, in_array( $id, BackWPup_Option::get( $jobid, 'type' ) ), FALSE ) . ' name="type[]" value="' . $id . '" /> ' . $typeclass->info[ 'description' ];
-									if ( ! empty( $info[ 'help' ] ) )
-										BackWPup_Help::tip( $typeclass->info[ 'help' ] );
-									echo "</label><br />";
+									$addclass = '';
+									if ( $typeclass->creates_file() )
+										$addclass .= ' filetype';
+									$title = '';
+									if ( ! empty( $typeclass->info[ 'help' ] ) ) {
+										$title = ' title="' . esc_attr( $typeclass->info[ 'help' ] ) . '"';
+										$addclass .= ' help-tip';
+									}
+									echo '<label for="jobtype-select-' . strtolower( $id ) . '"><input class="jobtype-select checkbox' . $addclass . '"' . $title . '  id="jobtype-select-' . strtolower( $id ) . '" type="checkbox" ' . checked( TRUE, in_array( $id, BackWPup_Option::get( $jobid, 'type' ) ), FALSE ) . ' name="type[]" value="' . $id . '" /> ' . $typeclass->info[ 'description' ] . '</label><br />';
 								}
 								?></fieldset>
 						</td>
@@ -453,13 +468,12 @@ class BackWPup_Page_Editjob {
 				<h3 class="title hasdests"><?php _e( 'Backup File Creation', 'backwpup' ) ?></h3>
 				<p class="hasdests"></p>
 				<table class="form-table hasdests">
-					<?php if ( class_exists( 'BackWPup_Features', FALSE ) ) { ?>
+					<?php if ( class_exists( 'BackWPup_Pro', FALSE ) ) { ?>
 					<tr>
 						<th scope="row"><?php _e( 'Backup type', 'backwpup' ); ?></th>
 						<td>
 							<fieldset>
-								<legend class="screen-reader-text"><span><?php _e( 'Backup type', 'backwpup' ) ?></span>
-								</legend>
+								<legend class="screen-reader-text">	<span><?php _e( 'Backup type', 'backwpup' ) ?></span></legend>
 								<label for="idbackuptype-sync"><input class="radio"
 									   type="radio"<?php checked( 'sync', BackWPup_Option::get( $jobid, 'backuptype' ), TRUE ); ?>
 									   name="backuptype" id="idbackuptype-sync"
@@ -477,35 +491,27 @@ class BackWPup_Page_Editjob {
 						<td>
 							<input name="archivename" type="text" id="archivename"
 								value="<?php echo BackWPup_Option::get( $jobid, 'archivename' );?>"
-								class="regular-text code" />
+								class="regular-text code help-tip" title="<?php
+									echo "<strong>" . esc_attr__( 'Replacement patterns:', 'backwpup' ) . "</strong><br />";
+									echo esc_attr__( '%d = Two digit day of the month, with leading zeros', 'backwpup' ) . '<br />';
+									echo esc_attr__( '%j = Day of the month, without leading zeros', 'backwpup' ) . '<br />';
+									echo esc_attr__( '%m = Day of the month, with leading zeros', 'backwpup' ) . '<br />';
+									echo esc_attr__( '%n = Representation of the month (without leading zeros)', 'backwpup' ) . '<br />';
+									echo esc_attr__( '%Y = Four digit representation for the year', 'backwpup' ) . '<br />';
+									echo esc_attr__( '%y = Two digit representation of the year', 'backwpup' ) . '<br />';
+									echo esc_attr__( '%a = Lowercase ante meridiem (am) and post meridiem (pm)', 'backwpup' ) . '<br />';
+									echo esc_attr__( '%A = Uppercase ante meridiem (AM) and post meridiem (PM)', 'backwpup' ) . '<br />';
+									echo esc_attr__( '%B = Swatch Internet Time', 'backwpup' ) . '<br />';
+									echo esc_attr__( '%g = Hour in 12-hour format, without leading zeros', 'backwpup' ) . '<br />';
+									echo esc_attr__( '%G = Hour in 24-hour format, without leading zeros', 'backwpup' ) . '<br />';
+									echo esc_attr__( '%h = Hour in 12-hour format, with leading zeros', 'backwpup' ) . '<br />';
+									echo esc_attr__( '%H = Hour in 24-hour format, with leading zeros', 'backwpup' ) . '<br />';
+									echo esc_attr__( '%i = Two digit representation of the minute', 'backwpup' ) . '<br />';
+									echo esc_attr__( '%s = Two digit representation of the second', 'backwpup' ) . '<br />';
+								?>" />
 							<?php
-							$patterns = array (
-								__( '%d = Two digit day of the month, with leading zeros', 'backwpup' ),
-								__( '%j = Day of the month, without leading zeros', 'backwpup' ),
-								__( '%m = Day of the month, with leading zeros', 'backwpup' ),
-								__( '%n = Representation of the month (without leading zeros)', 'backwpup' ),
-								__( '%Y = Four digit representation for the year', 'backwpup' ),
-								__( '%y = Two digit representation of the year', 'backwpup' ),
-								__( '%a = Lowercase ante meridiem (am) and post meridiem (pm)', 'backwpup' ),
-								__( '%A = Uppercase ante meridiem (AM) and post meridiem (PM)', 'backwpup' ),
-								__( '%B = Swatch Internet Time', 'backwpup' ),
-								__( '%g = Hour in 12-hour format, without leading zeros', 'backwpup' ),
-								__( '%G = Hour in 24-hour format, without leading zeros', 'backwpup' ),
-								__( '%h = Hour in 12-hour format, with leading zeros', 'backwpup' ),
-								__( '%H = Hour in 24-hour format, with leading zeros', 'backwpup' ),
-								__( '%i = Two digit representation of the minute', 'backwpup' ),
-								__( '%s = Two digit representation of the second', 'backwpup' ),
-								__( '%u = Two digit representation of the microsecond', 'backwpup' ),
-								__( '%U = UNIX timestamp (seconds since January 1 1970 00:00:00 GMT)', 'backwpup' ),
-							);
-
-							BackWPup_Help::tip(
-								"<strong>" . __( 'Replacement patterns:', 'backwpup' ) . "</strong><br />"
-								. join( '<br />', $patterns )
-							);
-
-							$datevars    = array( '%d', '%j', '%m', '%n', '%Y', '%y', '%a', '%A', '%B', '%g', '%G', '%h', '%H', '%i', '%s', '%u', '%U' );
-							$datevalues  = array( date_i18n( 'd' ), date_i18n( 'j' ), date_i18n( 'm' ), date_i18n( 'n' ), date_i18n( 'Y' ), date_i18n( 'y' ), date_i18n( 'a' ), date_i18n( 'A' ), date_i18n( 'B' ), date_i18n( 'g' ), date_i18n( 'G' ), date_i18n( 'h' ), date_i18n( 'H' ), date_i18n( 'i' ), date_i18n( 's' ), date_i18n( 'u' ), date_i18n( 'U' ) );
+							$datevars    = array( '%d', '%j', '%m', '%n', '%Y', '%y', '%a', '%A', '%B', '%g', '%G', '%h', '%H', '%i', '%s' );
+							$datevalues  = array( date_i18n( 'd' ), date_i18n( 'j' ), date_i18n( 'm' ), date_i18n( 'n' ), date_i18n( 'Y' ), date_i18n( 'y' ), date_i18n( 'a' ), date_i18n( 'A' ), date_i18n( 'B' ), date_i18n( 'g' ), date_i18n( 'G' ), date_i18n( 'h' ), date_i18n( 'H' ), date_i18n( 'i' ), date_i18n( 's' ) );
 							$archivename = str_replace( $datevars, $datevalues, BackWPup_Option::get( $jobid, 'archivename' ) );
 							$archivename = sanitize_file_name( $archivename );
 							echo '<p>Preview: <code><span id="archivefilename">' . $archivename . '</span><span id="archiveformat">' . BackWPup_Option::get( $jobid, 'archiveformat' ) . '</span></code></p>';
@@ -516,21 +522,21 @@ class BackWPup_Page_Editjob {
 						<th scope="row"><?php _e( 'Archive Format', 'backwpup' ); ?></th>
 						<td>
 							<fieldset>
-								<legend class="screen-reader-text"><span><?php _e( 'Archive Format', 'backwpup' ) ?></span>
-								</legend><?php
+								<legend class="screen-reader-text"><span><?php _e( 'Archive Format', 'backwpup' ) ?></span></legend>
+								<?php
 								if ( function_exists( 'gzopen' ) || class_exists( 'ZipArchive' ) )
-									echo '<label for="idarchiveformat-zip"><input class="radio" type="radio"' . checked( '.zip', BackWPup_Option::get( $jobid, 'archiveformat' ), FALSE ) . ' name="archiveformat" id="idarchiveformat-zip" value=".zip" /> ' . __( 'Zip', 'backwpup' ) . BackWPup_Help::tip( __( 'PHP Zip functions will be used if available (needs less memory). Otherwise the PCLZip class will be used.', 'backwpup' ), FALSE ) . '</label><br />';
+									echo '<label for="idarchiveformat-zip"><input class="radio help-tip" title="'. __( 'PHP Zip functions will be used if available (needs less memory). Otherwise the PCLZip class will be used.', 'backwpup' ) .'" type="radio"' . checked( '.zip', BackWPup_Option::get( $jobid, 'archiveformat' ), FALSE ) . ' name="archiveformat" id="idarchiveformat-zip" value=".zip" /> ' . __( 'Zip', 'backwpup' ) . '</label><br />';
 								else
-									echo '<label for="idarchiveformat-zip"><input class="radio" type="radio"' . checked( '.zip', BackWPup_Option::get( $jobid, 'archiveformat' ), FALSE ) . ' name="archiveformat" id="idarchiveformat-zip" value=".zip" disabled="disabled" /> ' . __( 'Zip', 'backwpup' ) . BackWPup_Help::tip( __( 'Disabled due to missing PHP function.', 'backwpup' ), FALSE ) . '</label><br />';
-								echo '<label for="idarchiveformat-tar"><input class="radio" type="radio"' . checked( '.tar', BackWPup_Option::get( $jobid, 'archiveformat' ), FALSE ) . ' name="archiveformat" id="idarchiveformat-tar" value=".tar" /> ' . __( 'Tar', 'backwpup' ) . BackWPup_Help::tip( __( 'A tarballed, not compressed archive (fast and less memory)', 'backwpup' ), FALSE ) . '</label><br />';
+									echo '<label for="idarchiveformat-zip"><input class="radio help-tip" title="' . __( 'Disabled due to missing PHP function.', 'backwpup' ) . '" type="radio"' . checked( '.zip', BackWPup_Option::get( $jobid, 'archiveformat' ), FALSE ) . ' name="archiveformat" id="idarchiveformat-zip" value=".zip" disabled="disabled" /> ' . __( 'Zip', 'backwpup' ) . '</label><br />';
+								echo '<label for="idarchiveformat-tar"><input class="radio help-tip" title="' . __( 'A tarballed, not compressed archive (fast and less memory)', 'backwpup' ) . '" type="radio"' . checked( '.tar', BackWPup_Option::get( $jobid, 'archiveformat' ), FALSE ) . ' name="archiveformat" id="idarchiveformat-tar" value=".tar" /> ' . __( 'Tar', 'backwpup' )  . '</label><br />';
 								if ( function_exists( 'gzopen' ) )
-									echo '<label for="idarchiveformat-targz"><input class="radio" type="radio"' . checked( '.tar.gz', BackWPup_Option::get( $jobid, 'archiveformat' ), FALSE ) . ' name="archiveformat" id="idarchiveformat-targz" value=".tar.gz" /> ' . __( 'Tar GZip', 'backwpup' ) . BackWPup_Help::tip( __( 'A tarballed, GZipped archive (fast and less memory)', 'backwpup' ), FALSE ) . '</label><br />';
+									echo '<label for="idarchiveformat-targz"><input class="radio help-tip" title="' . __( 'A tarballed, GZipped archive (fast and less memory)', 'backwpup' ) . '" type="radio"' . checked( '.tar.gz', BackWPup_Option::get( $jobid, 'archiveformat' ), FALSE ) . ' name="archiveformat" id="idarchiveformat-targz" value=".tar.gz" /> ' . __( 'Tar GZip', 'backwpup' ) .  '</label><br />';
 								else
-									echo '<label for="idarchiveformat-targz"><input class="radio" type="radio"' . checked( '.tar.gz', BackWPup_Option::get( $jobid, 'archiveformat' ), FALSE ) . ' name="archiveformat" id="idarchiveformat-targz" value=".tar.gz" disabled="disabled" /> ' . __( 'Tar GZip', 'backwpup' ) . BackWPup_Help::tip( __( 'Disabled due to missing PHP function.', 'backwpup' ), FALSE ) . '</label><br />';
+									echo '<label for="idarchiveformat-targz"><input class="radio help-tip" title="' . __( 'Disabled due to missing PHP function.', 'backwpup' ) . '" type="radio"' . checked( '.tar.gz', BackWPup_Option::get( $jobid, 'archiveformat' ), FALSE ) . ' name="archiveformat" id="idarchiveformat-targz" value=".tar.gz" disabled="disabled" /> ' . __( 'Tar GZip', 'backwpup' ) . '</label><br />';
 								if ( function_exists( 'bzopen' ) )
-									echo '<label for="idarchiveformat-tarbz2"><input class="radio" type="radio"' . checked( '.tar.bz2', BackWPup_Option::get( $jobid, 'archiveformat' ), FALSE ) . ' name="archiveformat" id="idarchiveformat-tarbz2" value=".tar.bz2" /> ' . __( 'Tar BZip2', 'backwpup' ) . BackWPup_Help::tip( __( 'A tarballed, BZipped archive (fast and less memory)', 'backwpup' ), FALSE ) . '</label><br />';
+									echo '<label for="idarchiveformat-tarbz2"><input class="radio help-tip" title="' . __( 'A tarballed, BZipped archive (fast and less memory)', 'backwpup' ) . '" type="radio"' . checked( '.tar.bz2', BackWPup_Option::get( $jobid, 'archiveformat' ), FALSE ) . ' name="archiveformat" id="idarchiveformat-tarbz2" value=".tar.bz2" /> ' . __( 'Tar BZip2', 'backwpup' ) . '</label><br />';
 								else
-									echo '<label for="idarchiveformat-tarbz2"><input class="radio" type="radio"' . checked( '.tar.bz2', BackWPup_Option::get( $jobid, 'archiveformat' ), FALSE ) . ' name="archiveformat" id="idarchiveformat-tarbz2" value=".tar.bz2" disabled="disabled" /> ' . __( 'Tar BZip2', 'backwpup' ) . BackWPup_Help::tip( __( 'Disabled due to missing PHP function.', 'backwpup' ), FALSE ) . '</label><br />';
+									echo '<label for="idarchiveformat-tarbz2"><input class="radio help-tip" title="' . __( 'Disabled due to missing PHP function.', 'backwpup' ) . '" type="radio"' . checked( '.tar.bz2', BackWPup_Option::get( $jobid, 'archiveformat' ), FALSE ) . ' name="archiveformat" id="idarchiveformat-tarbz2" value=".tar.bz2" disabled="disabled" /> ' . __( 'Tar BZip2', 'backwpup' ) . '</label><br />';
 								?></fieldset>
 						</td>
 					</tr>
@@ -545,13 +551,18 @@ class BackWPup_Page_Editjob {
 							<fieldset>
 								<legend class="screen-reader-text"><span><?php _e( 'Where should your backup file be stored?', 'backwpup' ) ?></span>
 								</legend><?php
-								foreach ( $destinations as $id => $destclass ) {
+								foreach ( $destinations as $id => $dest ) {
 									$syncclass = '';
-									if ( ! call_user_func( array( $destclass, 'can_sync' ) ) )
+									if ( ! $dest[ 'can_sync' ] )
 										$syncclass = 'nosync';
-									echo '<span class="' . $syncclass . '"><label for="dest-select-' . strtolower( $id ) . '"><input class="checkbox" id="dest-select-' . strtolower( $id ) . '" type="checkbox" ' . checked( TRUE, in_array( $id, BackWPup_Option::get( $jobid, 'destinations' ) ), FALSE ) . ' name="destinations[]" value="' . $id . '"/> ' . $destclass->info[ 'description' ];
-									if ( ! empty( $info[ 'help' ] ) )
-										BackWPup_Help::tip( $destclass->info[ 'help' ] );
+									$title = ''; $helpclass = '';
+									if ( ! empty( $dest[ 'info' ][ 'help' ] ) ) {
+										$title = ' title="'. esc_attr( $dest[ 'info' ][ 'help' ] ) . '"';
+										$helpclass = ' help-tip';
+									}
+									echo '<span class="' . $syncclass . '"><label for="dest-select-' . strtolower( $id ) . '"><input class="checkbox' . $helpclass . '"' . $title . ' id="dest-select-' . strtolower( $id ) . '" type="checkbox" ' . checked( TRUE, in_array( $id, BackWPup_Option::get( $jobid, 'destinations' ) ), FALSE ) . ' name="destinations[]" value="' . $id . '" ' . disabled( ! empty( $dest[ 'error' ] ), TRUE, FALSE ) . ' /> ' . $dest[ 'info' ][ 'description' ];
+									if ( ! empty( $dest[ 'error' ] ) )
+										echo '<br /><span class="description">' . $dest[ 'error' ] . '</span>';
 									echo '</label><br /></span>';
 								}
 								?></fieldset>
@@ -563,19 +574,19 @@ class BackWPup_Page_Editjob {
 				<p></p>
 				<table class="form-table">
 					<tr>
-						<th scope="row"><label for="mailaddresslog"><?php _e( 'Send log to e-mail address', 'backwpup' ) ?></label></th>
+						<th scope="row"><label for="mailaddresslog"><?php _e( 'Send log to email address', 'backwpup' ) ?></label></th>
 						<td>
 							<input name="mailaddresslog" type="text" id="mailaddresslog"
 								   value="<?php echo BackWPup_Option::get( $jobid, 'mailaddresslog' );?>"
-								   class="regular-text" /><?php BackWPup_Help::tip( __( 'Leave empty to not have log sent.', 'backwpup' ) ); ?>
+								   class="regular-text help-tip" title="<?php esc_attr_e( 'Leave empty to not have log sent.', 'backwpup' ); ?>" />
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><label for="mailaddresssenderlog"><?php _e( 'E-Mail FROM field', 'backwpup' ) ?></label></th>
+						<th scope="row"><label for="mailaddresssenderlog"><?php _e( 'Email FROM field', 'backwpup' ) ?></label></th>
 						<td>
 							<input name="mailaddresssenderlog" type="text" id="mailaddresssenderlog"
 								   value="<?php echo BackWPup_Option::get( $jobid, 'mailaddresssenderlog' );?>"
-								   class="regular-text" /><?php BackWPup_Help::tip( __( 'E-Mail "From" field (Name &lt;&#160;you@your-email-address.tld&#160;&gt;)', 'backwpup' ) ); ?>
+								   class="regular-text help-tip" title="<?php esc_attr_e( 'Email "From" field (Name &lt;&#160;you@your-email-address.tld&#160;&gt;)', 'backwpup' ); ?>" />
 						</td>
 					</tr>
 					<tr>
@@ -584,7 +595,7 @@ class BackWPup_Page_Editjob {
                             <label for="idmailerroronly">
 							<input class="checkbox" value="1" id="idmailerroronly"
 								   type="checkbox" <?php checked( BackWPup_Option::get( $jobid, 'mailerroronly' ), TRUE ); ?>
-								   name="mailerroronly" /> <?php _e( 'Send e-mail with log only when errors occur during job execution.', 'backwpup' ); ?>
+								   name="mailerroronly" /> <?php _e( 'Send email with log only when errors occur during job execution.', 'backwpup' ); ?>
 							</label>
 						</td>
 					</tr>
@@ -614,23 +625,19 @@ class BackWPup_Page_Editjob {
 								<?php
 								$url = BackWPup_Job::get_jobrun_url( 'runext', BackWPup_Option::get( $jobid, 'jobid' ) );
 								?>
-                                <label for="idactivetype-link"><input class="radio"
+                                <label for="idactivetype-link"><input class="radio help-tip"
 									   type="radio"<?php checked( 'link', BackWPup_Option::get( $jobid, 'activetype' ), TRUE ); ?>
 									   name="activetype" id="idactivetype-link"
-									   value="link" /> <?php _e( 'with a link', 'backwpup' ); ?> <code><?php echo $url[ 'url' ];?></code></label>
-								<?php
-									BackWPup_Help::tip( __( 'Copy the link for an external start. This option has to be activated to make the link work.', 'backwpup' ) );
-								?>
+									   value="link" title="<?php esc_attr_e( 'Copy the link for an external start. This option has to be activated to make the link work.', 'backwpup' )?>" /> <?php _e( 'with a link', 'backwpup' ); ?> <code><a href="<?php echo $url[ 'url' ];?>" target="_blank"><?php echo $url[ 'url' ];?></a></code></label>
 								<br />
                             </fieldset>
                         </td>
                     </tr>
                     <tr>
 						<th scope="row"><?php _e( 'Start job with CLI', 'backwpup' ); ?></th>
-						<td>
+						<td class="help-tip" title="<?php esc_attr_e( 'Generate a server script file to let the job start with the server’s cron on command line interface. Alternatively use WP-CLI commands.', 'backwpup' ); ?>">
 							<?php
 								echo str_replace( '\"','"', sprintf ( __( 'Use <a href="http://wp-cli.org/">WP-CLI</a> to run jobs from commandline or <a href="%s">get the start script</a>.', 'backwpup' ),  wp_nonce_url( network_admin_url( 'admin.php' ) . '?page=backwpupjobs&action=start_cli&jobid=' . $jobid, 'start_cli' ) ) );
-								BackWPup_Help::tip( __( 'Generate a server script file to let the job start with the server’s cron on command line interface. Alternatively use WP-CLI commands.', 'backwpup' ) );
 							?>
 						</td>
                     </tr>
@@ -642,8 +649,7 @@ class BackWPup_Page_Editjob {
 						<th scope="row"><?php _e( 'Scheduler type', 'backwpup' ); ?></th>
 						<td>
 							<fieldset>
-								<legend class="screen-reader-text"><span><?php _e( 'Scheduler type', 'backwpup' ) ?></span>
-								</legend>
+								<legend class="screen-reader-text"><span><?php _e( 'Scheduler type', 'backwpup' ) ?></span></legend>
                                 <label for="idcronselect-basic"><input class="radio"
 									   type="radio"<?php checked( 'basic', BackWPup_Option::get( $jobid, 'cronselect' ), TRUE ); ?>
 									   name="cronselect" id="idcronselect-basic"
@@ -838,12 +844,12 @@ class BackWPup_Page_Editjob {
 			default:
 				echo '<div class="table" id="info-tab-' . $_GET[ 'tab' ] . '">';
 				if ( strstr( $_GET[ 'tab' ], 'dest-' ) ) {
-					$id = strtoupper( str_replace( 'dest-', '', $_GET[ 'tab' ] ) );
-					call_user_func( array( $destinations[ $id ], 'edit_tab' ), $jobid );
+					$dest_object = BackWPup::get_destination( str_replace( 'dest-', '', $_GET[ 'tab' ] ) );
+					$dest_object->edit_tab( $jobid );
 				}
 				if ( strstr( $_GET[ 'tab' ], 'jobtype-' ) ) {
 					$id = strtoupper( str_replace( 'jobtype-', '', $_GET[ 'tab' ] ) );
-					call_user_func( array( $job_types[ $id ], 'edit_tab' ), $jobid );
+					$job_types[ $id ]->edit_tab( $jobid );
 				}
 				echo '</div>';
 		}
@@ -871,12 +877,12 @@ class BackWPup_Page_Editjob {
 		<?php
 		//add inline js
 		if ( strstr( $_GET[ 'tab' ], 'dest-' ) ) {
-			$id = strtoupper( str_replace( 'dest-', '', $_GET[ 'tab' ] ) );
-			call_user_func( array( $destinations[ $id ], 'edit_inline_js' ) );
+			$dest_object = BackWPup::get_destination( str_replace( 'dest-', '', $_GET[ 'tab' ] ) );
+			$dest_object->edit_inline_js();
 		}
 		if ( strstr( $_GET[ 'tab' ], 'jobtype-' ) ) {
 			$id = strtoupper( str_replace( 'jobtype-', '', $_GET[ 'tab' ] ) );
-			call_user_func( array( $job_types[ $id ], 'edit_inline_js' ) );
+			$job_types[ $id ]->edit_inline_js();
 		}
 		?>
     });

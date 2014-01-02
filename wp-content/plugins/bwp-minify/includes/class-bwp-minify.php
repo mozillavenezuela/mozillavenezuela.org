@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2012 Khang Minh <betterwp.net>
+ * Copyright (c) 2013 Khang Minh <betterwp.net>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,11 +18,10 @@
 
 /**
  * This is a wrapper function to help you convert a normal source to a minified source.
- *
  * Please do not use this function before WordPress has been initialized. Otherwise, you might get a fatal error.
  *
  * @param string $src The source file you would like to convert
- * @see http://betterwp.net/wordpress-plugins/bwp-minify/ for more information
+ * @link http://betterwp.net/wordpress-plugins/bwp-minify/ for more information
  */
 function bwp_minify($src)
 {
@@ -74,7 +73,7 @@ class BWP_MINIFY extends BWP_FRAMEWORK {
 	/**
 	 * Constructor
 	 */	
-	function __construct($version = '1.2.2')
+	function __construct($version = '1.2.3')
 	{
 		// Plugin's title
 		$this->plugin_title = 'BetterWP Minify';
@@ -130,15 +129,27 @@ class BWP_MINIFY extends BWP_FRAMEWORK {
 
 	private static function is_loadable()
 	{
-		// Ignore Geomashup for now
+		// Ignore Geomashup
 		if (!empty($_GET['geo_mashup_content']) && 'render-map' == $_GET['geo_mashup_content'])
 			return false;
-		return true;
+		// Ignore AEC (Ajax Edit Comment)
+		if (!empty($_GET['aec_page']))
+			return false;
+		// Ignore Simple:Press forum plugin
+		if (defined('SPVERSION') && function_exists('sp_get_option')) {
+			$sp_page = sp_get_option('sfpage');
+			if (is_page($sp_page)) {
+				return false;
+			}
+		}
+		// Allow other plugins to ignore specific things as well
+		return apply_filters('bwp_minify_is_loadable', true);
 	}
 
-	function add_hooks()
+	function add_conditional_hooks()
 	{
 		// Certain plugins use a single file to show contents, which doesn't make use of wp_head and wp_footer action
+		// and certain plugins should just be excluded :)
 		if (!self::is_loadable())
 			return;
 
@@ -163,9 +174,9 @@ class BWP_MINIFY extends BWP_FRAMEWORK {
 				add_action('admin_head', array($this, 'print_header_scripts'), 9);
 				add_action('admin_head', array($this, 'print_dynamic_header_scripts'), 9);
 				add_action('bwp_minify_before_header_scripts', array($this, 'print_header_scripts_l10n'));
-				add_action('bwp_minify_before_footer_scripts', array($this, 'print_footer_scripts_l10n'), 100);
+				add_action('bwp_minify_before_footer_scripts', array($this, 'print_footer_scripts_l10n'));
 			}
-			
+
 			// Minify styles if needed
 			if ('yes' == $this->options['enable_min_css'])
 			{
@@ -194,7 +205,12 @@ class BWP_MINIFY extends BWP_FRAMEWORK {
 			add_filter('locale_stylesheet_uri', array($this, 'minify_item'));
 		}
 	}
-	
+
+	function add_hooks()
+	{
+		add_action('template_redirect', array($this, 'add_conditional_hooks'));
+	}
+
 	/**
 	 * Build the Menus
 	 */
@@ -269,8 +285,8 @@ if (!empty($page))
 				'cb2' => array(__('most themes (e.g. Twenty Ten) use <code>bloginfo()</code> to print the main stylesheet (i.e. <code>style.css</code>) and BWP Minify will not be able to add it to the main minify string. If you want to minify <code>style.css</code> with the rest of your css files, you must enqueue it.', 'bwp-minify') => 'enable_bloginfo')
 			),
 			'input'	=> array(
-				'input_minurl' => array('size' => 91, 'disabled' => ' readonly="readonly"', 'label' => sprintf(__('This should be set automatically. If you think the URL is too long, please read <a href="%s#customization">here</a> to know how to properly modify this.', 'bwp-minify'), $this->plugin_url)),
-				'input_cache_dir' => array('size' => 91, 'disabled' => ' readonly="readonly"', 'label' => '<br />' . sprintf(__('<strong>Important</strong>: Changing cache directory is a two-step process, which is described in details <a href="%s#advanced_customization" target="_blank">here</a>. Please note that cache directory must be writable (i.e. CHMOD to 755 or 777).', 'bwp-minify'), $this->plugin_url)),
+				'input_minurl' => array('size' => 55, 'disabled' => ' readonly="readonly"', 'label' => sprintf(__('This should be set automatically. If you think the URL is too long, please read <a href="%s#customization">here</a> to know how to properly modify this.', 'bwp-minify'), $this->plugin_url)),
+				'input_cache_dir' => array('size' => 55, 'disabled' => ' readonly="readonly"', 'label' => '<br />' . sprintf(__('<strong>Important</strong>: Changing cache directory is a two-step process, which is described in details <a href="%s#advanced_customization" target="_blank">here</a>. Please note that cache directory must be writable (i.e. CHMOD to 755 or 777).', 'bwp-minify'), $this->plugin_url)),
 				'input_maxfiles' => array('size' => 3, 'label' => __('file(s) at most.', 'bwp-minify')),
 				'input_maxage' => array('size' => 5, 'label' => __('&mdash;', 'bwp-minify')),
 				'input_custom_buster' => array('pre' => __('<em>&rarr; /min/?f=file.js&amp;ver=</em> ', 'bwp-minify'), 'size' => 12, 'label' => '.', 'disabled' => ' disabled="disabled"')
@@ -537,8 +553,12 @@ if (!empty($page))
 	 */
 	function is_local($src = '')
 	{
+		// Add support for protocol-relative urls
+		if (false === strpos($src, '://') && substr($src, 0, 1) != '/') {
+			$src = 'http://'. $src;
+		}
 		$url = @parse_url($src);
-		$blog_url = @parse_url(get_option('home'));
+		$blog_url = @parse_url(home_url());
 		if (false === $url)
 			return false;
 		// If scheme is set
@@ -579,7 +599,7 @@ if (!empty($page))
 		if (0 === strpos($src, 'http'))
 		{
 			// We will need to handle both http and https, even if site URL is still set to http
-			$tmp_src = str_replace(array(get_option('siteurl'), str_replace('http://', 'https://', get_option('siteurl'))), '', $src);
+			$tmp_src = str_replace(site_url(), '', $src);
 			// If there was no difference between tmp_src and src, we need to loop through the base
 			if ($tmp_src == $src && !empty($this->base))
 			{
@@ -624,6 +644,10 @@ if (!empty($page))
 		$deps		= $wp_media->registered[$handle]->deps;
 		$return		= 'wp';
 
+		if (!$deps || !is_array($deps)) {
+			return $return;
+		}
+
 		foreach ($deps as $dep)
 		{
 			$dep_src = $wp_media->registered[$dep]->src;
@@ -665,7 +689,7 @@ if (!empty($page))
 			if (in_array($src, $media_string))
 				return 'min';
 
-		// Loop throught done array to find the handle
+		// Loop through done array to find the handle
 		$done_media = ('scripts' == $type) ? $this->wp_scripts_done : $this->wp_styles_done;
 		foreach ($done_media as $media_handle)
 			if ($dep_handle == $media_handle)
@@ -681,13 +705,23 @@ if (!empty($page))
 		return false;
 	}
 
+	/**
+	 * Append minify strings, support splitting strings into shorted ones.
+	 * 
+	 * @param array_K $media
+	 * @param number $count
+	 * @param string $src
+	 * @param string $done
+	 * @param string $parent 
+	 * @param string $type
+	 */
 	function append_minify_string(&$media = array(), &$count = 0, $src = '', $done = false, $parent = false, $type = 'scripts')
 	{
 		$current_pointer = sizeof($media) - 1;
 		// Don't append if already added
 		if (!$this->is_added($src, $type))
 			$media[$current_pointer][] = $src;
-		if (false == $parent && $this->options['input_maxfiles'] <= $count || true == $done)
+		if ((false == $parent && $this->options['input_maxfiles'] <= $count) || true == $done)
 		{
 			$current_pointer = sizeof($media) - 1;
 			$count = 0;
@@ -778,13 +812,16 @@ if (!empty($page))
 		foreach ($todo as $key => $handle)
 		{
 			$count++;
-			// Take the src from registred stylesheets, do not proceed if the src is external
+			// Take the src from registred stylesheets, do not proceed if the src is empty|false|external
 			// Also do not proceed if we can not print any more (except for login page)
 			$the_style = $wp_styles->registered[$handle];
 			$src = $the_style->src;
+			// @since 1.2.3 - if src is empty|false, do not continue
+			if (empty($src)) {
+				continue;
+			}
 			$ignore = false;
-			// Check for is_bool @since 1.0.2
-			if ($this->is_in($handle, 'style_ignore') || is_bool($src))
+			if ($this->is_in($handle, 'style_ignore'))
 				$ignore = true;
 			else if (!$this->is_source_static($src))
 				$ignore = true;
@@ -826,7 +863,7 @@ if (!empty($page))
 						$this->media_styles = $media_array;
 				}
 				// If this style needs conditional statement (e.g. IE-specific stylesheets) 
-				// or is an alternate stylesheet (@see http://www.w3.org/TR/REC-html40/present/styles.html#h-14.3.1), 
+				// or is an alternate stylesheet (@link http://www.w3.org/TR/REC-html40/present/styles.html#h-14.3.1), 
 				// we will not enqueue it (but still minify it).
 				else if ((isset($the_style->extra['conditional']) && $the_style->extra['conditional']) || (isset($the_style->extra['alt']) && $the_style->extra['alt']))
 				{
@@ -846,7 +883,7 @@ if (!empty($page))
 						continue;
 					}
 					$queued++;
-					$this->append_minify_string($this->styles, $queued, $src, $count == $total, true, 'styles');
+					$this->append_minify_string($this->styles, $queued, $src, $count == $total, false, 'styles');
 					// If this style has support for rtl language and the locale is rtl, 
 					// we will have to append the rtl stylesheet also
 					if ('rtl' === $wp_styles->text_direction && isset($the_style->extra['rtl']) && $the_style->extra['rtl'])
@@ -1007,11 +1044,14 @@ if (!empty($page))
 		foreach ($todo as $key => $script_handle)
 		{
 			$the_script = $wp_scripts->registered[$script_handle];
-			// Take the src from registred scripts, do not proceed if the src is external
 			$src = $the_script->src;
+			// @since 1.2.3 - if src is empty|false, do not continue
+			if (empty($src)) {
+				continue;
+			}
 			$expected_in_footer = ((isset($wp_scripts->groups[$script_handle]) && 0 < $wp_scripts->groups[$script_handle]) || did_action('wp_footer')) ? true : false;
 			$ignore_type = ($expected_in_footer) ? 'footer' : 'header';
-			if (!empty($src) && $this->is_source_static($src) && $this->is_local($src))
+			if ($this->is_source_static($src) && $this->is_local($src))
 			{
 				$src = $this->process_media_source($src);
 				// If this script is not allowed
@@ -1030,9 +1070,9 @@ if (!empty($page))
 								$temp[] = $script_handle;
 							continue;
 						}
-						else if ($this->is_added($src, 'scripts', $script_handle))
 						// If footer scripts have not yet been printed, ignore this script if it was added before
-								continue;
+						else if ($this->is_added($src, 'scripts', $script_handle))
+							continue;
 
 						$count_f++; $footer_count++;
 						$this->append_minify_string($this->footer_scripts, $footer_count, $src, $count_f == $total_footer);

@@ -21,7 +21,7 @@ class Hook_NextGen_Basic_Album_Defaults extends Hook
 {
     function set_defaults($entity)
     {
-		if (in_array($entity->name, array(
+		if (isset($entity->name) && in_array($entity->name, array(
 		  NEXTGEN_GALLERY_NEXTGEN_BASIC_COMPACT_ALBUM,
 		  NEXTGEN_GALLERY_NEXTGEN_BASIC_EXTENDED_ALBUM))) {
 

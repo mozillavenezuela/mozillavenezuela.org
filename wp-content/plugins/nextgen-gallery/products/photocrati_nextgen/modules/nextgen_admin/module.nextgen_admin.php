@@ -19,7 +19,7 @@ class M_NextGen_Admin extends C_Base_Module
 			'photocrati-nextgen_admin',
 			'NextGEN Administration',
 			'Provides a framework for adding Administration pages',
-			'0.4',
+			'0.5',
 			'http://www.nextgen-gallery.com',
 			'Photocrati Media',
 			'http://www.photocrati.com'
@@ -92,7 +92,7 @@ class M_NextGen_Admin extends C_Base_Module
 	function _register_hooks()
 	{
         // Register scripts
-        add_action('init', array(&$this, 'register_scripts'));
+        add_action('init', array(&$this, 'register_scripts'), 9);
 
 		// Provides menu options for managing NextGEN Settings
 		add_action('admin_menu', array(&$this, 'add_menu_pages'), 999);

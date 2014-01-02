@@ -10,7 +10,7 @@
 		<p><?php echo_h($success);?></p>
 	</div>
 	<?php endif ?>
-	<form method="POST" action="<?php echo esc_url($_SERVER['REQUEST_URI'])?>">
+	<form method="POST" action="<?php echo nextgen_esc_url($_SERVER['REQUEST_URI'])?>">
 		<?php if (isset($form_header)): ?>
 		<?php echo $form_header."\n"; ?>
 		<?php endif ?>

@@ -8,3 +8,8 @@ var thickboxL10n = {
     close: 'Close',
     noiframes: 'This feature requires inline frames. You have iframes disabled or your browser does not support them.'
 };
+
+jQuery(function($) {
+	var selector = nextgen_lightbox_filter_selector($, $([]));
+	selector.addClass('thickbox');
+});

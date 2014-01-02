@@ -14,7 +14,7 @@ class M_Ajax extends C_Base_Module
 			'photocrati-ajax',
 			'AJAX',
 			'Provides AJAX functionality',
-			'0.4',
+			'0.5',
 			'http://www.photocrati.com',
 			'Photocrati Media',
 			'http://www.photocrati.com'
@@ -47,7 +47,7 @@ class M_Ajax extends C_Base_Module
 	 */
 	function _register_hooks()
 	{
-		add_action('init', array(&$this, 'enqueue_scripts'));
+		add_action('init', array(&$this, 'enqueue_scripts'), 9);
 	}
 
 
@@ -68,7 +68,7 @@ class M_Ajax extends C_Base_Module
         $vars = array(
             'url' => $router->get_url($settings->ajax_slug, FALSE),
             'wp_site_url' => $home_url,
-            'wp_site_static_url' => str_replace('/index.php', '', $site_url)
+            'wp_site_static_url' => str_replace('/index.php', '', str_replace('/index.php', '', $site_url))
         );
         wp_localize_script('photocrati_ajax', 'photocrati_ajax', $vars);
 	}

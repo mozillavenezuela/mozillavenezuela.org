@@ -123,7 +123,7 @@ class A_NextGen_Basic_ImageBrowser_Controller extends Mixin_NextGen_Basic_Galler
         $next_image_link = trailingslashit($this->object->remove_param_for($next_image_link, 'show', $displayed_gallery->id()));
 
         // css class
-        $anchor = 'ngg-imagebrowser-' . $picture->galleryid . '-' . (get_the_ID() == false ? 0 : get_the_ID());
+        $anchor = 'ngg-imagebrowser-' . $displayed_gallery->id() . '-' . (get_the_ID() == false ? 0 : get_the_ID());
 
         // try to read EXIF data, but fallback to the db presets
         $meta = new C_NextGen_Metadata($picture);

@@ -38,7 +38,6 @@ class BackWPup_MySQLDump {
 	 * Compression to use
 	 * empty for none
 	 * gz for Gzip
-	 * bz2 for Bzip
 	 */
 	private $compression = '';
 
@@ -51,7 +50,7 @@ class BackWPup_MySQLDump {
 	 * @global $wpdb wpdb
 	 */
 	public function __construct( $args = array() ) {
-		
+
 		if ( ! class_exists( 'mysqli' ) )
 			throw new BackWPup_MySQLDump_Exception( __( 'No MySQLi extension found. Please install it.', 'backwpup' ) );
 
@@ -67,27 +66,43 @@ class BackWPup_MySQLDump {
 		);
 
 		$args = wp_parse_args( $args , $default_args );
-		
+
 		//set empty host to localhost
 		if ( empty( $args[ 'dbhost' ] ) )
-			$args[ 'dbhost' ] = 'localhost';
+			$args[ 'dbhost' ] = NULL;
 
 		//check if port or socket in hostname and set port and socket
 		$args[ 'dbport' ]   = NULL;
 		$args[ 'dbsocket' ] = NULL;
 		if ( strstr( $args[ 'dbhost' ], ':' ) ) {
 			$hostparts = explode( ':', $args[ 'dbhost' ], 2 );
-			$args[ 'dbhost' ] = $hostparts[ 0 ];
+			$hostparts[ 0 ] = trim( $hostparts[ 0 ] );
+			$hostparts[ 1 ] = trim( $hostparts[ 1 ] );
+			if ( empty( $hostparts[ 0 ] ) )
+				$args[ 'dbhost' ] = NULL;
+			else
+				$args[ 'dbhost' ] = $hostparts[ 0 ];
 			if ( is_numeric( $hostparts[ 1 ] ) )
 				$args[ 'dbport' ] = (int) $hostparts[ 1 ];
 			else
-				$args[ 'dbsocket' ] = $hostparts[ 1 ] ;
+				$args[ 'dbsocket' ] = $hostparts[ 1 ];
 		}
 
+		$this->mysqli = mysqli_init();
+		if ( ! $this->mysqli )
+			throw new BackWPup_MySQLDump_Exception( __( 'Cannot init MySQLi database connection', 'backwpup' ) );
+
+		if ( ! empty( $args[ 'dbcharset' ] ) ) {
+			if ( ! $this->mysqli->options( MYSQLI_INIT_COMMAND, 'SET NAMES ' . $args[ 'dbcharset' ] . ';' ) )
+				throw new BackWPup_MySQLDump_Exception( sprintf( __( 'Setting of MySQLi init command "%s" failed', 'backwpup' ), 'SET NAMES ' . $args[ 'dbcharset' ] . ';' ) );
+		}
+
+		if ( ! $this->mysqli->options( MYSQLI_OPT_CONNECT_TIMEOUT, 5 ) )
+			throw new BackWPup_MySQLDump_Exception( __( 'Setting of MySQLi connection timeout failed', 'backwpup' ) );
+
 		//connect to Database
-		$this->mysqli = new mysqli( $args[ 'dbhost' ], $args[ 'dbuser' ], $args[ 'dbpassword' ], $args[ 'dbname' ], $args[ 'dbport' ], $args[ 'dbsocket' ] );
-		if ( $this->mysqli->connect_error )
-			throw new BackWPup_MySQLDump_Exception( sprintf( __( 'Cannot connect to MySQL database %1$d: %2$s', 'backwpup' ), $this->mysqli->connect_errno, $this->mysqli->connect_error ) );
+		if ( ! $this->mysqli->real_connect( $args[ 'dbhost' ], $args[ 'dbuser' ], $args[ 'dbpassword' ], $args[ 'dbname' ], $args[ 'dbport' ], $args[ 'dbsocket' ] ) )
+			throw new BackWPup_MySQLDump_Exception( sprintf( __( 'Cannot connect to MySQL database %1$d: %2$s', 'backwpup' ), mysqli_connect_errno(), mysqli_connect_error() ) );
 
 		//set charset
 		if ( ! empty( $args[ 'dbcharset' ] ) && method_exists( $this->mysqli, 'set_charset' ) ) {
@@ -100,7 +115,7 @@ class BackWPup_MySQLDump {
 		$this->dbname = $args[ 'dbname' ];
 
 		//set compression
-		if ( ! empty( $args[ 'compression' ] ) && in_array( $args[ 'compression' ], array( 'gz', 'bz2' ) ) )
+		if ( ! empty( $args[ 'compression' ] ) && in_array( $args[ 'compression' ], array( 'gz' ) ) )
 			$this->compression = $args[ 'compression' ];
 
 		//open file if set
@@ -109,21 +124,18 @@ class BackWPup_MySQLDump {
 				if ( ! function_exists( 'gzencode' ) )
 					throw new BackWPup_MySQLDump_Exception( __( 'Functions for gz compression not available', 'backwpup' ) );
 				$this->compression = 'gz';
-			} elseif ( substr( strtolower( $args[ 'dumpfile' ] ), -4 ) == '.bz2' ) {
-				if ( ! function_exists( 'bzcompress' ) )
-					throw new BackWPup_MySQLDump_Exception( __( 'Functions for bz2 compression not available', 'backwpup' ) );
-				$this->compression = 'bz2';
-			} else {
+				$this->handle = fopen( 'compress.zlib://' . $args[ 'dumpfile' ], 'ab' );
+			}  else {
 				$this->compression = '';
+				$this->handle = fopen( $args[ 'dumpfile' ], 'ab' );
 			}
-			$this->handle = fopen( $args[ 'dumpfile' ], 'wb' );
 		} else {
 			$this->handle = $args[ 'dumpfilehandle' ];
 		}
 
 		//check file handle
 		if ( ! is_resource( $this->handle ) )
-			throw new BackWPup_MySQLDump_Exception( __( 'Cannot open dump file', 'backwpup' ) );
+			throw new BackWPup_MySQLDump_Exception( __( 'Cannot open SQL backup file', 'backwpup' ) );
 
 		//get table names and types from Database
 		$res = $this->mysqli->query( 'SHOW FULL TABLES FROM `' . $this->dbname . '`' );
@@ -157,8 +169,13 @@ class BackWPup_MySQLDump {
 		//write dump head
 		$this->dump_head();
 		//write tables
-		foreach( $this->tables_to_dump as $table )
-			$this->dump_table( $table );
+		foreach( $this->tables_to_dump as $table ) {
+			$records = $this->dump_table_head( $table );
+			if ( $records > 0 ) {
+				$this->dump_table( $table, 0 , $records );
+				$this->dump_table_footer( $table );
+			}
+		}
 		//write footer
 		$this->dump_footer();
 
@@ -181,7 +198,7 @@ class BackWPup_MySQLDump {
 
 		//For SQL always use \n as MySQL wants this on all platforms.
 		$dbdumpheader  = "-- ---------------------------------------------------------\n";
-		$dbdumpheader .= "-- Dumped with BackWPup ver.: " . BackWPup::get_plugin_data( 'Version' ) . "\n";
+		$dbdumpheader .= "-- Backup with BackWPup ver.: " . BackWPup::get_plugin_data( 'Version' ) . "\n";
 		$dbdumpheader .= "-- https://marketpress.de/product/backwpup-pro/\n";
 		if ( $wp_info ) {
 			$dbdumpheader .= "-- Blog Name: " . get_bloginfo( 'name' ) . "\n";
@@ -191,7 +208,7 @@ class BackWPup_MySQLDump {
 			$dbdumpheader .= "-- Table Prefix: " . $GLOBALS[ 'wpdb' ]->prefix . "\n";
 		}
 		$dbdumpheader .= "-- Database Name: " . $this->dbname . "\n";
-		$dbdumpheader .= "-- Dumped on: " . date_i18n( 'Y-m-d H:i.s' ) . "\n";
+		$dbdumpheader .= "-- Backup on: " . date_i18n( 'Y-m-d H:i.s' ) . "\n";
 		$dbdumpheader .= "-- ---------------------------------------------------------\n\n";
 		//for better import with mysql client
 		$dbdumpheader .= "/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;\n";
@@ -213,7 +230,7 @@ class BackWPup_MySQLDump {
 	public function dump_footer() {
 
 		//dump procedures and functions
-		$this->write( "\n--\n-- Dumping routines for database '" . $this->dbname . "'\n--\n" );
+		$this->write( "\n--\n-- Backup routines for database '" . $this->dbname . "'\n--\n" );
 
 		//dump Functions
 		$res = $this->mysqli->query( "SHOW FUNCTION STATUS" );
@@ -278,108 +295,164 @@ class BackWPup_MySQLDump {
 		$dbdumpfooter .= "/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;\n";
 		$dbdumpfooter .= "/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;\n";
 		$dbdumpfooter .= "/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;\n";
-		$dbdumpfooter .= "\n-- Dump completed on " . date_i18n( 'Y-m-d H:i:s' ). "\n";
+		$dbdumpfooter .= "\n-- Backup completed on " . date_i18n( 'Y-m-d H:i:s' ). "\n";
 		$this->write( $dbdumpfooter );
 	}
 
+
 	/**
-	 * Dump table structure and Data
+	 * Dump table structure
 	 *
 	 * @param string $table name of Table to dump
+	 * @throws BackWPup_MySQLDump_Exception
+	 * @return int Size of table
 	 */
-	public function dump_table( $table ) {
+	public function dump_table_head( $table ) {
 
-			//dump View
-			if ( $this->table_types[ $table ] == 'VIEW' ) {
-				$tablecreate = "\n--\n-- View structure for `" . $table . "`\n--\n\n";
-				$tablecreate .= "DROP VIEW IF EXISTS `" . $table . "`;\n";
-				$tablecreate .= "/*!40101 SET @saved_cs_client     = @@character_set_client */;\n";
-				$tablecreate .= "/*!40101 SET character_set_client = '" . $this->mysqli->character_set_name() . "' */;\n";
-				//Dump the view structure
-				$res = $this->mysqli->query( "SHOW CREATE VIEW `" . $table . "`" );
-				$GLOBALS[ 'wpdb' ]->num_queries ++;
-				if ( $this->mysqli->error )
-					trigger_error( sprintf( __( 'Database error %1$s for query %2$s', 'backwpup' ), $this->mysqli->error, "SHOW CREATE VIEW `" . $table . "`" ), E_USER_WARNING );
-				$createview = $res->fetch_assoc();
-				$res->close();
-				$tablecreate .= $createview[ 'Create View' ] . ";\n";
-				$tablecreate .= "/*!40101 SET character_set_client = @saved_cs_client */;\n";
-				$this->write( $tablecreate );
-
-				return;
-			}
-
-			if ( $this->table_types[ $table ] != 'BASE TABLE' )
-				return;
-
-			//dump normal Table
-			$tablecreate = "\n--\n-- Table structure for `" . $table . "`\n--\n\n";
-			$tablecreate .= "DROP TABLE IF EXISTS `" . $table . "`;\n";
+		//dump View
+		if ( $this->table_types[ $table ] == 'VIEW' ) {
+			$tablecreate = "\n--\n-- View structure for `" . $table . "`\n--\n\n";
+			$tablecreate .= "DROP VIEW IF EXISTS `" . $table . "`;\n";
 			$tablecreate .= "/*!40101 SET @saved_cs_client     = @@character_set_client */;\n";
 			$tablecreate .= "/*!40101 SET character_set_client = '" . $this->mysqli->character_set_name() . "' */;\n";
-			//Dump the table structure
-			$res = $this->mysqli->query( "SHOW CREATE TABLE `" . $table . "`" );
+			//Dump the view structure
+			$res = $this->mysqli->query( "SHOW CREATE VIEW `" . $table . "`" );
 			$GLOBALS[ 'wpdb' ]->num_queries ++;
 			if ( $this->mysqli->error )
-				trigger_error( sprintf( __( 'Database error %1$s for query %2$s', 'backwpup' ), $this->mysqli->error, "SHOW CREATE TABLE `" . $table . "`" ), E_USER_WARNING );
-			$createtable = $res->fetch_assoc();
+				trigger_error( sprintf( __( 'Database error %1$s for query %2$s', 'backwpup' ), $this->mysqli->error, "SHOW CREATE VIEW `" . $table . "`" ), E_USER_WARNING );
+			$createview = $res->fetch_assoc();
 			$res->close();
-			$tablecreate .= $createtable[ 'Create Table' ] . ";\n";
+			$tablecreate .= $createview[ 'Create View' ] . ";\n";
 			$tablecreate .= "/*!40101 SET character_set_client = @saved_cs_client */;\n";
 			$this->write( $tablecreate );
 
+			return 0;
+		}
 
-			//Dump Table data
-			$this->write( "\n--\n-- Dumping data for table `" . $table . "`\n--\n\nLOCK TABLES `" . $table . "` WRITE;\n/*!40000 ALTER TABLE `" . $table . "` DISABLE KEYS */;\n" );
+		if ( $this->table_types[ $table ] != 'BASE TABLE' )
+			return 0;
 
-			//get data from table
-			$res = $this->mysqli->query( "SELECT * FROM `" . $table . "`", MYSQLI_USE_RESULT );
+		//dump normal Table
+		$tablecreate = "\n--\n-- Table structure for `" . $table . "`\n--\n\n";
+		$tablecreate .= "DROP TABLE IF EXISTS `" . $table . "`;\n";
+		$tablecreate .= "/*!40101 SET @saved_cs_client     = @@character_set_client */;\n";
+		$tablecreate .= "/*!40101 SET character_set_client = '" . $this->mysqli->character_set_name() . "' */;\n";
+		//Dump the table structure
+		$res = $this->mysqli->query( "SHOW CREATE TABLE `" . $table . "`" );
+		$GLOBALS[ 'wpdb' ]->num_queries ++;
+		if ( $this->mysqli->error )
+			trigger_error( sprintf( __( 'Database error %1$s for query %2$s', 'backwpup' ), $this->mysqli->error, "SHOW CREATE TABLE `" . $table . "`" ), E_USER_WARNING );
+		$createtable = $res->fetch_assoc();
+		$res->close();
+		$tablecreate .= $createtable[ 'Create Table' ] . ";\n";
+		$tablecreate .= "/*!40101 SET character_set_client = @saved_cs_client */;\n";
+		$this->write( $tablecreate );
+
+		//get table size
+		$records = 0;
+		// MyISAM has exact size in status
+		if ( $this->table_status[ $table ][ 'Engine' ] == 'MyISAM' ) {
+			$records = $this->table_status[ $table ][ 'Rows' ];
+		} else {
+			// for other count size
+			$res = $this->mysqli->query( "SELECT SQL_CALC_FOUND_ROWS * FROM `" . $table . "`  LIMIT 1");
 			$GLOBALS[ 'wpdb' ]->num_queries ++;
 			if ( $this->mysqli->error )
-				trigger_error( sprintf( __( 'Database error %1$s for query %2$s', 'backwpup' ), $this->mysqli->error, "SELECT * FROM `" . $table . "`" ), E_USER_WARNING );
-
-			$fieldsarray = array();
-			$fieldinfo   = array();
-			$fields      = $res->fetch_fields();
-			$i = 0;
-			foreach ( $fields as $filed ) {
-				$fieldsarray[ $i ]               = $filed->orgname;
-				$fieldinfo[ $fieldsarray[ $i ] ] = $filed;
-				$i ++;
-			}
-
-			$dump = '';
-			while ( $data = $res->fetch_assoc() ) {
-				$values = array();
-				foreach ( $data as $key => $value ) {
-					if ( is_null( $value ) || ! isset( $value ) ) // Make Value NULL to string NULL
-						$value = "NULL";
-					elseif ( in_array($fieldinfo[ $key ]->type, array( MYSQLI_TYPE_DECIMAL, MYSQLI_TYPE_TINY, MYSQLI_TYPE_SHORT, MYSQLI_TYPE_LONG,  MYSQLI_TYPE_FLOAT, MYSQLI_TYPE_DOUBLE, MYSQLI_TYPE_LONGLONG, MYSQLI_TYPE_INT24 ) ) ) //is value numeric no esc
-						$value = empty( $value ) ? 0 : $value;
-					else
-						$value = "'" . $this->mysqli->real_escape_string( $value ) . "'";
-					$values[ ] = $value;
-				}
-				 //new query in dump on more than 50000 chars.
-				if ( empty( $dump ) )
-					$dump = "INSERT INTO `" . $table . "` (`" . implode( "`, `", $fieldsarray ) . "`) VALUES \n";
-				if ( strlen( $dump ) <= 50000  ) {
-					$dump .= "(" . implode( ", ", $values ) . "),\n";
-				} else {
-					$dump .= "(" . implode( ", ", $values ) . ");\n";
-					$this->write( $dump );
-					$dump = '';
-				}
-			}
-			if ( ! empty( $dump ) ) {
-				$dump = substr( $dump, 0, -2 ) . ";\n" ;
-				$this->write( $dump );
-			}
+				throw new BackWPup_MySQLDump_Exception( sprintf( __( 'Database error %1$s for query %2$s', 'backwpup' ), $this->mysqli->error, "SELECT SQL_CALC_FOUND_ROWS * FROM `" . $table . "`  LIMIT 1" ) );
+			$GLOBALS[ 'wpdb' ]->num_queries ++;
 			$res->close();
+			$res = $this->mysqli->query( "SELECT FOUND_ROWS() AS count_records");
+			$GLOBALS[ 'wpdb' ]->num_queries ++;
+			if ( $this->mysqli->error )
+				throw new BackWPup_MySQLDump_Exception( sprintf( __( 'Database error %1$s for query %2$s', 'backwpup' ), $this->mysqli->error, "SELECT FOUND_ROWS() AS count_records" ) );
+			$count_records =  $res->fetch_assoc();
+			$res->close();
+			$records = $count_records[ 'count_records' ];
+		}
 
-			$this->write( "/*!40000 ALTER TABLE `" . $table . "` ENABLE KEYS */;\nUNLOCK TABLES;\n" );
+		if ( $records > 0 ) {
+			//Dump Table data
+			$this->write( "\n--\n-- Backup data for table `" . $table . "`\n--\n\nLOCK TABLES `" . $table . "` WRITE;\n/*!40000 ALTER TABLE `" . $table . "` DISABLE KEYS */;\n" );
+		}
 
+		return $records;
 
+	}
+
+	/**
+	 * Dump table footer
+	 *
+	 * @param string $table name of Table to dump
+	 * @return int Size of table
+	 */
+	public function dump_table_footer( $table ) {
+
+		$this->write( "/*!40000 ALTER TABLE `" . $table . "` ENABLE KEYS */;\nUNLOCK TABLES;\n" );
+	}
+
+	/**
+	 * Dump table  Data
+	 *
+	 * @param string $table   name of Table to dump
+	 * @param int    $start   Start of lengh paramter
+	 * @param int    $length how many
+	 * @throws BackWPup_MySQLDump_Exception
+	 */
+	public function dump_table( $table, $start, $length = 100 ) {
+
+		if ( ! is_numeric( $start ) )
+			throw new BackWPup_MySQLDump_Exception( sprintf( __( 'Start for table backup is not correctly set: %1$s ', 'backwpup' ), $start ) );
+
+		if ( ! is_numeric( $length ) )
+			throw new BackWPup_MySQLDump_Exception( sprintf( __( 'Length for table backup is not correctly set: %1$s ', 'backwpup' ), $length ) );
+
+		if ( $length == 0 )
+			return;
+
+		//get data from table
+		$res = $this->mysqli->query( "SELECT * FROM `" . $table . "` LIMIT " . $start . ", " . $length, MYSQLI_USE_RESULT );
+		$GLOBALS[ 'wpdb' ]->num_queries ++;
+		if ( $this->mysqli->error )
+			trigger_error( sprintf( __( 'Database error %1$s for query %2$s', 'backwpup' ), $this->mysqli->error, "SELECT * FROM `" . $table . "`" ), E_USER_WARNING );
+
+		$fieldsarray = array();
+		$fieldinfo   = array();
+		$fields      = $res->fetch_fields();
+		$i = 0;
+		foreach ( $fields as $filed ) {
+			$fieldsarray[ $i ]               = $filed->orgname;
+			$fieldinfo[ $fieldsarray[ $i ] ] = $filed;
+			$i ++;
+		}
+
+		$dump = '';
+		while ( $data = $res->fetch_assoc() ) {
+			$values = array();
+			foreach ( $data as $key => $value ) {
+				if ( is_null( $value ) || ! isset( $value ) ) // Make Value NULL to string NULL
+					$value = "NULL";
+				elseif ( in_array($fieldinfo[ $key ]->type, array( MYSQLI_TYPE_DECIMAL, MYSQLI_TYPE_TINY, MYSQLI_TYPE_SHORT, MYSQLI_TYPE_LONG,  MYSQLI_TYPE_FLOAT, MYSQLI_TYPE_DOUBLE, MYSQLI_TYPE_LONGLONG, MYSQLI_TYPE_INT24 ) ) ) //is value numeric no esc
+					$value = empty( $value ) ? 0 : $value;
+				else
+					$value = "'" . $this->mysqli->real_escape_string( $value ) . "'";
+				$values[ ] = $value;
+			}
+			//new query in dump on more than 50000 chars.
+			if ( empty( $dump ) )
+				$dump = "INSERT INTO `" . $table . "` (`" . implode( "`, `", $fieldsarray ) . "`) VALUES \n";
+			if ( strlen( $dump ) <= 50000  ) {
+				$dump .= "(" . implode( ", ", $values ) . "),\n";
+			} else {
+				$dump .= "(" . implode( ", ", $values ) . ");\n";
+				$this->write( $dump );
+				$dump = '';
+			}
+		}
+		if ( ! empty( $dump ) ) {
+			$dump = substr( $dump, 0, -2 ) . ";\n" ;
+			$this->write( $dump );
+		}
+		$res->close();
 	}
 
 	/**
@@ -390,12 +463,7 @@ class BackWPup_MySQLDump {
 	 */
 	private function write( $data ) {
 
-		if ( $this->compression == 'gz' )
-			$written = fwrite( $this->handle, gzencode( $data ) );
-		elseif ( $this->compression == 'bz2' )
-			$written = fwrite( $this->handle, bzcompress( $data ) );
-		else
-			$written = fwrite( $this->handle, $data );
+		$written = fwrite( $this->handle, $data );
 
 		if ( ! $written )
 			throw new BackWPup_MySQLDump_Exception( __( 'Error while writing file!', 'backwpup' ) );
@@ -409,7 +477,8 @@ class BackWPup_MySQLDump {
 		//close MySQL connection
 		$this->mysqli->close();
 		//close file handle
-		fclose( $this->handle );
+		if ( is_resource( $this->handle ) )
+			fclose( $this->handle );
 	}
 
 }

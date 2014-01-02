@@ -95,7 +95,7 @@ class Mixin_Displayed_Gallery_Renderer extends Mixin
 
         // Configure the arguments
         $defaults = array(
-            'id'				=>	NULL,
+			'id'				=>	NULL,
             'source'			=>	'',
             'container_ids'		=>	array(),
             'gallery_ids'		=>	array(),
@@ -186,7 +186,7 @@ class Mixin_Displayed_Gallery_Renderer extends Mixin
 
             // Create the displayed gallery
             $factory = $this->get_registry()->get_utility('I_Component_Factory');
-            $displayed_gallery = $factory->create('displayed_gallery', $mapper, $args);
+            $displayed_gallery = $factory->create('displayed_gallery', $args, $mapper);
 
             unset($factory);
         }
@@ -198,17 +198,41 @@ class Mixin_Displayed_Gallery_Renderer extends Mixin
                 // Set a temporary id
                 $displayed_gallery->id($displayed_gallery->to_transient());
 
-
                 // Display!
                 return $this->object->render($displayed_gallery, TRUE, $mode);
             }
-            else $retval =  "Invalid Displayed Gallery".var_dump($displayed_gallery->get_errors());
+            else {
+                if (C_NextGEN_Bootstrap::$debug)
+                    $retval = "Invalid Displayed Gallery" . var_dump($displayed_gallery->get_errors());
+                else
+                    $retval = "Gallery not found. Please <strong>check your settings</strong>.";
+            }
         }
         else {
             $retval = "Invalid Displayed Gallery";
         }
         return $retval;
     }
+
+	function debug_msg($msg, $print_r=FALSE)
+	{
+		$retval = '';
+
+		if (C_NextGEN_Bootstrap::$debug) {
+			ob_start();
+			if ($print_r) {
+				echo '<pre>';
+				print_r($msg);
+				echo '</pre>';
+			}
+			else
+				var_dump($msg);
+
+			$retval = ob_get_clean();
+		}
+
+		return $retval;
+	}
 
 
     /**
@@ -217,44 +241,58 @@ class Mixin_Displayed_Gallery_Renderer extends Mixin
      */
     function render($displayed_gallery, $return=FALSE, $mode = null)
     {
+		$retval = '';
+		$lookup = TRUE;
+		$cache  = C_Photocrati_Cache::get_instance('displayed_gallery_rendering');
+
         // Simply throwing our rendered gallery into a feed will most likely not work correctly.
         // The MediaRSS option in NextGEN is available as an alternative.
         if(is_feed())
             return '';
 
-    		if ($mode == null)
-    		{
-    			$mode = 'normal';
-    		}
+		if ($mode == null)
+		{
+			$mode = 'normal';
+		}
 
         // Save the displayed gallery as a transient if it hasn't already. Allows for ajax operations
         // to add or modify the gallery without losing a retrievable ID
-        if (empty($displayed_gallery->transient_id))
-            $displayed_gallery->transient_id = $displayed_gallery->to_transient();
+		if (!$displayed_gallery->apply_transient()) {
+			$displayed_gallery->to_transient();
+		}
 
         // Get the display type controller
         $controller = $this->get_registry()->get_utility(
             'I_Display_Type_Controller', $displayed_gallery->display_type
         );
 
-		// Enqueue any necessary static resources
-		$controller->enqueue_frontend_resources($displayed_gallery);
-
 		// Get routing info
 		$router = $url = C_Router::get_instance();
 		$url    = $router->get_url($router->get_request_uri(), TRUE);
 
 		// Should we lookup in cache?
-		$lookup = TRUE;
-		if ($displayed_gallery->source == 'random_images') $lookup = FALSE;
-		elseif (is_array($displayed_gallery->container_ids) && in_array('All', $displayed_gallery->container_ids)) $lookup = FALSE;
+		if (is_array($displayed_gallery->container_ids) && in_array('All', $displayed_gallery->container_ids)) $lookup = FALSE;
 		elseif ($displayed_gallery->source == 'albums' && ($controller->param('gallery')) OR $controller->param('album')) $lookup = FALSE;
-		elseif (!$controller->cachable) $lookup = FALSE;
+		elseif ($controller->param('show')) $lookup = FALSE;
+		elseif ($controller->cachable === FALSE) $lookup = FALSE;
+
+		// Enqueue any necessary static resources
+		$controller->enqueue_frontend_resources($displayed_gallery);
 
 		// Try cache lookup, if we're to do so
 		$key = null;
 		$html = FALSE;
 		if ($lookup) {
+
+			// The display type may need to output some things
+			// even when serving from the cache
+			if ($controller->has_method('cache_action')) {
+				$retval = $controller->cache_action($displayed_gallery);
+			}
+
+			// Output debug message
+			$retval .= $this->debug_msg("Lookup!");
+
 			// Some settings affect display types
 			$settings = C_NextGen_Settings::get_instance();
 			$key_params = apply_filters('ngg_displayed_gallery_cache_params', array(
@@ -271,43 +309,43 @@ class Mixin_Displayed_Gallery_Renderer extends Mixin
 			));
 
 			// Try getting the rendered HTML from the cache
-			$key  = C_Photocrati_Cache::generate_key($key_params);
-			$html = C_Photocrati_Cache::get($key, FALSE);
+			$key = $cache->generate_key($key_params);
+			$html = $cache->lookup($key, FALSE);
+
+			// Output debug messages
+			if ($html) $retval .= $this->debug_msg("HIT!");
+			else $retval .= $this->debug_msg("MISS!");
+
 
 			// TODO: This is hack. We need to figure out a more uniform way of detecting dynamic image urls
-			if (strpos($html, C_Photocrati_Settings_Manager::get_instance()->dynamic_thumbnail_slug) !== FALSE) {
+			if (strpos($html, C_Photocrati_Settings_Manager::get_instance()->dynamic_thumbnail_slug.'/') !== FALSE) {
 				$html = FALSE; // forces the cache to be re-generated
 			}
+		}
+		else $retval .= $this->debug_msg("Not looking up in cache as per rules");
+
+		// If we're displaying a variant, I want to know it
+		if (isset($displayed_gallery->variation) && is_numeric($displayed_gallery->variation) && $displayed_gallery->variation > 0) {
+			$retval .= $this->debug_msg("Using variation #{$displayed_gallery->variation}!");
 		}
 
 		// If a cached version doesn't exist, then create the cache
 		if (!$html) {
+
+			$retval .= $this->debug_msg("Rendering displayed gallery");
+
 			$current_mode = $controller->get_render_mode();
 			$controller->set_render_mode($mode);
 			$html = $controller->index_action($displayed_gallery, TRUE);
-			if ($key != null) 
-				C_Photocrati_Cache::set($key, $html);
+			if ($key != null) $cache->update($key, $html);
 			$controller->set_render_mode($current_mode);
-
-			// Compress the html to avoid wpautop problems
-			$html = $this->compress_html($html);
 		}
 
-		if (!$return) echo $html;
+		$retval .= $html;
 
-		return $html;
+
+		if (!$return) echo $retval;
+
+		return $retval;
     }
-
-	/**
-	 * Removes any un-nessessary whitespace from the HTML
-	 * @param string $html
-	 * @return string
-	 */
-	function compress_html($html)
-	{
-		$html = preg_replace("/>\\s+/", ">", $html);
-		$html = preg_replace("/\\s+</", "<", $html);
-		$html = preg_replace("/<!--(?:(?!-->).)*-->/m", "", $html);
-		return $html;
-	}
 }

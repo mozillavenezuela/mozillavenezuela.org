@@ -8,7 +8,7 @@ class C_DataMapper_Model extends C_Component
 	/**
 	 * Define the model
 	 */
-	function define($mapper, $properties, $context=FALSE)
+	function define($mapper=NULL, $properties=array(), $context=FALSE)
 	{
 		parent::define($context);
 		$this->add_mixin('Mixin_Validation');
@@ -23,7 +23,7 @@ class C_DataMapper_Model extends C_Component
 	 * @param array|stdClass $properties
 	 * @param string $context
 	 */
-	function initialize($mapper, $properties=FALSE)
+	function initialize($mapper=NULL, $properties=FALSE)
 	{
 		$this->_mapper = $mapper;
 		$this->_stdObject = $properties ? (object)$properties  : new stdClass();
@@ -105,7 +105,7 @@ class C_DataMapper_Model extends C_Component
 	 */
 	function destroy()
 	{
-		$this->get_mapper()->destroy($this->_stdObject);
+		return $this->get_mapper()->destroy($this->_stdObject);
 	}
 
 
@@ -121,16 +121,14 @@ class C_DataMapper_Model extends C_Component
 	/**
 	 * Gets/sets the primary key
 	 */
-	function id()
+	function id($value=NULL)
 	{
 		$key = $this->get_mapper()->get_primary_key_column();
-		$args = func_get_args();
-		if ($args) {
-			return $this->__set($key, $args[0]);
+		if ($value) {
+			$this->__set($key, $value);
+
 		}
-		else {
-			return $this->__get($key);
-		}
+		return $this->__get($key);
 	}
 }
 

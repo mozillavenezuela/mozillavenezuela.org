@@ -32,8 +32,19 @@ class A_NextGen_Basic_Singlepic_Controller extends Mixin
                 break;
         }
 
-        // validate and/or clean our passed settings
-        $display_settings['link'] = (!empty($display_settings['link'])) ? $display_settings['link'] : $storage->get_image_url($image);
+        $params = array();
+
+        if (!empty($display_settings['link']))
+        {
+            $target = '_blank';
+            $effect_code = '';
+        }
+        else {
+            $display_settings['link'] = $storage->get_image_url($image, 'full', TRUE);
+            $target = '_self';
+            $effect_code = $this->object->get_effect_code($displayed_gallery);
+        }
+        $params['target'] = $target;
 
         // mode is a legacy parameter
         if (!is_array($display_settings['mode']))
@@ -88,22 +99,41 @@ class A_NextGen_Basic_Singlepic_Controller extends Mixin
             $params['image']->container[0]->_cache_overrides['classname']    = 'ngg-singlepic ' . $display_settings['float'];
             $params['image']->container[0]->_cache_overrides['imageURL']     = $display_settings['link'];
             $params['image']->container[0]->_cache_overrides['thumbnailURL'] = $thumbnail_url;
+            $params['target'] = $target;
 
-            return $this->object->legacy_render($display_settings['template'], $params, $return, 'singlepic');
+            // if a link is present we temporarily must filter out the effect code
+            if (empty($effect_code))
+                add_filter('ngg_get_thumbcode', array(&$this, 'strip_thumbcode'), 10);
+
+            $retval = $this->object->legacy_render($display_settings['template'], $params, $return, 'singlepic');
+
+            if (empty($effect_code))
+                remove_filter('ngg_get_thumbcode', array(&$this, 'strip_thumbcode'), 10);
+
+            return $retval;
         }
         else {
             $params = $display_settings;
             $params['storage']       = &$storage;
             $params['image']         = &$image;
-            $params['effect_code']   = $this->object->get_effect_code($displayed_gallery);
+            $params['effect_code']   = $effect_code;
             $params['inner_content'] = $displayed_gallery->inner_content;
             $params['settings']      = $display_settings;
             $params['thumbnail_url'] = $thumbnail_url;
+            $params['target']        = $target;
                 
             $params = $this->object->prepare_display_parameters($displayed_gallery, $params);
 
             return $this->object->render_partial('photocrati-nextgen_basic_singlepic#nextgen_basic_singlepic', $params, $return);
         }
+    }
+
+    /**
+     * Intentionally disable the application of the effect code
+     */
+    function strip_thumbcode($thumbcode)
+    {
+        return '';
     }
 
     /**

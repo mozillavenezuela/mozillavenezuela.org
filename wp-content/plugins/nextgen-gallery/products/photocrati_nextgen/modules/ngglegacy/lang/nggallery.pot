@@ -1128,11 +1128,11 @@ msgid "NextGEN Gallery : Tables could not created, please check your database se
 msgstr ""
 
 #: ../admin/install.php:170
-msgid "[Show as slideshow]"
+msgid "[Show slideshow]"
 msgstr ""
 
 #: ../admin/install.php:171
-msgid "[Show picture list]"
+msgid "[Show thumbnails]"
 msgstr ""
 
 #: ../admin/manage-galleries.php:69

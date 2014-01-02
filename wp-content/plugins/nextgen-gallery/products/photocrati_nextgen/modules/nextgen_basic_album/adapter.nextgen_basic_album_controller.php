@@ -27,19 +27,21 @@ class A_NextGen_Basic_Album_Controller extends Mixin
 		// /nggallery/album--id/gallery--id
 
 		// Are we to display a gallery?
-        if (($gallery = $this->param('gallery')))
+        if (($gallery = $gallery_slug = $this->param('gallery')))
         {
             // basic albums only support one per post
             if (isset($GLOBALS['nggShowGallery']))
                 return;
             $GLOBALS['nggShowGallery'] = TRUE;
 
-            if (!is_numeric($gallery))
-            {
-                $mapper = $this->object->get_registry()->get_utility('I_Gallery_Mapper');
-                $result = reset($mapper->select()->where(array('slug = %s', $gallery))->limit(1)->run_query());
-                $gallery = $result->{$result->id_field};
-            }
+			// Try finding the gallery by slug first. If nothing is found, we assume that
+			// the user passed in a gallery id instead
+			$mapper = $this->object->get_registry()->get_utility('I_Gallery_Mapper');
+			$result = reset($mapper->select()->where(array('slug = %s', $gallery))->limit(1)->run_query());
+			if ($result) {
+				$gallery = $result->{$result->id_field};
+			}
+
 
             $renderer = $this->object->get_registry()->get_utility('I_Displayed_Gallery_Renderer');
             return $renderer->display_images(
@@ -106,6 +108,7 @@ class A_NextGen_Basic_Album_Controller extends Mixin
             else {
                 $params = $display_settings;
                 $albums = $this->prepare_legacy_album_params($displayed_gallery->get_entity(), array('entities' => $entities));;
+                $params['image_gen_params'] = $albums['image_gen_params'];
                 $params['galleries'] = $albums['galleries'];
                 $params['displayed_gallery'] = $displayed_gallery;
                 $params = $this->object->prepare_display_parameters($displayed_gallery, $params);
@@ -173,6 +176,9 @@ class A_NextGen_Basic_Album_Controller extends Mixin
             );
         }
 
+        // so user templates can know how big the images are expected to be
+        $params['image_gen_params'] = $image_gen_params;
+
         // Transform entities
         $params['galleries'] = $params['entities'];
         unset($params['entities']);
@@ -185,7 +191,7 @@ class A_NextGen_Basic_Album_Controller extends Mixin
             {
                 if (($image = $image_mapper->find(intval($gallery->previewpic))))
                 {
-                    $gallery->previewurl = $storage->get_image_url($image, $image_gen->get_size_name($image_gen_params));
+                    $gallery->previewurl = $storage->get_image_url($image, $image_gen->get_size_name($image_gen_params), TRUE);
                     $gallery->previewname = $gallery->name;
                 }
             }
@@ -209,9 +215,10 @@ class A_NextGen_Basic_Album_Controller extends Mixin
 			// Otherwise, if it's a gallery then it will look like
 			// /nggallery/album--slug/gallery--slug
 			else {
-                if ($gallery->pageid > 0)
-                    $gallery->pagelink = get_post_permalink($gallery->pageid);
-                else {
+                if ($gallery->pageid > 0) {
+					$gallery->pagelink = @get_post_permalink($gallery->pageid);
+				}
+                if (empty($gallery->pagelink)) {
                     $pagelink = $this->object->get_routed_url(TRUE);
                     $parent_album = $this->object->get_parent_album_for($gallery->$id_field);
                     if ($parent_album) {

@@ -16,7 +16,7 @@ class Hook_NextGen_Basic_TagCloud_Defaults extends Hook
 {
 	function set_defaults($entity)
 	{
-		if ($entity->name == NEXTGEN_BASIC_TAG_CLOUD_MODULE_NAME) {
+		if (isset($entity->name) && $entity->name == NEXTGEN_BASIC_TAG_CLOUD_MODULE_NAME) {
 			$this->object->_set_default_value(
 				$entity,
 				'settings',

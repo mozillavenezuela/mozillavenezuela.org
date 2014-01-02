@@ -19,14 +19,14 @@ Follow variables are useable :
 
 <div class="ngg-galleryoverview">
 
-	<div class="pic"><img title="<?php echo $current->alttext ?>" alt="<?php echo $current->alttext ?>" src="<?php echo $current->url; ?>" /></div>
+	<div class="pic"><img title="<?php echo esc_attr($current->alttext) ?>" alt="<?php echo esc_attr($current->alttext) ?>" src="<?php echo nextgen_esc_url($current->url); ?>" /></div>
 	
 	<ul class="ngg-gallery-list">
 	
 		<!-- PREV LINK -->	
 		<?php if ($prev) : ?>
 		<li class="ngg-prev">
-			<a class="prev" href="<?php echo $prev ?>">&#9668;</a>
+			<a class="prev" href="<?php echo nextgen_esc_url($prev) ?>">&#9668;</a>
 		</li>
 		<?php endif; ?>
 		
@@ -34,9 +34,9 @@ Follow variables are useable :
 		<?php foreach ( $images as $image ) : ?>
 		<?php if ( $image->hidden ) continue; ?> 
 		
-		<li id="ngg-image-<?php echo $image->pid ?>" class="ngg-thumbnail-list <?php if ($image->pid == $current->pid) echo 'selected' ?>" >
-			<a href="<?php echo $image->pidlink ?>" title="<?php echo $image->description ?>" >
-				<img title="<?php echo $image->alttext ?>" alt="<?php echo $image->alttext ?>" src="<?php echo $image->thumbnailURL ?>" <?php echo $image->size ?> />
+		<li id="ngg-image-<?php echo esc_attr($image->pid) ?>" class="ngg-thumbnail-list <?php if ($image->pid == $current->pid) echo 'selected' ?>" >
+			<a href="<?php echo nextgen_esc_url($image->pidlink) ?>" title="<?php echo esc_attr($image->description) ?>" >
+				<img title="<?php echo esc_attr($image->alttext) ?>" alt="<?php echo esc_attr($image->alttext) ?>" src="<?php echo nextgen_esc_url($image->thumbnailURL) ?>" <?php echo $image->size ?> />
 			</a>
 		</li>
 
@@ -45,7 +45,7 @@ Follow variables are useable :
 	 	<!-- NEXT LINK -->
 		<?php if ($next) : ?>
 		<li class="ngg-next">
-			<a class="next" href="<?php echo $next ?>">&#9658;</a>
+			<a class="next" href="<?php echo nextgen_esc_url($next) ?>">&#9658;</a>
 		</li>
 		<?php endif; ?>
 	 	

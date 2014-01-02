@@ -1,5 +1,8 @@
 jQuery(function($){
     var callback = function(){
+				var selector = nextgen_lightbox_filter_selector($, $([]));
+				selector.addClass('shutterset');
+				
         var shutterLinks = {}, shutterSets = {}; shutterReloaded.init();
     };
     $(this).bind('refreshed', callback);

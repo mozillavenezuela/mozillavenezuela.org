@@ -76,8 +76,20 @@ msgid "All"
 msgstr "Vše"
 
 #: jquery-archive-list-widget.php:208
-msgid "Current year"
-msgstr "Aktuální rok"
+msgid "Current or post date"
+msgstr "Aktuální datum, nebo po"
+
+#: jquery-archive-list-widget.php:208
+msgid "Only post date"
+msgstr "Pouze datum Post"
+
+#: jquery-archive-list-widget.php:208
+msgid "Only current date"
+msgstr "Pouze aktuální datum"
+
+#: jquery-archive-list-widget.php:233
+msgid "Show only post from selected category in a category page"
+msgstr "Zobrazit pouze příspěvek z vybrané kategorie v kategorii stránku"
 
 #: jquery-archive-list-widget.php:208
 msgid "Current month"

@@ -25,7 +25,7 @@ class C_Displayed_Gallery_Source_Mapper extends C_CustomPost_DataMapper_Driver
 	 * Define the mapper
 	 * @param string|array|bool $context
 	 */
-	function define($context=FALSE)
+	function define($context=FALSE, $not_used=FALSE)
 	{
 		$object_name = 'gal_display_source';
 
@@ -35,7 +35,7 @@ class C_Displayed_Gallery_Source_Mapper extends C_CustomPost_DataMapper_Driver
 		array_push($context, $object_name);
 
 		// Define the driver
-		parent::define(NULL, $context);
+		parent::define($object_name, $context);
 
 		// Add the mixin of instance methods
 		$this->add_mixin('Mixin_Displayed_Gallery_Source_Mapper');
@@ -85,5 +85,7 @@ class Mixin_Displayed_Gallery_Source_Mapper extends Mixin
 	function set_defaults($entity)
 	{
 		if (!isset($entity->aliases)) $entity->aliases = array();
+		$this->object->_set_default_value($entity, 'has_variations', FALSE);
+		$this->object->_set_default_value($entity, 'variation', 0);
 	}
 }

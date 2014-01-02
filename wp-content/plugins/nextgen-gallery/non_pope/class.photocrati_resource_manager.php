@@ -39,8 +39,13 @@ class C_Photocrati_Resource_Manager
 
 		if (strpos($_SERVER['REQUEST_URI'], 'wp-admin/update') !== FALSE) $retval = FALSE;
 		else if (isset($_GET['display_gallery_iframe'])) 				  $retval = FALSE;
-		else if (preg_match("/(js|css|xsl|xml)$/", $_SERVER['REQUEST_URI'])) $retval = FALSE;
         else if (defined('WP_ADMIN') && WP_ADMIN && defined('DOING_AJAX') && DOING_AJAX) $retval = FALSE;
+		else if (preg_match("/(js|css|xsl|xml|kml)$/", $_SERVER['REQUEST_URI'])) $retval = FALSE;
+		elseif (preg_match("/\\.(\\w{3,4})$/", $_SERVER['REQUEST_URI'], $match)) {
+			if (!in_array($match[1], array('htm', 'html', 'php'))) {
+				$retval = FALSE;
+			}
+		}
 
 		$this->valid_request = $retval;
 	}

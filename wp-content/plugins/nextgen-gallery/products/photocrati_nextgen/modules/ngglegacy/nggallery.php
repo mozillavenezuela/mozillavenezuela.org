@@ -11,7 +11,7 @@ if (!class_exists('nggLoader')) {
 
 		var $version     = NEXTGEN_GALLERY_PLUGIN_VERSION;
 		var $dbversion   = '1.8.1';
-		var $minimum_WP  = '3.6';
+		var $minimum_WP  = '3.6.1';
 		var $donators    = 'http://www.nextgen-gallery.com/donators.php';
 		var $options     = '';
 		var $manage_page;
@@ -35,13 +35,6 @@ if (!class_exists('nggLoader')) {
 			$this->define_tables();
 			$this->load_dependencies();
 			$this->start_rewrite_module();
-
-			// Init options & tables during activation & deregister init option
-			register_activation_hook( $this->plugin_name, array(&$this, 'activate') );
-			register_deactivation_hook( $this->plugin_name, array(&$this, 'deactivate') );
-
-			// Register a uninstall hook to remove all tables & option automatic
-			register_uninstall_hook( $this->plugin_name, array(__CLASS__, 'uninstall') );
 
 			// Start this plugin once all other plugins are fully loaded
 			add_action( 'plugins_loaded', array(&$this, 'start_plugin') );
@@ -264,10 +257,6 @@ if (!class_exists('nggLoader')) {
 			require_once (dirname (__FILE__) . '/nggfunctions.php');		        // n.a.
 			require_once (dirname (__FILE__) . '/lib/shortcodes.php'); 		        // 92.664
 
-			//Just needed if you access remote to WordPress
-			if ( defined('XMLRPC_REQUEST') )
-				require_once (dirname (__FILE__) . '/lib/xmlrpc.php');
-
 			// We didn't need all stuff during a AJAX operation
 			if ( defined('DOING_AJAX') )
 				require_once (dirname (__FILE__) . '/admin/ajax.php');
@@ -318,97 +307,10 @@ if (!class_exists('nggLoader')) {
 			if (is_plugin_active_for_network( $this->plugin_name )) {
 				$current_blog = $wpdb->blogid;
 				switch_to_blog($blog_id);
-				nggallery_install();
+				$installer = new C_NggLegacy_Installer;
+				nggallery_install($installer);
 				switch_to_blog($current_blog);
 			}
-		}
-
-		/**
-		 * Removes all transients created by NextGEN. Called during activation
-		 * and deactivation routines
-		 */
-		static function remove_transients()
-		{
-			global $wpdb, $_wp_using_ext_object_cache;
-
-			// Fetch all transients
-			$query = "
-				SELECT option_name FROM {$wpdb->options}
-				WHERE option_name LIKE '%ngg_request%'
-			";
-			$transient_names = $wpdb->get_col($query);;
-
-			// Delete all transients in the database
-			$query = "
-				DELETE FROM {$wpdb->options}
-				WHERE option_name LIKE '%ngg_request%'
-			";
-			$wpdb->query($query);
-
-			// If using an external caching mechanism, delete the cached items
-			if ($_wp_using_ext_object_cache) {
-				foreach ($transient_names as $transient) {
-					wp_cache_delete($transient, 'transient');
-					wp_cache_delete(substr($transient, 11), 'transient');
-				}
-			}
-		}
-
-		function activate() {
-			global $wpdb;
-			//Starting from version 1.8.0 it's works only with PHP5.2
-			if (version_compare(PHP_VERSION, '5.2.0', '<')) {
-					deactivate_plugins($this->plugin_name); // Deactivate ourself
-					wp_die("Sorry, but you can't run this plugin, it requires PHP 5.2 or higher.");
-					return;
-			}
-
-			// Clean up transients
-			self::remove_transients();
-
-			include_once (dirname (__FILE__) . '/admin/install.php');
-
-			if (is_multisite()) {
-				$network=isset($_SERVER['SCRIPT_NAME'])?$_SERVER['SCRIPT_NAME']:"";
-				$activate=isset($_GET['action'])?$_GET['action']:"";
-				$isNetwork=($network=='/wp-admin/network/plugins.php')?true:false;
-				$isActivation=($activate=='deactivate')?false:true;
-
-				if ($isNetwork and $isActivation){
-					$old_blog = $wpdb->blogid;
-					$blogids = $wpdb->get_col($wpdb->prepare("SELECT blog_id FROM $wpdb->blogs", NULL));
-					foreach ($blogids as $blog_id) {
-						switch_to_blog($blog_id);
-						nggallery_install();
-					}
-					switch_to_blog($old_blog);
-					return;
-				}
-			}
-
-			// check for tables
-			nggallery_install();
-			// remove the update message
-			delete_option( 'ngg_update_exists' );
-
-		}
-
-		function deactivate() {
-
-			// remove & reset the init check option
-			delete_option( 'ngg_init_check' );
-			delete_option( 'ngg_update_exists' );
-
-			// Clean up transients
-			self::remove_transients();
-		}
-
-		function uninstall() {
-			// Clean up transients
-			self::remove_transients();
-
-			include_once (dirname (__FILE__) . '/admin/install.php');
-			nggallery_uninstall();
 		}
 
 		function disable_upgrade($option){

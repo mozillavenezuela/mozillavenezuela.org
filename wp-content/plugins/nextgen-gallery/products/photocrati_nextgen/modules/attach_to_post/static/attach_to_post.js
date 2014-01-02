@@ -6,35 +6,33 @@ function close_attach_to_post_window()
 
 // Adjusts the height of a frame on the page, and then executes
 // the specified callback
-function adjust_height_for_frame(frame, callback)
+function adjust_height_for_frame(parent_window, current_window, callback)
 {
 	// Adjust height of the frame
-	var $frame			= jQuery(frame);
-	var new_height		= $frame.contents().find('#wpbody').height();
-    var parent_height   = jQuery(parent.document).height();
+	var $frame			= jQuery(current_window.frameElement);
+	var new_height		= $frame.contents().height()/3;
+    var new_height_body = $frame.contents().find('#wpbody').height();
+    var parent_height   = jQuery(parent_window.document).height();
 	var current_height	= $frame.height();
 
-    // If the height is less than the parent window height, then use
-    // the parent window height instead
+    if (new_height < new_height_body) new_height = new_height_body;
     if (new_height < parent_height) new_height = parent_height;
 
-    // If the height has changed, then use the new height
-	if (current_height != new_height) {
-		var frame_id = $frame.attr('id');
-		
-		$frame.height(new_height);
-		
-		if (frame_id && frame_id.indexOf('ngg-iframe-') == 0) {
-			var tab_id = frame_id.substr(11);
-			
-			if (tab_id) {
-				jQuery('#' + tab_id).height(new_height);
-			}
-		}
-	} 
+    if (current_height < new_height) {
+        $frame.height(new_height);
+
+        var frame_id = $frame.attr('id');
+        if (frame_id && frame_id.indexOf('ngg-iframe-') == 0) {
+            var tab_id = frame_id.substr(11);
+
+            if (tab_id) {
+                jQuery('#' + tab_id).height(new_height);
+            }
+        }
+    }
 
 	if (callback != undefined)
-		return callback.call(frame, new_height);
+		return callback(parent_window, current_window, new_height);
 	else
 		return true;
 }

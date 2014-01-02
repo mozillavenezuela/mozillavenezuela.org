@@ -33,18 +33,32 @@ function media_upload_nextgen() {
 		$img = nggdb::find_image($send_id);
 		$thumbcode = $img->get_thumbcode();
 		$class="ngg-singlepic ngg-{$image['align']}";
-		
+
+        // Create a shell displayed-gallery so we can inspect its settings
+        $registry = C_Component_Registry::get_instance();
+        $mapper   = $registry->get_utility('I_Displayed_Gallery_Mapper');
+        $factory  = $registry->get_utility('I_Component_Factory');
+        $args = array(
+            'display_type' => NEXTGEN_BASIC_SINGLEPIC_MODULE_NAME
+        );
+        $displayed_gallery = $factory->create('displayed_gallery', $args, $mapper);
+        $width  = $displayed_gallery->display_settings['width'];
+        $height = $displayed_gallery->display_settings['height'];
+
 		// Build output
 		if ($image['size'] == "thumbnail") 
-			$html = "<img src='{$image['thumb']}' alt='$alttext' class='$class' />";
-		// Wrap the link to the fullsize image around	
-		$html = "<a $thumbcode href='{$image['url']}' title='$clean_description'>$html</a>";
+			$html = "<img src='{$image['thumb']}' alt='{$alttext}' class='{$class}' />";
+        else
+            $html = '';
+
+		// Wrap the link to the fullsize image around
+		$html = "<a {$thumbcode} href='{$image['url']}' title='{$clean_description}'>{$html}</a>";
 
 		if ($image['size'] == "full") 
-			$html = "<img src='{$image['url']}' alt='$alttext' class='$class' />";
+			$html = "<img src='{$image['url']}' alt='{$alttext}' class='{$class}' />";
 		
 		if ($image['size'] == "singlepic") 
-			$html = "[singlepic id=$send_id w=320 h=240 float={$image['align']}]";
+			$html = "[singlepic id={$send_id} w={$width} h={$height} float={$image['align']}]";
 			
 		media_upload_nextgen_save_image();
 		

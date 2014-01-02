@@ -12,11 +12,6 @@ abstract class BackWPup_Destinations {
 	public $info = array();
 
 	/**
-	 *
-	 */
-	abstract public function __construct();
-
-	/**
 	 * @return array
 	 */
 	abstract public function option_defaults();
@@ -133,21 +128,13 @@ abstract class BackWPup_Destinations {
 	/**
 	 * @param $job_object BackWPup_Job Object
 	 */
-	abstract public function job_run_archive( $job_object );
+	abstract public function job_run_archive( &$job_object );
 
 	/**
 	 * @param $job_object BackWPup_Job Object
 	 */
-	public function job_run_sync( $job_object ) {
+	public function job_run_sync( &$job_object ) {
 
-	}
-
-	/**
-	 * @return bool
-	 */
-	public function can_sync() {
-
-		return FALSE;
 	}
 
 	/**

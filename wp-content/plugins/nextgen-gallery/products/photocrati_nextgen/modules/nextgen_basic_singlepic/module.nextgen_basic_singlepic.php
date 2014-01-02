@@ -17,7 +17,7 @@ class M_NextGen_Basic_Singlepic extends C_Base_Module
             NEXTGEN_BASIC_SINGLEPIC_MODULE_NAME,
             'NextGen Basic Singlepic',
             'Provides a singlepic gallery for NextGEN Gallery',
-            '0.3',
+            '0.5',
             'http://www.photocrati.com',
             'Photocrati Media',
             'http://www.photocrati.com'
@@ -43,18 +43,19 @@ class M_NextGen_Basic_Singlepic extends C_Base_Module
 			'A_NextGen_Basic_Singlepic_Mapper'
 		);
 
-		// Provides the display settings form for the SinglePic display type
-		$this->get_registry()->add_adapter(
-			'I_Form',
-			'A_NextGen_Basic_SinglePic_Form',
-			$this->module_id
-		);
-
-       // Adds the setting forms
-        $this->get_registry()->add_adapter(
-            'I_Form_Manager',
-            'A_NextGen_Basic_SinglePic_Forms'
-        );
+        if (is_admin()) {
+            // Provides the display settings form for the SinglePic display type
+            $this->get_registry()->add_adapter(
+                'I_Form',
+                'A_NextGen_Basic_SinglePic_Form',
+                $this->module_id
+            );
+            // Adds the setting forms
+            $this->get_registry()->add_adapter(
+                'I_Form_Manager',
+                'A_NextGen_Basic_SinglePic_Forms'
+            );
+        }
     }
 
 	function _register_hooks()

@@ -23,7 +23,7 @@ class M_Attach_To_Post extends C_Base_Module
 			'photocrati-attach_to_post',
 			'Attach To Post',
 			'Provides the "Attach to Post" interface for displaying galleries and albums',
-			'0.6',
+			'0.8',
 			'http://www.nextgen-gallery.com',
 			'Photocrati Media',
 			'http://www.photocrati.com',
@@ -39,6 +39,12 @@ class M_Attach_To_Post extends C_Base_Module
 
 		include_once('class.attach_to_post_installer.php');
 		C_Photocrati_Installer::add_handler($this->module_id, 'C_Attach_To_Post_Installer');
+		
+		$uri = strtolower($_SERVER['REQUEST_URI']);
+		
+		if (strpos($uri, '/nextgen-attach_to_post') !== false) {
+			define('WP_ADMIN', true);
+		}
     }
 
     /**
@@ -297,12 +303,13 @@ class M_Attach_To_Post extends C_Base_Module
 	function new_gallery_event($gallery_id)
 	{
         $gallery = $this->get_registry()->get_utility('I_Gallery_Mapper')->find($gallery_id);
-
-        $this->_get_frame_event_publisher()->add_event(array(
-			'event'		=>	'new_gallery',
-			'gallery_id'=>	intval($gallery_id),
-            'gallery_title'   =>  $gallery->title
-		));
+		if ($gallery) {
+			$this->_get_frame_event_publisher()->add_event(array(
+				'event'		=>	'new_gallery',
+				'gallery_id'=>	intval($gallery_id),
+				'gallery_title'   =>  $gallery->title
+			));
+		}
 	}
 
 	/**

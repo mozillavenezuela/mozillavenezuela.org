@@ -8,7 +8,8 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('You 
  * @access internal
  * @return void
  */
-function nggallery_install () {
+function nggallery_install($installer)
+{
 
    	global $wpdb , $wp_roles, $wp_version;
 
@@ -35,19 +36,6 @@ function nggallery_install () {
 	$role->add_cap('NextGEN Change options');
 	$role->add_cap('NextGEN Attach Interface');
 
-	// upgrade function changed in WordPress 2.3
-	require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-
-	// add charset & collate like wp core
-	$charset_collate = '';
-
-	if ( version_compare(mysql_get_server_info(), '4.1.0', '>=') ) {
-		if ( ! empty($wpdb->charset) )
-			$charset_collate = "DEFAULT CHARACTER SET $wpdb->charset";
-		if ( ! empty($wpdb->collate) )
-			$charset_collate .= " COLLATE $wpdb->collate";
-	}
-
    	$nggpictures					= $wpdb->prefix . 'ngg_pictures';
 	$nggallery						= $wpdb->prefix . 'ngg_gallery';
 	$nggalbum						= $wpdb->prefix . 'ngg_album';
@@ -67,8 +55,8 @@ function nggallery_install () {
 	meta_data LONGTEXT,
 	PRIMARY KEY  (pid),
 	KEY post_id (post_id)
-	) $charset_collate;";
-	dbDelta($sql);
+	);";
+	$installer->upgrade_schema($sql);
 
 	// Create gallery table
 	$sql = "CREATE TABLE " . $nggallery . " (
@@ -82,8 +70,8 @@ function nggallery_install () {
 	previewpic BIGINT(20) DEFAULT '0' NOT NULL ,
 	author BIGINT(20) DEFAULT '0' NOT NULL  ,
 	PRIMARY KEY  (gid)
-	) $charset_collate;";
-	dbDelta($sql);
+	)";
+	$installer->upgrade_schema($sql);
 
 	// Create albums table
 	$sql = "CREATE TABLE " . $nggalbum . " (
@@ -95,8 +83,8 @@ function nggallery_install () {
 	sortorder LONGTEXT NOT NULL,
 	pageid BIGINT(20) DEFAULT '0' NOT NULL,
 	PRIMARY KEY  (id)
-	) $charset_collate;";
-	dbDelta($sql);
+	)";
+	$installer->upgrade_schema($sql);
 
 	// check one table again, to be sure
 	if( !$wpdb->get_var( "SHOW TABLES LIKE '$nggpictures'" ) ) {
@@ -128,37 +116,4 @@ function ngg_remove_capability($capability){
 		$role->remove_cap($capability) ;
 	}
 
-}
-
-/**
- * Uninstall all settings and tables
- * Called via Setup and register_unstall hook
- *
- * @access internal
- * @return void
- */
-function nggallery_uninstall() {
-	global $wpdb;
-	
-	// TODO don't remove data on uninstall
-	// first remove all tables
-#	$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}ngg_pictures");
-#	$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}ngg_gallery");
-#	$wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}ngg_album");
-
-	// then remove all options
-	delete_option( 'ngg_options' );
-	delete_option( 'ngg_db_version' );
-	delete_option( 'ngg_update_exists' );
-	delete_option( 'ngg_next_update' );
-
-	// now remove the capability
-	ngg_remove_capability("NextGEN Gallery overview");
-	ngg_remove_capability("NextGEN Use TinyMCE");
-	ngg_remove_capability("NextGEN Upload images");
-	ngg_remove_capability("NextGEN Manage gallery");
-	ngg_remove_capability("NextGEN Edit album");
-	ngg_remove_capability("NextGEN Change style");
-	ngg_remove_capability("NextGEN Change options");
-	ngg_remove_capability("NextGEN Attach Interface");
 }

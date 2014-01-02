@@ -221,10 +221,10 @@ class nggMediaRss {
 		$out .= $indent . "\t<description><![CDATA[" . nggGallery::i18n($desc, 'pic_' . $image->pid . '_description') . "]]></description>\n";
 		$out .= $indent . "\t<link><![CDATA[" . $image->get_permalink() . "]]></link>\n";
         $out .= $indent . "\t<guid>image-id:" . $image->pid . "</guid>\n";
-		$out .= $indent . "\t<media:content url='" . esc_url($image->imageURL) . "' medium='image' />\n";
+		$out .= $indent . "\t<media:content url='" . nextgen_esc_url($image->imageURL) . "' medium='image' />\n";
 		$out .= $indent . "\t<media:title><![CDATA[" . nggGallery::i18n($title, 'pic_' . $image->pid . '_alttext') . "]]></media:title>\n";
 		$out .= $indent . "\t<media:description><![CDATA[" . nggGallery::i18n($desc, 'pic_' . $image->pid . '_description') . "]]></media:description>\n";
-		$out .= $indent . "\t<media:thumbnail url='" . esc_url($image->thumbURL) . "' width='" . $thumbwidth . "' height='" . $thumbheight . "' />\n";
+		$out .= $indent . "\t<media:thumbnail url='" . nextgen_esc_url($image->thumbURL) . "' width='" . $thumbwidth . "' height='" . $thumbheight . "' />\n";
 		$out .= $indent . "\t<media:keywords><![CDATA[" . nggGallery::i18n($tag_names) . "]]></media:keywords>\n";
 		$out .= $indent . "\t<media:copyright><![CDATA[Copyright (c) " . get_option("blogname") . " (" . site_url() . ")]]></media:copyright>\n";
 		$out .= $indent . "</item>\n";

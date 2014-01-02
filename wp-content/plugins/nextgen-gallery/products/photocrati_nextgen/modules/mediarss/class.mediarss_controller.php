@@ -50,7 +50,7 @@ class Mixin_MediaRSS_Controller extends Mixin
         {
             // retrieve by transient id
             $factory           = $this->object->get_registry()->get_utility('I_Component_Factory');
-            $displayed_gallery = $factory->create('displayed_gallery', $mapper);
+            $displayed_gallery = $factory->create('displayed_gallery', NULL, $mapper);
             $displayed_gallery->apply_transient($transient_id);
         }
         elseif (($params = $this->object->param('params')))
@@ -58,7 +58,7 @@ class Mixin_MediaRSS_Controller extends Mixin
             // Create the displayed gallery based on the URL parameters
 			$factory = $this->object->get_registry()->get_utility('I_Component_Factory');
 			$displayed_gallery = $factory->create(
-				'displayed_gallery', $mapper, json_decode($params)
+				'displayed_gallery', json_decode($params), $mapper
 			);
 		}
 

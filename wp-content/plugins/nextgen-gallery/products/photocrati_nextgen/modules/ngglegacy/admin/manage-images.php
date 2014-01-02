@@ -470,7 +470,7 @@ if($picturelist) {
                         $attributes = 'class="title column-filename column-title"' . $style;
 						?>
 						<td <?php echo $attributes ?>>
-							<strong><a href="<?php echo esc_url( $picture->imageURL ); ?>" class="thickbox" title="<?php echo esc_attr ($picture->filename); ?>">
+							<strong><a href="<?php echo nextgen_esc_url( $picture->imageURL ); ?>" class="thickbox" title="<?php echo esc_attr ($picture->filename); ?>">
 								<?php echo ( empty($picture->alttext) ) ? esc_html( $picture->filename ) : esc_html( stripslashes(nggGallery::i18n($picture->alttext)) ); ?>
 							</a></strong>
 							<br /><?php echo $date; ?>
@@ -481,7 +481,7 @@ if($picturelist) {
 							<p>
 							<?php
 							$actions = array();
-							$actions['view']   = '<a class="shutter" href="' . esc_url( $picture->imageURL ) . '" title="' . esc_attr( sprintf(__('View "%s"'), sanitize_title ($picture->filename) )) . '">' . __('View', 'nggallery') . '</a>';
+							$actions['view']   = '<a class="shutter" href="' . nextgen_esc_url( $picture->imageURL ) . '" title="' . esc_attr( sprintf(__('View "%s"'), sanitize_title ($picture->filename) )) . '">' . __('View', 'nggallery') . '</a>';
 							$actions['meta']   = '<a class="ngg-dialog" href="' . NGGALLERY_URLPATH . 'admin/showmeta.php?id=' . $pid . '" title="' . __('Show Meta data','nggallery') . '">' . __('Meta', 'nggallery') . '</a>';
 							$actions['custom_thumb']   = '<a class="ngg-dialog" href="' . NGGALLERY_URLPATH . 'admin/edit-thumbnail.php?id=' . $pid . '" title="' . __('Customize thumbnail','nggallery') . '">' . __('Edit thumb', 'nggallery') . '</a>';
 							$actions['rotate'] = '<a class="ngg-dialog" href="' . NGGALLERY_URLPATH . 'admin/rotate.php?id=' . $pid . '" title="' . __('Rotate','nggallery') . '">' . __('Rotate', 'nggallery') . '</a>';
@@ -506,8 +506,8 @@ if($picturelist) {
 					case 'thumbnail' :
                         $attributes = 'class="id column-thumbnail media-icon"' . $style;
 						?>
-						<td <?php echo $attributes ?>><a href="<?php echo esc_url ( add_query_arg('i', mt_rand(), $picture->imageURL) ); ?>" class="shutter" title="<?php echo $picture->filename ?>">
-								<img class="thumb" src="<?php echo esc_url ( add_query_arg('i', mt_rand(), $picture->thumbURL) ); ?>" id="thumb<?php echo $pid ?>" />
+						<td <?php echo $attributes ?>><a href="<?php echo nextgen_esc_url ( add_query_arg('i', mt_rand(), $picture->imageURL) ); ?>" class="shutter" title="<?php echo $picture->filename ?>">
+								<img class="thumb" src="<?php echo nextgen_esc_url ( add_query_arg('i', mt_rand(), $picture->thumbURL) ); ?>" id="thumb<?php echo $pid ?>" />
 							</a>
 						</td>
 						<?php

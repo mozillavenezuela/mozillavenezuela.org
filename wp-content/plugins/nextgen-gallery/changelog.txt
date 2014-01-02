@@ -1,6 +1,78 @@
 NextGEN Gallery
 by Photocrati Media
 
+= V2.0.40 - 11.26.2013 =
+* NEW:     Added the ability to apply lightbox effects to non-NGG images
+* NEW:     Added NGG_HIDE_STRICT_ERRORS constant. Define and set to TRUE to hide strict errors
+* NEW:     Added NEXTGEN_GALLERY_IMPORT_ROOT constant. Define and set to TRUE to browse from a custom directory
+* NEW:     Added NGG_DEBUG constant. Define and set to TRUE to display helpful messages for debugging
+* NEW:     Each custom table record will have an associated custom post record for expansion
+* NEW:     Display helpful error messages when there's a problem uploading images
+* NEW:     Add data-(src|thumbnail|image-id|title|description) attribute to gallery image anchors
+* NEW:     Variant support for displayed gallery sources. Random images is limited to 5 variations
+* Fixed:   Excessive creation of transients for random galleries
+* Fixed:   Many issues prohibiting the ability to upload images
+* Fixed:   Compatibility with NextGEN Gallery Export Plugin for Adobe Lightroom (thanks Vladimir!)
+* Fixed:   Sorting in the Attach to Post interface
+* Fixed:   HTML allowed in gallery/album descriptions
+* Fixed:   Requests for galleries within albums that have numeric names are broken
+* Fixed:   Call to a non-member function get() on WP_Query
+* Fixed:   Ability to sort by Image ID in the Attach to Post interface
+* Fixed:   Isolate the Attach to Post from implicit third-party script inclusion
+* Fixed:   Check for the existance of thumbnails when generating urls, and if missing, generate new ones
+* Fixed:   Compatibility with NextGEN Facebook OpenGraph+ plugin
+* Fixed:   Various XML-RPC issues
+* Fixed:   Widgets stylesheet not included
+* Fixed:   Issue with color not being pre-selected when previewing Watermark
+* Fixed:   E_NOTICE emitted when cleaning up cached image files
+* Fixed:   E_NOTICE emitted when viewing display type settings
+* Fixed:   Typo adjusting pcre.backtrack_limit for shortcodes
+* Fixed:   Content within the tabs of the Attach to Post interface cut-off
+* Fixed:   Routing problem which would cause conflicts with different display types on the same page
+* Fixed:   Broken Dynamic CSS links on GoDaddy
+* Fixed:   Ability to use HTML in gallery/album descriptions
+* Fixed:   Sub-album requests conflicting with paginated galleries on the same page
+* Merged:  Pull request from andreasE (https://bitbucket.org/photocrati/nextgen-gallery/pull-request/6/)
+
+= V2.0.33 - 10.21.2013 =
+* NEW:     Requests /ngg_tag/[tagname] will create a displayed gallery
+* NEW:     Option added to "Import Gallery" tab to use original images
+* Fixed:   Links are broken on the ngg_tags-sitemap.xml file by WordPress SEO
+* Fixed:   PHP notice: Attempt to assign property of non-object
+* Fixed:   Undefined property warnings when using NextGEN Basic Thumbnails
+* Fixed:   Detect if an applying a transient to a displayed gallery was successful
+* Fixed:   Compatibility issues with BJ-Lazy-Load and Colorbox
+* Fixed:   Pagination conflicts for multiple Imagebrowsers on the same page
+* Fixed:   Ability to display previous exception with debug mode
+* Fixed:   Tagclouds not working in multisite instances
+* Fixed:   Load widgets.css when a widget is being used
+* Fixed:   Installer should remove all instances of the component factory
+* Fixed:   Widget settings interface not intuitive
+* Fixed:   Inability to upload images in some Windows host environments
+* Fixed:   Sorting images/galleries using the Attach To Post interface
+* Fixed:   Fix detection of HTTPS (pull request by Leonhardt Wille)
+* Fixed:   Compilation errors of regular expressions
+* Fixed:   Pro galleries wouldn't display in environments using PHP 5.3.3 or less
+* Fixed:   Scanning of router slug is now limited to the uri, not the url
+* Fixed:   Show slideshow link isn't required for thumbnail/imagebrowser integration
+* Fixed:   WordPress media-upload with 'singlepic' image size
+* Fixed:   Use target=_blank when the link setting is provided for NextGEN Basic Singlepic
+* Fixed:   Only display rendering errors if WP_DEBUG is enabled
+
+
+= V2.0.31 - 10.03.2013 =
+* NEW:     Restored AJAX pagination for NextGEN Basic ImageBrowser display type
+* Fixed:   Compatibility with WordPress Local SEO by Yoast
+* Fixed:   Inability to upload images if image_slug field was missing in database
+* Fixed:   Integration of NextGEN Basic Thumbnail and NextGEN Basic Slideshow display types
+* Fixed:   Photocrati Resource Manager further adjusted to be third-party friendly
+* Fixed:   Added the ability to find legacy templates in both the child/parent theme directories
+* Fixed:   JavaScript errors in Attach to Post interface
+* Fixed:   Router can handle port numbers in urls
+* Fixed:   Carousel template was linking to NextGEN Basic ImageBrowser view
+* Fixed:   SQL query generated for displayed galleries using tags as source
+* Fixed:   3rd party compat: raise & never lower pcre.backtrack_limit
+
 = V2.0.30 - 09.25.2013 =
 * NEW:     Restored the ability to use imagebrowser display type instead of a lightbox effect
 * Changed: Displayed galleries are no longer rendered in RSS feeds

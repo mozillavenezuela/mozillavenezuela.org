@@ -12,6 +12,9 @@ class A_NextGen_Basic_ImageBrowser_Form extends Mixin_Display_Type_Form
      */
     function _get_field_names()
     {
-        return array('nextgen_basic_templates_template');
+        return array(
+			'ajax_pagination',
+			'nextgen_basic_templates_template',
+		);
     }
 }

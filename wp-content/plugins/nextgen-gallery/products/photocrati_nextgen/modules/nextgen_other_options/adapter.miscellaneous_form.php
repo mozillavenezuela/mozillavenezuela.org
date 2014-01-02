@@ -54,6 +54,7 @@ class A_Miscellaneous_Form extends Mixin
         $cache->flush_galleries();
 		C_Photocrati_Cache::flush();
 		C_Photocrati_Cache::flush('displayed_galleries');
+		C_Photocrati_Cache::flush('displayed_gallery_rendering');
     }
 
 	function save_action()

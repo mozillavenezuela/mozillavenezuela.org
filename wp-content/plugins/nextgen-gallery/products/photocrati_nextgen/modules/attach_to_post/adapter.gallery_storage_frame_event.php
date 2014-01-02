@@ -29,11 +29,19 @@ class A_Gallery_Storage_Frame_Event extends Mixin
             $storage->get_thumb_url($image)
         );
 
-        $events->add_event(
-            array(
-                'event' => 'thumbnail_modified',
-                'image' => $image,
-            )
-        );
+        if (is_admin()) {
+
+			$event = new stdClass();
+			$event->pid = $image->{$image->id_field};
+			$event->id_field = $image->id_field;
+			$event->thumb_url = $image->thumb_url;
+
+			$events->add_event(
+				array(
+					'event' => 'thumbnail_modified',
+					'image' => $event,
+				)
+			);
+		}
     }
 }

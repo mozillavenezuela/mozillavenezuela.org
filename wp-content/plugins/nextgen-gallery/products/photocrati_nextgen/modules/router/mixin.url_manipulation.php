@@ -121,9 +121,16 @@ class Mixin_Url_Manipulation extends Mixin
 	 */
 	function construct_url_from_parts($parts)
 	{
+        // let relative paths be relative, and full paths full
+        $prefix = '';
+        if (!empty($parts['scheme']) && !empty($parts['host'])) {
+            $prefix = $parts['scheme'] . '://' . $parts['host'];
+            if (!empty($parts['port']))
+                $prefix .= ':' . $parts['port'];
+        }
+
 		$retval =  $this->object->join_paths(
-			isset($parts['scheme']) && $parts['host'] ?
-				"{$parts['scheme']}://{$parts['host']}" : '',
+            $prefix,
 			isset($parts['path']) ? $parts['path'] : ''
 		);
 		if (isset($parts['query']) && $parts['query']) $retval .= "?{$parts['query']}";

@@ -24,7 +24,7 @@ class M_NggLegacy extends C_Base_Module
 			'photocrati-nextgen-legacy',
 			'NextGEN Legacy',
 			'Embeds the original version of NextGEN 1.9.3 by Alex Rabe',
-			'0.1',
+			'0.3',
 			'http://www.nextgen-gallery.com',
 			'Photocrati Media',
 			'http://www.photocrati.com'

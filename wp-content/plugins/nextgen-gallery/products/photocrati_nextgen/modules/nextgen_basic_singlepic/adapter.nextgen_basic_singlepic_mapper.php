@@ -58,7 +58,7 @@ class A_NextGen_Basic_SinglePic_Mapper extends Mixin
 	 */
 	function _set_singlepic_defaults($entity)
 	{
-		if ($entity->name == NEXTGEN_BASIC_SINGLEPIC_MODULE_NAME) {
+		if (isset($entity->name) && $entity->name == NEXTGEN_BASIC_SINGLEPIC_MODULE_NAME) {
 			$this->object->_set_default_value($entity, 'settings', 'width', '');
 			$this->object->_set_default_value($entity, 'settings', 'height', '');
 			$this->object->_set_default_value($entity, 'settings', 'mode', '');

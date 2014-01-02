@@ -13,25 +13,38 @@ class BackWPup_Cron {
 	public static function run( $arg ) {
 
 		$job_object = BackWPup_Job::get_working_data();
-		if ( is_object( $job_object ) ) {
+
+		if ( $arg == 'restart' && ! empty( $job_object ) ) {
 			//reschedule restart
 			wp_schedule_single_event( time() + 60, 'backwpup_cron', array( 'id' => 'restart' ) );
-			//restart job if not working
+			//restart job if not working or a restart imitated
 			$not_worked_time = microtime( TRUE ) - $job_object->timestamp_last_update;
-			if ( $not_worked_time > 300 )
-				BackWPup_Job::start_wp_cron( 0 );
+			if ( empty( $job_object->pid ) || $not_worked_time > 300 )
+				BackWPup_Job::start_wp_cron();
+			return;
 		}
-		elseif ( $arg != 'restart' ) {
-			//check that job exits
-			$jobids = BackWPup_Option::get_job_ids( 'activetype', 'wpcron' );
-			if ( ! in_array( $arg, $jobids) )
-				return;
-			//reschedule job for next run
-			$cron_next = self::cron_next( BackWPup_Option::get( $arg, 'cron' ) );
-			wp_schedule_single_event( $cron_next, 'backwpup_cron', array( 'id' => $arg ) );
-			//start job
-			BackWPup_Job::start_wp_cron( $arg );
+
+		if ( empty( $arg ) || $arg == 'restart' )
+			return;
+
+		//check that job exits
+		$jobids = BackWPup_Option::get_job_ids( 'activetype', 'wpcron' );
+		if ( ! in_array( $arg, $jobids ) )
+			return;
+
+		//delay other job start for 5 minutes if already one is running
+		if ( ! empty( $job_object ) ) {
+			wp_schedule_single_event( time() + 300 , 'backwpup_cron', array( 'id' => $arg ) );
+			return;
 		}
+
+		//reschedule next job run
+		$cron_next = self::cron_next( BackWPup_Option::get( $arg, 'cron' ) );
+		wp_schedule_single_event( $cron_next, 'backwpup_cron', array( 'id' => $arg ) );
+
+		//start job
+		BackWPup_Job::start_wp_cron( $arg );
+
 	}
 
 
@@ -40,83 +53,33 @@ class BackWPup_Cron {
 	 */
 	public static function check_cleanup() {
 
-		$job_object = BackWPup_Job::get_working_data( TRUE );
-		$jobids = BackWPup_Option::get_job_ids( );
+		$job_object = BackWPup_Job::get_working_data();
 
 		// check aborted jobs for longer than a tow hours, abort them courtly and send mail
 		if ( is_object( $job_object ) && ! empty( $job_object->logfile ) ) {
 			$not_worked_time = microtime( TRUE ) - $job_object->timestamp_last_update;
-			if ( $not_worked_time > 7200 ) {
-				unlink( BackWPup::get_plugin_data( 'running_file' ) );
-				//add log entry
-				$timestamp = "<span title=\"[Type: " . E_USER_ERROR . "|Line: " . __LINE__ . "|File: " . basename( __FILE__ ) . "|PID: " . $job_object->pid . "]\">[" . date_i18n( 'd-M-Y H:i:s' ) . "]</span> ";
-				file_put_contents( $job_object->logfile, $timestamp . "<span class=\"error\">" . __( 'ERROR:', 'backwpup' ) . " " . __( 'Aborted, because no progress for 2 hours!', 'backwpup' ) . "</span><br />" . PHP_EOL, FILE_APPEND );
-				//write new log header
-				$job_object->errors ++;
-				$fd      = fopen( $job_object->logfile, 'r+' );
-				if ( is_resource( $fd ) ) {
-					$filepos = ftell( $fd );
-					while ( ! feof( $fd ) ) {
-						$line = fgets( $fd );
-						if ( stripos( $line, "<meta name=\"backwpup_errors\"" ) !== FALSE ) {
-							fseek( $fd, $filepos );
-							fwrite( $fd, str_pad( "<meta name=\"backwpup_errors\" content=\"" . $job_object->errors . "\" />", 100 ) . PHP_EOL );
-							break;
-						}
-						$filepos = ftell( $fd );
-					}
-					fclose( $fd );
-				}
-				//update job settings
-				if ( ! empty( $job_object->job[ 'jobid' ] ) )
-					BackWPup_Option::update( $job_object->job[ 'jobid' ], 'lastruntime', ( current_time( 'timestamp' ) - $job_object->start_time ) );
-				//clean up temp
-				if ( ! empty( $job_object->backup_file ) && is_file( BackWPup::get_plugin_data( 'TEMP' ) . $job_object->backup_file ) )
-					unlink( BackWPup::get_plugin_data( 'TEMP' ) . $job_object->backup_file );
-				if ( ! empty( $job_object->folder_list_file ) && is_file( $job_object->folder_list_file ) )
-					unlink( $job_object->folder_list_file );
-				if ( ! empty( $job_object->additional_files_to_backup ) ) {
-					foreach ( $job_object->additional_files_to_backup as $additional_file ) {
-						if ( $additional_file == BackWPup::get_plugin_data( 'TEMP' ) . basename( $additional_file ) && is_file( $additional_file ) )
-							unlink( $additional_file );
-					}
-				}
-				//Send mail with log
-				if ( $job_object->job[ 'mailaddresslog' ] ) {
-					$subject = sprintf( __( '[%3$s] BackWPup log %1$s: %2$s', 'backwpup' ), date_i18n( 'd-M-Y H:i', $job_object->job[ 'lastrun' ], TRUE ), esc_attr( $job_object->job[ 'name' ] ), __('ERROR','backwpup') );
-					$headers = array();
-					$headers[] = 'Content-Type: text/html; charset='. get_bloginfo( 'charset' );
-					$headers[] = 'X-Priority: 1';
-					if ( ! empty( $job_object->job[ 'mailaddresssenderlog' ] ) )
-						$headers[] = 'From: ' . $job_object->job[ 'mailaddresssenderlog' ];
-					wp_mail( $job_object->job[ 'mailaddresslog' ], $subject, file_get_contents( $job_object->logfile ), $headers );
-				}
+			if ( $not_worked_time > 3600 ) {
+				$job_object->log( E_USER_ERROR, __( 'Aborted, because no progress for one hour!', 'backwpup' ), __FILE__, __LINE__ );
+				$job_object->end();
 			}
 		}
 
 		//Compress not compressed logs
-		if ( function_exists( 'gzopen' ) && ! $job_object && BackWPup_Option::get(  'cfg', 'gzlogs' )) {
-			//Compress logs from last Jobs
-			foreach ( $jobids as $jobid ) {
-				$log_file = BackWPup_Option::get( $jobid, 'logfile' );
-				//compress uncompressed
-				if ( is_file( $log_file ) && '.html' == substr( $log_file, -5 ) ) {
-					$compress = new BackWPup_Create_Archive( $log_file . '.gz' );
-					if ( $compress->add_file( $log_file ) ) {
-						BackWPup_Option::update( $jobid, 'logfile', $log_file. '.gz' );
-						unlink( $log_file );
-					}
-					unset( $compress );
-				}
-
-			}
+		if ( function_exists( 'gzopen' ) && get_site_option( 'backwpup_cfg_gzlogs' ) &&! is_object( $job_object ) ) {
 			//Compress old not compressed logs
-			if ( $dir = opendir( BackWPup_Option::get( 'cfg', 'logfolder' ) ) ) {
+			if ( $dir = opendir( get_site_option( 'backwpup_cfg_logfolder' ) ) ) {
+				$jobids = BackWPup_Option::get_job_ids();
 				while ( FALSE !== ( $file = readdir( $dir ) ) ) {
-					if ( is_file( BackWPup_Option::get( 'cfg', 'logfolder' ) . $file ) && '.html' == substr( $file, -5 ) ) {
-						$compress = new BackWPup_Create_Archive(  BackWPup_Option::get( 'cfg', 'logfolder' ) . $file . '.gz' );
-						if ( $compress->add_file( BackWPup_Option::get( 'cfg', 'logfolder' ) . $file ) ) {
-							unlink( BackWPup_Option::get( 'cfg', 'logfolder' ) . $file );
+					if ( is_writeable( get_site_option( 'backwpup_cfg_logfolder' ) . $file ) && '.html' == substr( $file, -5 ) ) {
+						$compress = new BackWPup_Create_Archive( get_site_option( 'backwpup_cfg_logfolder' ) . $file . '.gz' );
+						if ( $compress->add_file( get_site_option( 'backwpup_cfg_logfolder' ) . $file ) ) {
+							unlink( get_site_option( 'backwpup_cfg_logfolder' ) . $file );
+							//change last logfile in jobs
+							foreach( $jobids as $jobid ) {
+								$job_logfile = BackWPup_Option::get( $jobid, 'logfile' );
+								if ( ! empty( $job_logfile ) && $job_logfile == get_site_option( 'backwpup_cfg_logfolder' ) . $file )
+									BackWPup_Option::update( $jobid, 'logfile', get_site_option( 'backwpup_cfg_logfolder' ) . $file . '.gz' );
+							}
 						}
 						unset( $compress );
 					}
@@ -126,23 +89,29 @@ class BackWPup_Cron {
 		}
 
 		//Jobs cleanings
-		if ( ! $job_object ) {
+		if ( ! is_object( $job_object ) ) {
 			//remove restart cron
 			wp_clear_scheduled_hook( 'backwpup_cron', array( 'id' => 'restart' ) );
 			//temp cleanup
-			if ( $dir = opendir( BackWPup::get_plugin_data( 'TEMP' ) ) ) {
-				while ( FALSE !== ( $file = readdir( $dir ) ) ) {
-					if ( is_file( BackWPup::get_plugin_data( 'TEMP' ) . $file ) ) {
-						if ( '.gz' == substr( $file, -3 ) || '.sql' == substr( $file, -4 ) || '.bz2' == substr( $file, -4 ) || '.zip' == substr( $file, -4 ) || '.txt' == substr( $file, -4 ) || '.xml' == substr( $file, -4 ) )
-							unlink( BackWPup::get_plugin_data( 'TEMP' ) . $file );
-					}
-				}
-				closedir( $dir );
-			}				
+			BackWPup_Job::clean_temp_folder();
 		}
+
+		//check scheduling jobs that not found will removed because there are single scheduled
+		$activejobs = BackWPup_Option::get_job_ids( 'activetype', 'wpcron' );
+		if ( ! empty( $activejobs ) ) {
+			foreach ( $activejobs as $jobid ) {
+				$cron_next = wp_next_scheduled( 'backwpup_cron', array( 'id' => $jobid ) );
+				if ( ! $cron_next || $cron_next < time() ) {
+					wp_unschedule_event( $cron_next, 'backwpup_cron', array( 'id' => $jobid ) );
+					$cron_next = BackWPup_Cron::cron_next( BackWPup_Option::get( $jobid, 'cron') );
+					wp_schedule_single_event( $cron_next, 'backwpup_cron', array( 'id' => $jobid ) );
+				}
+			}
+		}
+
 	}
 
-	
+
 	/**
 	 * Start job if in cron and run query args are set.
 	 */
@@ -151,25 +120,27 @@ class BackWPup_Cron {
 		//only if cron active
 		if ( ! defined( 'DOING_CRON' ) || ! DOING_CRON )
 			return;
-			
+
 		//only work if backwpup_run as query var ist set and nothing else and the value ist right
 		if ( empty( $_GET[ 'backwpup_run' ] ) || ! in_array( $_GET[ 'backwpup_run' ], array( 'test','restart', 'runnow', 'runnowalt', 'runext', 'cronrun' ) ) )
 			return;
-		
-		//set some header
-		send_nosniff_header();
+
+		//special header
+		@session_write_close();
+		@header( 'Content-Type: text/html; charset=' . get_bloginfo( 'charset' ), TRUE );
+		@header( 'X-Robots-Tag: noindex, nofollow', TRUE );
+		@header( 'X-BackWPup-Version: ' . BackWPup::get_plugin_data( 'version' ), TRUE );
 		nocache_headers();
-		@header( 'x-backwpup-ver: ' . BackWPup::get_plugin_data( 'version' ) );
-		
+
 		//on test die for fast feedback
-		if ( $_GET[ 'backwpup_run' ] == 'test' ) 
-			die();
-		
+		if ( $_GET[ 'backwpup_run' ] == 'test' )
+			die( 'BackWPup Test' );
+
 		// generate normal nonce
-		$nonce = substr( wp_hash( wp_nonce_tick() . 'backwup_job_run-' . $_GET[ 'backwpup_run' ], 'nonce' ), - 12, 10 );
+		$nonce = substr( wp_hash( wp_nonce_tick() . 'backwpup_job_run-' . $_GET[ 'backwpup_run' ], 'nonce' ), - 12, 10 );
 		//special nonce on external start
 		if ( $_GET[ 'backwpup_run' ] == 'runext' )
-			$nonce = BackWPup_Option::get( 'cfg', 'jobrunauthkey' );
+			$nonce = get_site_option( 'backwpup_cfg_jobrunauthkey' );
 		// check nonce
 		if ( empty( $_GET['_nonce'] ) || $nonce != $_GET['_nonce'] )
 			return;
@@ -185,8 +156,8 @@ class BackWPup_Cron {
 		BackWPup_Job::start_http( $_GET[ 'backwpup_run' ] );
 		die();
 	}
-	
-	
+
+
 	/**
 	 *
 	 * Get the local time timestamp of the next cron execution
@@ -312,7 +283,7 @@ class BackWPup_Cron {
 			}
 		}
 
-		//generate  years
+		//generate years
 		for ( $i = gmdate( 'Y' ); $i < gmdate( 'Y', 2147483647 ); $i ++ ) {
 			$cron[ 'year' ][ ] = $i;
 		}
@@ -322,14 +293,13 @@ class BackWPup_Cron {
 		foreach ( $cron[ 'year' ] as $year ) {
 			foreach ( $cron[ 'mon' ] as $mon ) {
 				foreach ( $cron[ 'mday' ] as $mday ) {
-					if ( checkdate( $mon, $mday, $year ) ) {
-						foreach ( $cron[ 'hours' ] as $hours ) {
-							foreach ( $cron[ 'minutes' ] as $minutes ) {
-								$timestamp = gmmktime( $hours , $minutes, 0, $mon, $mday, $year );
-								if ( $timestamp && in_array( gmdate( 'j', $timestamp ), $cron[ 'mday' ] ) && in_array( gmdate( 'w', $timestamp ), $cron[ 'wday' ] ) && $timestamp > $current_timestamp ) {
-									return $timestamp - ( get_option( 'gmt_offset' ) * 3600 );
-								}
-							}
+					if ( ! checkdate( $mon, $mday, $year ) )
+						continue;
+					foreach ( $cron[ 'hours' ] as $hours ) {
+						foreach ( $cron[ 'minutes' ] as $minutes ) {
+							$timestamp = gmmktime( $hours, $minutes, 0, $mon, $mday, $year );
+							if ( $timestamp && in_array( gmdate( 'j', $timestamp ), $cron[ 'mday' ] ) && in_array( gmdate( 'w', $timestamp ), $cron[ 'wday' ] ) && $timestamp > $current_timestamp )
+								return $timestamp - ( get_option( 'gmt_offset' ) * 3600 );
 						}
 					}
 				}

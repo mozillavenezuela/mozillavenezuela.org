@@ -154,12 +154,14 @@ class A_NextGen_Basic_Template_Form extends Mixin
             $gallery->slideshow_link = $params['slideshow_link'];
             $gallery->slideshow_link_text = $displayed_gallery->display_settings['slideshow_link_text'];
         }
+		else $gallery->show_slideshow = FALSE;
 
         if (!empty($displayed_gallery->display_settings['show_piclens_link'])) {
             $gallery->show_piclens = true;
             $gallery->piclens_link = $params['piclens_link'];
             $gallery->piclens_link_text = $displayed_gallery->display_settings['piclens_link_text'];
         }
+		else $gallery->show_piclens = FALSE;
 
         $gallery = apply_filters('ngg_gallery_object', $gallery, 4);
 
@@ -208,5 +210,9 @@ class A_NextGen_Basic_Template_Form extends Mixin
             $this->module_version,
             TRUE
         );
+		$atp = $this->object->get_registry()->get_utility('I_Attach_To_Post_Controller');
+	
+	if ($atp != null) {
+		$atp->mark_script('ngg_template_settings');	}
 	}
 }

@@ -25,7 +25,7 @@ class M_NextGen_Basic_Gallery extends C_Base_Module
             'photocrati-nextgen_basic_gallery',
             'NextGEN Basic Gallery',
             "Provides NextGEN Gallery's basic thumbnail/slideshow integrated gallery",
-            '0.5',
+            '0.7',
             'http://www.nextgen-gallery.com',
             'Photocrati Media',
             'http://www.photocrati.com'
@@ -57,17 +57,19 @@ class M_NextGen_Basic_Gallery extends C_Base_Module
    
     function _register_adapters()
     {
-        // Provides the display type forms
-        $this->get_registry()->add_adapter(
-            'I_Form',
-            'A_NextGen_Basic_Slideshow_Form',
-            NEXTGEN_GALLERY_BASIC_SLIDESHOW
-        );
-        $this->get_registry()->add_adapter(
-            'I_Form',
-            'A_NextGen_Basic_Thumbnail_Form',
-            NEXTGEN_GALLERY_BASIC_THUMBNAILS
-        );
+        if (is_admin()) {
+            // Provides the display type forms
+            $this->get_registry()->add_adapter(
+                'I_Form',
+                'A_NextGen_Basic_Slideshow_Form',
+                NEXTGEN_GALLERY_BASIC_SLIDESHOW
+            );
+            $this->get_registry()->add_adapter(
+                'I_Form',
+                'A_NextGen_Basic_Thumbnail_Form',
+                NEXTGEN_GALLERY_BASIC_THUMBNAILS
+            );
+        }
         
         // Provides the controllers for the display types
         $this->get_registry()->add_adapter(
@@ -112,11 +114,13 @@ class M_NextGen_Basic_Gallery extends C_Base_Module
             'A_Ajax_Pagination_Actions'
         );
 
-        // Adds the settings forms
-        $this->get_registry()->add_adapter(
-            'I_Form_Manager',
-            'A_NextGen_Basic_Gallery_Forms'
-        );
+        if (is_admin()) {
+            // Adds the settings forms
+            $this->get_registry()->add_adapter(
+                'I_Form_Manager',
+                'A_NextGen_Basic_Gallery_Forms'
+            );
+        }
     }
     
     function _register_hooks()

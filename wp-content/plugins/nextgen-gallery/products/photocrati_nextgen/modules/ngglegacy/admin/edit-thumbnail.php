@@ -145,7 +145,7 @@ if ($thumbnail_crop_frame != null)
 <table width="98%" align="center" style="border:1px solid #DADADA">
 	<tr>
 		<td rowspan="3" valign="middle" align="center" width="350" style="background-color:#DADADA;">
-			<img src="<?php echo esc_url( $preview_image ); ?>" alt="" id="imageToEdit" />	
+			<img src="<?php echo nextgen_esc_url( $preview_image ); ?>" alt="" id="imageToEdit" />	
 		</td>
 		<td width="300" style="background-color : #DADADA;">
 			<small style="margin-left:6px; display:block;"><?php esc_html_e('Select the area for the thumbnail from the picture on the left.', 'nggallery'); ?></small>
@@ -154,10 +154,10 @@ if ($thumbnail_crop_frame != null)
 	<tr>
 		<td align="center" width="300" height="320">
 			<div id="previewNewThumb" style="display:none;width:<?php echo $WidthHtmlPrev; ?>px;height:<?php echo $HeightHtmlPrev; ?>px;overflow:hidden; margin-left:5px;">
-				<img src="<?php echo esc_url( $preview_image ); ?>" id="imageToEditPreview" />
+				<img src="<?php echo nextgen_esc_url( $preview_image ); ?>" id="imageToEditPreview" />
 			</div>
 			<div id="actualThumb">
-				<img src="<?php echo esc_url( $picture->thumbURL ); ?>?<?php echo time()?>" />
+				<img src="<?php echo nextgen_esc_url( $picture->thumbURL ); ?>?<?php echo time()?>" />
 			</div>
 		</td>
 	</tr>

@@ -23,6 +23,10 @@ class A_NextGen_Basic_Thumbnail_Form extends Mixin_Display_Type_Form
 			$this->object->get_static_url('photocrati-nextgen_basic_gallery#thumbnails/nextgen_basic_thumbnails_settings.js'),
 			array('jquery.nextgen_radio_toggle')
 		);
+			$atp = $this->object->get_registry()->get_utility('I_Attach_To_Post_Controller');
+	
+		if ($atp != null) {
+			$atp->mark_script('nextgen_basic_thumbnails_settings');		}
 	}
 
 	/**
@@ -158,7 +162,7 @@ class A_NextGen_Basic_Thumbnail_Form extends Mixin_Display_Type_Form
         return $this->_render_radio_field(
             $display_type,
             'ajax_pagination',
-            'Enable Ajax pagination',
+            'Enable AJAX pagination',
             $display_type->settings['ajax_pagination'],
             'Browse images without reloading the page.'
         );

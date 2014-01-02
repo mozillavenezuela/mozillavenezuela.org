@@ -4,7 +4,7 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('You 
 /**
  * Plugin Name: NextGEN Gallery by Photocrati
  * Description: The most popular gallery plugin for WordPress and one of the most popular plugins of all time with over 7 million downloads.
- * Version: 2.0.30
+ * Version: 2.0.40
  * Author: Photocrati Media
  * Plugin URI: http://www.nextgen-gallery.com
  * Author URI: http://www.photocrati.com
@@ -12,6 +12,49 @@ if(preg_match('#' . basename(__FILE__) . '#', $_SERVER['PHP_SELF'])) { die('You 
  */
 
 if (!class_exists('E_Clean_Exit')) { class E_Clean_Exit extends RuntimeException {} }
+if (!class_exists('E_NggErrorException')) { class E_NggErrorException extends RuntimeException {} }
+
+// This is a temporary function to replace the use of WP's esc_url which strips spaces away from URLs
+if (!function_exists('nextgen_esc_url')) {
+	function nextgen_esc_url( $url, $protocols = null, $_context = 'display' ) {
+		$original_url = $url;
+
+		if ( '' == $url )
+			return $url;
+		$url = preg_replace('|[^a-z0-9 \\-~+_.?#=!&;,/:%@$\|*\'()\\x80-\\xff]|i', '', $url);
+		$strip = array('%0d', '%0a', '%0D', '%0A');
+		$url = _deep_replace($strip, $url);
+		$url = str_replace(';//', '://', $url);
+		/* If the URL doesn't appear to contain a scheme, we
+		 * presume it needs http:// appended (unless a relative
+		 * link starting with /, # or ? or a php file).
+		 */
+		 
+		if ( strpos($url, ':') === false && ! in_array( $url[0], array( '/', '#', '?' ) ) &&
+			! preg_match('/^[a-z0-9-]+?\.php/i', $url) )
+			$url = 'http://' . $url;
+
+		// Replace ampersands and single quotes only when displaying.
+		if ( 'display' == $_context ) {
+			$url = wp_kses_normalize_entities( $url );
+			$url = str_replace( ' ', '%20', $url );
+			$url = str_replace( '&amp;', '&#038;', $url );
+			$url = str_replace( "'", '&#039;', $url );
+		}
+
+		if ( '/' === $url[0] ) {
+			$good_protocol_url = $url;
+		} else {
+			if ( ! is_array( $protocols ) )
+				$protocols = wp_allowed_protocols();
+			$good_protocol_url = wp_kses_bad_protocol( $url, $protocols );
+			if ( strtolower( $good_protocol_url ) != strtolower( $url ) )
+				return '';
+		}
+
+		return apply_filters('clean_url', $good_protocol_url, $original_url, $_context);
+	}
+}
 
 /**
  * NextGEN Gallery is built on top of the Photocrati Pope Framework:
@@ -33,7 +76,7 @@ class C_NextGEN_Bootstrap
 	var $_registry = NULL;
 	var $_settings_option_name = 'ngg_options';
 	var $_pope_loaded = FALSE;
-	static $debug = WP_DEBUG;
+	static $debug = FALSE;
 
 	static function shutdown($exception=NULL)
 	{
@@ -52,15 +95,42 @@ class C_NextGEN_Bootstrap
 		$klass = get_class($exception);
 		echo "<h1>{$klass} thrown</h1>";
 		echo "<p>{$exception->getMessage()}</p>";
-		if (self::$debug OR (defined('NEXTGEN_GALLERY_DEBUG') AND NEXTGEN_GALLERY_DEBUG == TRUE)) {
+		if (self::$debug OR (defined('NGG_DEBUG') AND NGG_DEBUG == TRUE)) {
 			echo "<h3>Where:</h3>";
 			echo "<p>On line <strong>{$exception->getLine()}</strong> of <strong>{$exception->getFile()}</strong></p>";
 			echo "<h3>Trace:</h3>";
 			echo "<pre>{$exception->getTraceAsString()}</pre>";
-			while (($previous = $exception->getPrevious())) {
-				self::print_exception($previous);
+			if (method_exists($exception, 'getPrevious')) {
+				if (($previous = $exception->getPrevious())) {
+					self::print_exception($previous);
+				}
 			}
 		}
+	}
+
+	static function get_backtrace($objects=FALSE, $remove_dynamic_calls=TRUE)
+	{
+		$trace = debug_backtrace($objects);
+		if ($remove_dynamic_calls) {
+			$skip_methods = array(
+				'_exec_cached_method',
+				'__call',
+				'get_method_property',
+				'set_method_property',
+				'call_method'
+			);
+			foreach ($trace as $key => &$value) {
+				if (isset($value['class']) && isset($value['function'])) {
+					if ($value['class'] == 'ReflectionMethod' && $value['function'] == 'invokeArgs')
+						unset($trace[$key]);
+
+					else if ($value['class'] == 'ExtensibleObject' && in_array($value['function'], $skip_methods))
+						unset($trace[$key]);
+				}
+			}
+		}
+
+		return $trace;
 	}
 
 	function __construct()
@@ -81,11 +151,12 @@ class C_NextGEN_Bootstrap
 		include_once('non_pope/class.photocrati_cache.php');
 		C_Photocrati_Cache::get_instance();
 		C_Photocrati_Cache::get_instance('displayed_galleries');
-		C_Photocrati_Cache::$enabled = TRUE;
+		C_Photocrati_Cache::get_instance('displayed_gallery_rendering');
+		C_Photocrati_Cache::$enabled = PHOTOCRATI_CACHE;
 
 		if (isset($_REQUEST['ngg_flush'])) {
 			C_Photocrati_Cache::flush('all');
-			$_SERVER['QUERY_STRING'] = str_replace('ngg_flush=1', '', $_SERVER['QUERY_STRING']);
+			die("Flushed all caches");
 		}
 		elseif (isset($_REQUEST['ngg_force_update'])) {
 			C_Photocrati_Cache::$do_not_lookup = TRUE;
@@ -94,7 +165,7 @@ class C_NextGEN_Bootstrap
 		}
 		elseif (isset($_REQUEST['ngg_flush_expired'])) {
 			C_Photocrati_Cache::flush('all', TRUE);
-			$_SERVER['QUERY_STRING'] = str_replace('ngg_flush_expired=1', '', $_SERVER['QUERY_STRING']);
+			die("Flushed all expired items from the cache");
 		}
 
 		// Load Settings Manager
@@ -202,10 +273,10 @@ class C_NextGEN_Bootstrap
 		}
 
 		// Update modules
-		add_action('init', array(&$this, 'update'), PHP_INT_MAX);
+		add_action('init', array(&$this, 'update'), PHP_INT_MAX-1);
 
 		// Start the plugin!
-		add_action('init', array(&$this, 'route'), PHP_INT_MAX);
+		add_action('init', array(&$this, 'route'), 11);
 	}
 
 	function delete_expired_transients()
@@ -279,6 +350,8 @@ class C_NextGEN_Bootstrap
 	function update()
 	{
 		$this->_load_pope();
+
+		// Try updating all modules
 		C_Photocrati_Installer::update();
 	}
 
@@ -329,7 +402,38 @@ class C_NextGEN_Bootstrap
 		define('NEXTGEN_GALLERY_MODULE_URL', path_join(NEXTGEN_GALLERY_PRODUCT_URL, 'photocrati_nextgen/modules'));
 		define('NEXTGEN_GALLERY_PLUGIN_CLASS', path_join(NEXTGEN_GALLERY_PLUGIN_DIR, 'module.NEXTGEN_GALLERY_PLUGIN.php'));
 		define('NEXTGEN_GALLERY_PLUGIN_STARTED_AT', microtime());
-		define('NEXTGEN_GALLERY_PLUGIN_VERSION', '2.0.30');
+		define('NEXTGEN_GALLERY_PLUGIN_VERSION', '2.0.40');
+
+		if (!defined('NGG_HIDE_STRICT_ERRORS')) {
+			define('NGG_HIDE_STRICT_ERRORS', TRUE);
+		}
+
+		// Should we display E_STRICT errors?
+		if (NGG_HIDE_STRICT_ERRORS) {
+			$level = error_reporting();
+			if ($level != 0) error_reporting($level & ~E_STRICT);
+		}
+
+		// Should we display NGG debugging information?
+		if (!defined('NGG_DEBUG')) {
+			define('NGG_DEBUG', FALSE);
+		}
+		self::$debug = NGG_DEBUG;
+
+		// User definable constants
+		if (!defined('NEXTGEN_GALLERY_IMPORT_ROOT')) {
+			$path = WP_CONTENT_DIR;
+			if (is_multisite()) {
+				$uploads = wp_upload_dir();
+				$path = $uploads['path'];
+			}
+			define('NEXTGEN_GALLERY_IMPORT_ROOT', $path);
+		}
+
+		// Should the Photocrati cache be enabled
+		if (!defined('PHOTOCRATI_CACHE')) {
+			define('PHOTOCRATI_CACHE', TRUE);
+		}
 	}
 
 

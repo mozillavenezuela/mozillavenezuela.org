@@ -4,6 +4,8 @@ class C_Attach_Controller extends C_NextGen_Admin_Page_Controller
 {
 	static $_instances = array();
 	var	   $_displayed_gallery;
+	var    $_marked_scripts;
+	var 	 $_is_rendering;
 
 	static function &get_instance($context)
 	{
@@ -28,6 +30,56 @@ class C_Attach_Controller extends C_NextGen_Admin_Page_Controller
 	{
 		parent::initialize();
 		$this->_load_displayed_gallery();
+		
+		$this->_marked_scripts = array();
+		
+		if (did_action('wp_print_scripts')) {
+			$this->_handle_scripts();
+		}
+		else {
+			add_action('wp_print_scripts', array($this, '_handle_scripts'), 9999);
+		}
+	}
+	
+	function _handle_scripts()
+	{
+		if (is_admin() && $this->_is_rendering) 
+		{
+			global $wp_scripts;
+	
+			$queue = $wp_scripts->queue;
+			$marked = $this->_marked_scripts;
+			
+			foreach ($marked as $tag => $value) {
+				$this->_handle_script($tag, $queue);
+			}
+
+			foreach ($queue as $extra) {
+				wp_dequeue_script($extra);
+			}
+		}
+	}
+	
+	function _handle_script($tag, &$queue)
+	{
+		global $wp_scripts;
+	
+		$registered = $wp_scripts->registered;
+
+		$idx = array_search($tag, $queue);
+		if ($idx !== false) {
+			unset($queue[$idx]);
+		}
+		
+		if (isset($registered[$tag])) {
+			$script = $registered[$tag];
+			
+			if ($script->deps) {
+				foreach ($script->deps as $dep) {
+					$this->_handle_script($dep, $queue);
+				}
+			}
+		}
 	}
 }
 
@@ -40,26 +92,37 @@ class Mixin_Attach_To_Post extends Mixin
 			$this->object->_displayed_gallery = $mapper->create();
 		}
 	}
+	
+	function mark_script($script_tag)
+	{
+		$this->object->_marked_scripts[$script_tag] = true;
+	}
 
 	function enqueue_backend_resources()
 	{
 		$this->call_parent('enqueue_backend_resources');
-
         // Enqueue frame event publishing
 		wp_enqueue_script('frame_event_publisher');
+		$this->object->mark_script('frame_event_publisher');
 
 		// Enqueue JQuery UI libraries
 		wp_enqueue_script('jquery-ui-tabs');
 		wp_enqueue_script('jquery-ui-sortable');
-        wp_enqueue_script('jquery-ui-tooltip');
+    	wp_enqueue_script('jquery-ui-tooltip');
 		wp_enqueue_script('ngg_tabs', $this->get_static_url('photocrati-attach_to_post#ngg_tabs.js'));
+		$this->object->mark_script('jquery-ui-tabs');
+		$this->object->mark_script('jquery-ui-sortable');
+		$this->object->mark_script('jquery-ui-tooltip');
+		$this->object->mark_script('ngg_tabs');
 
 		// Ensure select2
 		wp_enqueue_style('select2');
 		wp_enqueue_script('select2');
+		$this->object->mark_script('select2');
 
 		// Ensure that the Photocrati AJAX library is loaded
 		wp_enqueue_script('photocrati_ajax');
+		$this->object->mark_script('photocrati_ajax');
 
 		// Enqueue logic for the Attach to Post interface as a whole
 		wp_enqueue_script(
@@ -68,9 +131,11 @@ class Mixin_Attach_To_Post extends Mixin
 		wp_enqueue_style(
 			'ngg_attach_to_post', $this->get_static_url('photocrati-attach_to_post#attach_to_post.css')
 		);
+		$this->object->mark_script('ngg_attach_to_post');
 
 		// Enqueue backbone.js library, required by the Attach to Post display tab
 		wp_enqueue_script('backbone'); // provided by WP
+		$this->object->mark_script('backbone');
 
 		// Ensure underscore sting, a helper utility
 		wp_enqueue_script(
@@ -79,6 +144,7 @@ class Mixin_Attach_To_Post extends Mixin
 			array('underscore'),
 			'2.3.0'
 		);
+		$this->object->mark_script('underscore.string');
 
 		// Enqueue the backbone app for the display tab
 		$settings			= C_NextGen_Settings::get_instance();
@@ -98,6 +164,15 @@ class Mixin_Attach_To_Post extends Mixin
 			'ngg_displayed_gallery_preview_url',
 			$settings->gallery_preview_url
 		);
+		$this->object->mark_script('ngg_display_tab');
+		
+		// TODO: for now mark Pro scripts to ensure they are enqueued properly, remove this after Pro upgrade with tagging added
+		$display_types = array('photocrati-nextgen_pro_slideshow', 'photocrati-nextgen_pro_horizontal_filmstrip', 'photocrati-nextgen_pro_thumbnail_grid', 'photocrati-nextgen_pro_blog_gallery', 'photocrati-nextgen_pro_film');
+		foreach ($display_types as $display_type) {
+			$this->object->mark_script($display_type . '-js');
+		}
+		
+		$this->object->mark_script('nextgen_pro_albums_settings_script');
 	}
 
 	/**
@@ -106,7 +181,9 @@ class Mixin_Attach_To_Post extends Mixin
 	function index_action($return=FALSE)
 	{
         if ($this->object->_displayed_gallery->is_new()) $this->object->expires("+2 hour");
-
+        
+    $this->object->_is_rendering = true;
+    
 		// Enqueue resources
 		return $this->object->render_view('photocrati-attach_to_post#attach_to_post', array(
 			'page_title'	=>	$this->object->_get_page_title(),
@@ -232,7 +309,7 @@ class Mixin_Attach_To_Post extends Mixin
 	function _render_ngg_page_in_frame($page, $tab_id = null)
 	{
 		$frame_url = admin_url("/admin.php?page={$page}&attach_to_post");
-		$frame_url = esc_url($frame_url);
+		$frame_url = nextgen_esc_url($frame_url);
 
 		if ($tab_id) {
 			$tab_id = " id='ngg-iframe-{$tab_id}'";

@@ -2,6 +2,7 @@
 <div id="file_browser">
 </div>
 <p>
+    <input type="checkbox" id="import_keep_location" name="keep_location" value="on" /> <label for="import_keep_location"> <?php esc_html_e('Keep images in original location.', 'nggallery'); ?> <span style="font-size: 85%"><?php esc_html_e('Caution: If you keep images in the original folder and later delete the gallery, the images in that folder might be deleted depending on your settings.', 'nggallery'); ?></span></label><br/><br/>
     <input type="button" id="import_button" name="import_folder" value="Import Folder" class="button-primary"/>
 </p>
 <script type="text/javascript">
@@ -43,18 +44,18 @@
             // Start importing process
             var post_params = {
                 action: 'import_folder',
-                folder: selected_folder
+                folder: selected_folder,
+                keep_location: $('#import_keep_location').is(":checked") ? 'on' : 'off'
             };
             $.post(photocrati_ajax.url, post_params, function(response){
                 if (typeof(response) != 'object') response = JSON.parse(response);
                 if (typeof(response.error) == 'string') {
-                    progress_bar.set("Error occurred");
-                    alert(response.error);
+                    progress_bar.set(response.error);
                 }
                 else {
                     progress_bar.set('Done! Successfully imported '+response.image_ids.length+' images.');
                 }
-                progress_bar.close();
+                progress_bar.close(2000);
             });
         })
     });

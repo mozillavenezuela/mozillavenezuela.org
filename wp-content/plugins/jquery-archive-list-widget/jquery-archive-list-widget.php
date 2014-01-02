@@ -3,11 +3,11 @@
   Plugin Name: jQuery Archive List Widget
   Plugin URI: http://skatox.com/blog/jquery-archive-list-widget/
   Description: A simple jQuery widget for displaying an archive list with some effects.
-  Version: 2.0.1
+  Version: 2.2
   Author: Miguel Useche
   Author URI: http://migueluseche.com/
   License: GPL2
-  Copyleft 2009-2013  Miguel Useche  (email : migueluseche@skatox.com)
+  Copyleft 2009-2014  Miguel Useche  (email : migueluseche@skatox.com)
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -25,8 +25,6 @@
  */
 class JQArchiveList extends WP_Widget 
 {
-    const JS_FILENAME = "jal.js";
-    protected $pluginUrl;
     public $defaults = array( 
             'title' => '',
             'symbol' => 1, 
@@ -45,10 +43,6 @@ class JQArchiveList extends WP_Widget
 
     public function __construct()
     {
-        $this->pluginUrl =  WP_PLUGIN_URL . '/' . 
-                            preg_replace("/^.*[\/\\\]/", "", dirname(__FILE__)) .
-                            '/' . self::JS_FILENAME;
-
         add_shortcode('jQuery Archive List', array($this,'filter'));
         add_filter('widget_text', 'do_shortcode');
         
@@ -66,15 +60,23 @@ class JQArchiveList extends WP_Widget
         );
     }
 
+    /**
+     * Function to enqueue custom JS file to create animations
+     */
+    protected function enqueue_script()
+    {
+        if (function_exists("wp_enqueue_script")) {
+            wp_enqueue_script('jquery_archive_list', plugins_url( "jal.js" , __FILE__ ), array('jquery'), false, true);
+        }
+    }
+
     function widget($args, $instance)
     {
         //Exclude feature was developed by Michael Westergaard <michael@westergaard.eu>
         //and improved by myself at v 1.3.1
         $instance['excluded'] = empty($instance['excluded']) ? array() : implode(',', unserialize($instance['excluded']));
 
-        if (function_exists("wp_enqueue_script")) {
-            wp_enqueue_script('jquery_archive_list', $this->pluginUrl, array('jquery'), false, true);
-        }
+        $this->enqueue_script();
 
         //Prints widget
         extract($args);
@@ -100,6 +102,7 @@ class JQArchiveList extends WP_Widget
         $instance['month_format'] = stripslashes($new_instance['month_format']);
         $instance['showpost'] = empty($new_instance['showpost']) ? 0 : 1;
         $instance['showcount'] = empty($new_instance['showcount']) ? 0 : 1;
+        $instance['onlycategory'] = empty($new_instance['onlycategory']) ? 0 : 1;
         $instance['only_sym_link'] = empty($new_instance['only_sym_link']) ? 0 : 1;
         $instance['expand'] = $new_instance['expand'];
         $instance['excluded'] = !empty($new_instance['excluded']) ? serialize($new_instance['excluded']) : NULL;
@@ -207,7 +210,13 @@ class JQArchiveList extends WP_Widget
                         <?php _e('All', 'jalw_i18n') ?>
                     </option>
                     <option value="current" <?php if ($instance['expand'] == 'current') echo 'selected="selected"'?> >
-                        <?php _e('Current year', 'jalw_i18n') ?>
+                        <?php _e('Current or post date', 'jalw_i18n') ?>
+                    </option>
+                    <option value="current_post" <?php if ($instance['expand'] == 'current_post') echo 'selected="selected"'?> >
+                        <?php _e('Only post date', 'jalw_i18n') ?>
+                    </option>
+                    <option value="current_date" <?php if ($instance['expand'] == 'current_date') echo 'selected="selected"'?> >
+                        <?php _e('Only current date', 'jalw_i18n') ?>
                     </option>
                 </select>
             </dd>
@@ -219,6 +228,10 @@ class JQArchiveList extends WP_Widget
             <dd>
                 <input id="<?php echo $this->get_field_id( 'showpost' ) ?>" name="<?php echo $this->get_field_name( 'showpost' ) ?>" type="checkbox" <?php if ($instance['showpost']) echo 'checked="checked"' ?> />
                 <?php _e('Show posts under months', 'jalw_i18n') ?>
+            </dd>
+            <dd>
+                <input id="<?php echo $this->get_field_id( 'onlycategory' ) ?>" name="<?php echo $this->get_field_name( 'onlycategory' ) ?>" type="checkbox" <?php if ($instance['onlycategory']) echo 'checked="checked"' ?> />
+                <?php _e('Show only post from selected category in a category page', 'jalw_i18n') ?>
             </dd>
             <dd>
                 <input id="<?php echo $this->get_field_id( 'only_sym_link' ) ?>" name="<?php echo $this->get_field_name( 'only_sym_link' ) ?>" type="checkbox" value="1" <?php if ($instance['only_sym_link']) echo 'checked="checked"' ?> />
@@ -241,7 +254,7 @@ class JQArchiveList extends WP_Widget
         </dl>
         <?php
     }
-
+        
     protected function getYears($instance)
     {
         global $wpdb;
@@ -249,13 +262,20 @@ class JQArchiveList extends WP_Widget
         $join_raw = "";
         $where_raw = "WHERE post_type = 'post' AND post_status = 'publish' ";
 
-        if (!empty($instance['excluded'])) {
+        if (!empty($instance['excluded']))
             $where_raw .= "AND {$wpdb->term_taxonomy}.term_id NOT IN ({$instance['excluded']}) ";
-            $where_raw .= "AND {$wpdb->term_taxonomy}.taxonomy = 'category'";
+
+        if($instance['onlycategory'] && is_category())
+            $where_raw .= sprintf("AND {$wpdb->term_taxonomy}.term_id=%d ", get_query_var('cat'));
+
+
+        if (!empty($instance['excluded']) || ($instance['onlycategory'] && is_category())){
+            $where_raw .= "AND {$wpdb->term_taxonomy}.taxonomy = 'category' ";
 
             $join_raw = " LEFT JOIN {$wpdb->term_relationships} ON({$wpdb->posts}.ID = {$wpdb->term_relationships}.object_id)";
-            $join_raw .= " LEFT JOIN {$wpdb->term_taxonomy} ON({$wpdb->term_relationships}.term_taxonomy_id = {$wpdb->term_taxonomy}.term_taxonomy_id)";
+            $join_raw .= " LEFT JOIN {$wpdb->term_taxonomy} ON({$wpdb->term_relationships}.term_taxonomy_id = {$wpdb->term_taxonomy}.term_taxonomy_id) ";
         }
+
 
         //Filters supplied by Ramiro García <ramiro(at)inbytes.com>
         $where = apply_filters('getarchives_where', $where_raw);
@@ -278,9 +298,14 @@ class JQArchiveList extends WP_Widget
                 . "AND post_status = 'publish' "
                 . "AND YEAR(post_date) = {$year} ";
 
-        if (!empty($instance['excluded'])) {
+        if (!empty($instance['excluded']))
             $where_raw .= "AND {$wpdb->term_taxonomy}.term_id NOT IN ({$instance['excluded']}) ";
-            $where_raw .= "AND {$wpdb->term_taxonomy}.taxonomy = 'category'";
+
+        if($instance['onlycategory'] && is_category())
+            $where_raw .= sprintf("AND {$wpdb->term_taxonomy}.term_id=%d ", get_query_var('cat'));
+
+        if (!empty($instance['excluded']) || ($instance['onlycategory'] && is_category())) {
+            $where_raw .= "AND {$wpdb->term_taxonomy}.taxonomy = 'category' ";
 
             $join_raw = " LEFT JOIN {$wpdb->term_relationships} ON({$wpdb->posts}.ID = {$wpdb->term_relationships}.object_id)";
             $join_raw .= " LEFT JOIN {$wpdb->term_taxonomy} ON({$wpdb->term_relationships}.term_taxonomy_id = {$wpdb->term_taxonomy}.term_taxonomy_id)";
@@ -310,9 +335,14 @@ class JQArchiveList extends WP_Widget
                 . "AND YEAR(post_date) = {$year} "
                 . "AND MONTH(post_date) = {$month} ";
 
-        if (!empty($instance['excluded'])) {
+        if (!empty($instance['excluded']))
             $where_raw .= "AND {$wpdb->term_taxonomy}.term_id NOT IN ({$instance['excluded']}) ";
-            $where_raw .= "AND {$wpdb->term_taxonomy}.taxonomy = 'category'";
+
+        if($instance['onlycategory'] && is_category())
+            $where_raw .= sprintf("AND {$wpdb->term_taxonomy}.term_id=%d ", get_query_var('cat'));
+        
+        if (!empty($instance['excluded']) || ($instance['onlycategory'] && is_category())) {
+            $where_raw .= "AND {$wpdb->term_taxonomy}.taxonomy = 'category' ";
 
             $join_raw = "LEFT JOIN {$wpdb->term_relationships} ON({$wpdb->posts}.ID = {$wpdb->term_relationships}.object_id)";
             $join_raw .= "LEFT JOIN {$wpdb->term_taxonomy} ON({$wpdb->term_relationships}.term_taxonomy_id = {$wpdb->term_taxonomy}.term_taxonomy_id)";
@@ -354,17 +384,20 @@ class JQArchiveList extends WP_Widget
 
         //Prints Years
         for ($i = 0; $i < count($years); $i++) {
-            $currentYear = $instance['expand'] == 'current' && $years[$i]->year == $postYear && $years[$i]->year == date('Y');
+            $expandByPostDate = $years[$i]->year == $postYear && ($instance['expand'] == 'current' || $instance['expand'] == 'current_post');
+            $expandByCurrDate = $years[$i]->year == date('Y') && ($instance['expand'] == 'current' || $instance['expand'] == 'current_date');
+            $expandOnly = $expandByCurrDate || $expandByPostDate;
+            $expandYear = $instance['expand'] == 'all' || $expandOnly;
+
             $yearLink = get_year_link($years[$i]->year);
 
-            if ($currentYear || $instance['expand'] == 'all') {
+            if ($expandYear) {
                 $class = 'jaw_years expanded';
                 $symbol = htmlspecialchars($instance['con_sym']);
             } else {
                 $class = 'jaw_years';
                 $symbol = htmlspecialchars($instance['ex_sym']);
             }
-
 
             if($instance['only_sym_link']){
                 $html.= "\n<li class=\"{$class}\"><a class=\"jaw_years\" href=\"{$yearLink}\">";
@@ -373,7 +406,6 @@ class JQArchiveList extends WP_Widget
                 $html.= "\n<li class=\"{$class}\"><a class=\"jaw_years\" href=\"{$yearLink}\">";
                 $html.= "<span class=\"jaw_symbol\">{$symbol}</span> {$years[$i]->year}";
             }
-
 
             //Prints number of post_date
             if ($instance['showcount'])
@@ -387,14 +419,18 @@ class JQArchiveList extends WP_Widget
             foreach ($months as $month) {
                 $month_url = get_month_link($years[$i]->year, $month->month);
 
-                $style = $currentYear || $instance['expand'] == 'all'? 'list-item' : 'none';
+                $expandByPostDateMonth = ($postId >= 0 && $month->month == $postMonth && $years[$i]->year == $postYear) && ($instance['expand'] == 'current' || $instance['expand'] == 'current_post');
+                $expandByCurrDateMonth = ($years[$i]->year == date('Y') && $month->month == date('n'))  && ($instance['expand'] == 'current' || $instance['expand'] == 'current_date');
+                $expandOnlyMonth = $expandByCurrDateMonth || $expandByPostDateMonth;
+
+                $expandMonth = $instance['expand'] == 'all' || $expandOnlyMonth;
+
+                $style = $expandYear ? 'list-item' : 'none';
                 $html.= "\n\t<li class=\"jaw_months\" style=\"display:{$style};\">";
                 $html.= "<a class=\"jaw_months\" href=\"{$month_url}\">";
 
-                $this_month = $currentYear && (($postId >= 0 && $month->month == $postMonth) || ($postId < 0 && $month == $months[0]));
-
                 if ($instance['showpost']) {
-                    $sym_key = ($this_month || $instance['expand'] == 'all') ? 'con_sym' : 'ex_sym';
+                    $sym_key = $expandMonth ? 'con_sym' : 'ex_sym';
                     $html.= '<span class="jaw_symbol">' . htmlspecialchars($instance[$sym_key]) . '</span> ';
                 }
 
@@ -428,7 +464,7 @@ class JQArchiveList extends WP_Widget
                     $posts = $this->getPosts($instance, $years[$i]->year, $month->month);
 
                     foreach ($posts as $post) {
-                        $style = ($this_month || $instance['expand'] == 'all') ? 'list-item' : 'none';
+                        $style = $expandMonth ? 'list-item' : 'none';
                         $html.= "\n\t\t" . '<li class="jaw_posts" style="display:' . $style . ';">';
                         $html.= '<a href="' . get_permalink($post->ID) . '">' . $post->post_title . '</a></li>';
                     }
@@ -477,10 +513,7 @@ class JQArchiveList extends WP_Widget
      */
     public function filter($attr)
     {
-        if (function_exists("wp_enqueue_script")) {
-            wp_enqueue_script('jquery_archive_list', $this->pluginUrl, array('jquery'), false, true);
-        }
-        
+        $this->enqueue_script();        
         $instance = shortcode_atts($this->defaults, $attr);
         
         return $this->buildHtml($instance);

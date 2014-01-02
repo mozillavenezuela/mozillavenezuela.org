@@ -22,12 +22,24 @@ Follow variables are useable :
 	<div class="ngg-album-compact">
 		<div class="ngg-album-compactbox">
 			<div class="ngg-album-link">
-				<a class="Link" href="<?php echo $gallery->pagelink ?>">
-					<img class="Thumb" alt="<?php echo $gallery->title ?>" src="<?php echo $gallery->previewurl ?>"/>
+				<a class="Link" href="<?php echo nextgen_esc_url($gallery->pagelink) ?>">
+					<img class="Thumb" alt="<?php echo esc_attr($gallery->title) ?>" src="<?php echo nextgen_esc_url($gallery->previewurl) ?>"/>
 				</a>
 			</div>
 		</div>
-		<h4><a class="ngg-album-desc" title="<?php echo $gallery->title ?>" href="<?php echo $gallery->pagelink ?>" ><?php echo $gallery->title ?></a></h4>
+        <?php if (!empty($image_gen_params)) {
+            $max_width = 'style="max-width: ' . ($image_gen_params['width'] + 20) . 'px"';
+        } else {
+            $max_width = '';
+        } ?>
+        <h4>
+            <a class="ngg-album-desc"
+               title="<?php echo esc_attr($gallery->title) ?>"
+               href="<?php echo nextgen_esc_url($gallery->pagelink) ?>"
+               <?php echo $max_width; ?>>
+                <?php echo $gallery->title ?>
+            </a>
+        </h4>
 		<?php if (@$gallery->counter > 0) : ?>
 		<p><strong><?php echo $gallery->counter ?></strong>&nbsp;<?php _e('Photos', 'nggallery') ?></p>
 		<?php endif; ?>

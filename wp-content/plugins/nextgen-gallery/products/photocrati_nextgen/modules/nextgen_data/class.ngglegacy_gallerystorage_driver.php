@@ -161,16 +161,33 @@ class Mixin_NggLegacy_GalleryStorage_Driver extends Mixin
 	 * @param string $size
 	 * @returns array
 	 */
-	function get_image_url($image, $size='full')
+	function get_image_url($image, $size='full', $check_existance=FALSE)
 	{
-		$fs		= $this->get_registry()->get_utility('I_Fs');
-		$router = $this->get_registry()->get_utility('I_Router');
-		$request_uri = str_replace(
-			trailingslashit($fs->get_document_root()),
-			'',
-			$this->object->get_image_abspath($image, $size)
-		);
-        return $router->remove_url_segment('/index.php', $router->get_url($request_uri, FALSE, TRUE));
+		$retval  = NULL;
+		$fs		 = $this->get_registry()->get_utility('I_Fs');
+		$router	 = $this->get_registry()->get_utility('I_Router');
+		$abspath = $this->object->get_image_abspath($image, $size, $check_existance);
+		if ($abspath) {
+			$doc_root = $fs->get_document_root();
+			
+			if ($doc_root != null) {
+				$doc_root = trailingslashit($doc_root);
+			}
+			
+			$request_uri = str_replace(
+				$doc_root,
+				'',
+				$abspath
+			);
+			
+			if ($request_uri != null && $request_uri[0] != '/') {
+				$request_uri = '/' . $request_uri;
+			}
+			
+			$retval = $router->remove_url_segment('/index.php', $router->get_url($request_uri, FALSE, TRUE));
+		}
+
+		return $retval;
 	}
 
 	/**
@@ -638,16 +655,10 @@ class Mixin_NggLegacy_GalleryStorage_Driver extends Mixin
         }
 
         foreach ($images as $image) {
-
-            // Ensure that there is capacity available
-            if ((is_multisite()) && $settings->get('wpmuQuotaCheck'))
-            {
-                require_once(ABSPATH . 'wp-admin/includes/ms.php');
-                if (upload_is_user_over_quota(FALSE)) {
-                    $message .= sprintf(__('Sorry, you have used your space allocation. Please delete some files to upload more files.', 'nggallery'));
-                    throw new E_NoSpaceAvailableException();
-                }
-            }
+			if ($this->object->is_current_user_over_quota()) {
+				$message = sprintf(__('Sorry, you have used your space allocation. Please delete some files to upload more files.', 'nggallery'));
+				throw new E_NoSpaceAvailableException($message);
+			}
 
             // Copy the db entry
             if (is_numeric($image))

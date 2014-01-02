@@ -3,8 +3,8 @@ Contributors: skatox
 Donate link: http://skatox.com/blog/jquery-archive-list-widget/
 Tags: jquery, ajax, javacript, collapse, collapsible, archive, collapsible archive, widget
 Requires at least: 3.0
-Tested up to: 3.5.1
-Stable tag: 2.0.1
+Tested up to: 3.8
+Stable tag: 2.2
 
 A simple jQuery widget (can be used in posts) for displaying an archive list with some effects.
 
@@ -102,7 +102,12 @@ Since 2.0 it's possible. Each instance has its own configuration. Shortcode widg
 
 == Change Log ==
 
-= 2.1 =
+= 2.2 =
+* Added support for HTTPS, now the plugin generates the correct link if HTTPS is being used, thanks to **bridgetwes** for the patch.
+* Added more expansion options, you can select if you want to expand: only on current date, current loaded post, both, none or all archives dates.
+* Added an option to show only posts from selected category when visiting a category page.
+
+= 2.0.1 =
 * Added option to exclude categories when using shortcodes, just add categorie's ID separated by commas in the exclude attribute.
 * Solved bug of not including JS file when using a filter without any widget.
 * Solved bug of not including JS in some WP installlations under Windows.

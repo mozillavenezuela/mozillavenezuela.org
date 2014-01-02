@@ -4,7 +4,7 @@ $this->start_element('nextgen_gallery.gallery_container', 'container', $displaye
 
 ?>
 <div
-	class="ngg-galleryoverview"
+	class="ngg-galleryoverview<?php if (!intval($ajax_pagination)) echo ' ngg-ajax-pagination-none'; ?>"
 	id="ngg-gallery-<?php echo_h($displayed_gallery_id)?>-<?php echo_h($current_page)?>">
 
     <?php if (!empty($slideshow_link)): ?>
@@ -50,14 +50,18 @@ $this->start_element('nextgen_gallery.gallery_container', 'container', $displaye
 
 				?>
         <div class="ngg-gallery-thumbnail">
-            <a href="<?php echo esc_attr($storage->get_image_url($image))?>"
+            <a href="<?php echo esc_attr($storage->get_image_url($image, 'full', TRUE))?>"
                title="<?php echo esc_attr($image->description)?>"
-               data-image-id='<?php echo esc_attr($image->pid); ?>'
+               data-src="<?php echo esc_attr($storage->get_image_url($image)); ?>"
+               data-thumbnail="<?php echo esc_attr($storage->get_image_url($image, 'thumb')); ?>"
+               data-image-id="<?php echo esc_attr($image->{$image->id_field}); ?>"
+               data-title="<?php echo esc_attr($image->alttext); ?>"
+               data-description="<?php echo esc_attr(stripslashes($image->description)); ?>"
                <?php echo $effect_code ?>>
                 <img
                     title="<?php echo esc_attr($image->alttext)?>"
                     alt="<?php echo esc_attr($image->alttext)?>"
-                    src="<?php echo esc_attr($storage->get_image_url($image, $thumbnail_size_name))?>"
+                    src="<?php echo esc_attr($storage->get_image_url($image, $thumbnail_size_name, TRUE))?>"
                     width="<?php echo esc_attr($thumb_size['width'])?>"
                     height="<?php echo esc_attr($thumb_size['height'])?>"
                     style="max-width:none;"

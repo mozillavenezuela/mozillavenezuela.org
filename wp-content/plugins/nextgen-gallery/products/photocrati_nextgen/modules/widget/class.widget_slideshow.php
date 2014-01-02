@@ -58,6 +58,10 @@ class C_Widget_Slideshow extends WP_Widget
 
     function widget($args, $instance)
     {
+		$router = C_Router::get_instance();
+		wp_enqueue_style('nextgen_widgets_style', $router->get_static_url('photocrati-widget#widgets.css'));
+		wp_enqueue_style('nextgen_basic_slideshow_style', $router->get_static_url('photocrati-nextgen_basic_gallery#slideshow/nextgen_basic_slideshow.css'));
+
         // these are handled by extract() but I want to silence my IDE warnings that these vars don't exist
         $before_widget = NULL;
         $before_title = NULL;
@@ -71,7 +75,7 @@ class C_Widget_Slideshow extends WP_Widget
 
         $title = apply_filters('widget_title', empty($instance['title']) ? __('Slideshow', 'nggallery') : $instance['title'], $instance, $this->id_base);
 
-        $out = $this->render_slideshow($instance['galleryid'], $instance['width'], $instance['height']);
+        $out = $this->render_slideshow($instance['galleryid'], $instance['width'], $instance['height'], $args);
 
         $parent->render_partial(
             'photocrati-widget#display_slideshow',
@@ -89,7 +93,7 @@ class C_Widget_Slideshow extends WP_Widget
         );
     }
 
-    function render_slideshow($galleryID, $irWidth = '', $irHeight = '')
+    function render_slideshow($galleryID, $irWidth = '', $irHeight = '', $args)
     {
         $registry = C_Component_Registry::get_instance();
         $renderer = $registry->get_utility('I_Displayed_Gallery_Renderer');
@@ -100,6 +104,7 @@ class C_Widget_Slideshow extends WP_Widget
             'gallery_width'  => $irWidth,
             'gallery_height' => $irHeight,
             'source'         => 'galleries',
+            'slug'           => 'widget-' . $args['widget_id'],
             'entity_types'   => array('image'),
             'show_thumbnail_link' => FALSE,
             'ngg_triggers_display' => 'never'

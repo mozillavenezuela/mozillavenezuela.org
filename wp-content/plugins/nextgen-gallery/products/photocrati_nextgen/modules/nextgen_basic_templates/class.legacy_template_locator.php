@@ -38,7 +38,8 @@ class Mixin_Legacy_Template_Locator extends Mixin
     function get_template_directories()
     {
         return array(
-            'Overrides' => STYLESHEETPATH . DIRECTORY_SEPARATOR . 'nggallery' . DIRECTORY_SEPARATOR,
+			'Child Theme' => get_stylesheet_directory() . DIRECTORY_SEPARATOR . 'nggallery' . DIRECTORY_SEPARATOR,
+			'Parent Theme' => get_template_directory() . DIRECTORY_SEPARATOR . 'nggallery' . DIRECTORY_SEPARATOR,
             'NextGEN' => NGGALLERY_ABSPATH . 'view' . DIRECTORY_SEPARATOR
         );
     }
@@ -90,7 +91,7 @@ class Mixin_Legacy_Template_Locator extends Mixin
         }
         elseif (is_string($prefix))
         {
-            $regex_iterator = new RegexIterator($iterator, "#(.*)/{$prefix}\-?.*\.php$#i", RecursiveRegexIterator::GET_MATCH);
+            $regex_iterator = new RegexIterator($iterator, "#(.*)[/\\\]{$prefix}\-?.*\.php$#i", RecursiveRegexIterator::GET_MATCH);
         }
         else {
             $regex_iterator = new RegexIterator($iterator, '/^.+\.php$/i', RecursiveRegexIterator::GET_MATCH);

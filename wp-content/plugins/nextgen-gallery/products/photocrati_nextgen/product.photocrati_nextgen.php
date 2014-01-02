@@ -1,10 +1,10 @@
 <?php
 
 /***
-	{
-		Product: photocrati-nextgen
-	}
-***/
+{
+Product: photocrati-nextgen
+}
+ ***/
 
 define('NEXTGEN_GALLERY_CHANGE_OPTIONS_CAP', 'NextGEN Manage gallery');
 
@@ -17,7 +17,7 @@ class P_Photocrati_NextGen extends C_Base_Product
 		'photocrati-wordpress_routing',
 		'photocrati-security',
 		'photocrati-lzw',
-        'photocrati-nextgen_settings',
+		'photocrati-nextgen_settings',
 		'photocrati-mvc',
 		'photocrati-ajax',
 		'photocrati-dynamic_stylesheet',
@@ -43,7 +43,9 @@ class P_Photocrati_NextGen extends C_Base_Product
 		'photocrati-nextgen_basic_singlepic',
 		'photocrati-nextgen_basic_tagcloud',
 		'photocrati-nextgen_basic_album',
-		'photocrati-widget'
+		'photocrati-widget',
+		'photocrati-third_party_compat',
+		'photocrati-nextgen_xmlrpc'
 	);
 
 	function define()
@@ -52,7 +54,7 @@ class P_Photocrati_NextGen extends C_Base_Product
 			'photocrati-nextgen',
 			'Photocrati NextGEN',
 			'Photocrati NextGEN',
-			'2.0.30',
+			'2.0.40',
 			'http://www.nextgen-gallery.com',
 			'Photocrati Media',
 			'http://www.photocrati.com'
