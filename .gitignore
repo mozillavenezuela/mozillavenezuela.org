@@ -12,6 +12,7 @@
 wp-content/*
 !wp-content/themes/
 !wp-content/plugins/
+!wp-content/plugins/bwp-minify/cache/
 !wp-content/languages/
 
 wp-content/themes/*
