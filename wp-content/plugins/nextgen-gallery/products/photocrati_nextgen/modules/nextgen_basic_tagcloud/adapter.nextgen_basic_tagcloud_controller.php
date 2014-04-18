@@ -33,7 +33,7 @@ class A_NextGen_Basic_Tagcloud_Controller extends Mixin
             'include'  => $displayed_gallery->get_term_ids_for_tags(),
             'largest'  => 22,
             'link'     => 'view',
-            'number'   => 45,
+            'number'   => $display_settings['number'],
             'order'    => 'ASC',
             'orderby'  => 'name',
             'smallest' => 8,

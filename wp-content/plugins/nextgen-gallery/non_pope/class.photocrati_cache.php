@@ -51,7 +51,7 @@ class C_Photocrati_Cache
 	 * @param null $value
 	 * @return bool|int
 	 */
-	static function set($key, $value=NULL, $group=NULL, $ttl=3600)
+	static function set($key, $value=NULL, $group=NULL, $ttl=NULL)
 	{
 		return self::get_instance($group)->update($key, $value, $ttl);
 	}
@@ -87,6 +87,7 @@ class C_Photocrati_Cache
 	 */
 	static function flush($group=NULL, $expired_only=FALSE)
 	{
+        ini_set('memory_limit', -1);
 		$retval = 0;
 
 		if (self::$enabled) {
@@ -123,10 +124,51 @@ class C_Photocrati_Cache
 							$all_keys[] = "'_transient_timeout_{$value}'";
 							$all_keys[] = "'_transient_{$value}'";
 						}
-						unset($keys);
-						$all_keys = implode(',', $all_keys);
-						$sql = "DELETE FROM {$wpdb->options} WHERE option_name IN (". $all_keys. ')';
-						$retval = $wpdb->query($sql);
+
+						// Determine the maximum packet size for the MySQL server
+						$max_packet_size = 1000000; // 1 MB
+						if ($row = $wpdb->get_row("SHOW VARIABLES LIKE 'max_allowed_packet'")) {
+							$max_packet_size = intval($row->Value);
+						}
+						$precision = -6;
+						if ($max_packet_size <1000000)	$precision = -5;
+						if ($max_packet_size <100000)	$precision = -4;
+						if ($max_packet_size <10000)	$precision = -3;
+						if ($max_packet_size <1000)		$precision = -2;
+
+                        if (version_compare(PHP_VERSION, '5.3.0') >= 0)
+                            $max_packet_size = round($max_packet_size, $precision, PHP_ROUND_HALF_DOWN);
+                        else
+                            $max_packet_size = round($max_packet_size, $precision);
+
+						// Generate DELETE queries up to $max_packet_size
+						$keys = array();
+						$average_key_size = strlen($all_keys[0])+15;
+						$count = 1000; // 1 KB buffer
+						while (($key = array_pop($all_keys))) {
+
+							if (($count + $average_key_size) < $max_packet_size) {
+								$keys[] = $key;
+								$count += $average_key_size;
+							}
+							else {
+								$keys = implode(',', $keys);
+								$sql = "DELETE FROM {$wpdb->options} WHERE option_name IN (". $keys. ')';
+								if (strlen($sql) > $max_packet_size) error_log("Delete transient query larger than max_allowed_packet for MySQL");
+								else $retval += $wpdb->query($sql);
+								$count = 1000;
+								$keys = array();
+							}
+						}
+
+                        // If the number of keys to delete is less than the max packet size, then we should still
+                        // delete the records
+                        if (!$retval && $keys) {
+                            $keys = implode(',', $keys);
+                            $sql = "DELETE FROM {$wpdb->options} WHERE option_name IN (". $keys. ')';
+                            if (strlen($sql) > $max_packet_size) error_log("Delete transient query larger than max_allowed_packet for MySQL");
+                            else $retval += $wpdb->query($sql);
+                        }
 					}
 				}
 			}
@@ -190,14 +232,17 @@ class C_Photocrati_Cache
 	 * @param $value
 	 * @return bool|int
 	 */
-	function update($key, $value, $ttl=3600)
+	function update($key, $value, $ttl=NULL)
 	{
+        if (!$ttl) $ttl = PHOTOCRATI_CACHE_TTL;
+
 		$retval = FALSE;
 		if (self::$enabled) {
 			if (is_array($key)) $key = self::generate_key($key);
 			if (self::$force_update OR $this->lookup($key, FALSE) === FALSE) {
 				set_transient($key, $value, $ttl);
-				update_option($this->group.$key, time()+$ttl);
+                delete_option($this->group.$key);
+				add_option($this->group.$key, time()+$ttl, NULL, 'no');
 				$retval = $key;
 			}
 		}

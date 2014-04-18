@@ -14,7 +14,7 @@ class M_NextGen_Pro_Upgrade extends C_Base_Module
             'photocrati-nextgen_pro_upgrade',
             'NextGEN Pro Page',
             'NextGEN Gallery Pro Upgrade Page',
-            '0.1',
+            '0.3',
             'http://www.nextgen-gallery.com',
             'Photocrati Media',
             'http://www.photocrati.com'

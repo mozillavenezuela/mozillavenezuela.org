@@ -40,7 +40,7 @@ class C_Taxonomy_Controller extends C_MVC_Controller
             'source' => 'tags',
             'container_ids' => $tag,
             'slug' => $tag,
-            'display_type' => NEXTGEN_GALLERY_BASIC_THUMBNAILS
+            'display_type' => NGG_BASIC_THUMBNAILS
         ));
 
         // This strips extra whitespace and strips newlines. For some reason this is especially

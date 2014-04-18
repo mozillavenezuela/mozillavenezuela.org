@@ -2,8 +2,6 @@
 // Swift Mailer v5.0.1
 // http://swiftmailer.org/
 // https://github.com/swiftmailer/swiftmailer
-if ( ! class_exists( 'Swift' ) )
-	require BackWPup::get_plugin_data( 'PluginDir' ) . '/vendor/SwiftMailer/swift_required.php';
 
 /**
  *
@@ -387,8 +385,6 @@ class BackWPup_Destination_Email extends BackWPup_Destinations {
 		}
 
 		try {
-			//Set Temp dir for mailing
-			Swift_Preferences::getInstance()->setTempDir( untrailingslashit( BackWPup::get_plugin_data( 'TEMP' ) ) )->setCacheType( 'disk' );
 			// Create the Transport
 			if ( $emailmethod == 'smtp' ) {
 				$transport = Swift_SmtpTransport::newInstance( $emailhost, $emailhostport );

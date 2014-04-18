@@ -4,7 +4,7 @@ class A_NextGen_Basic_Tagcloud extends Mixin
 {
     function initialize()
     {
-        if ($this->object->name == NEXTGEN_BASIC_TAG_CLOUD_MODULE_NAME) {
+        if ($this->object->name == NGG_BASIC_TAGCLOUD) {
             $this->object->add_pre_hook(
 				'validation',
 				get_class(),

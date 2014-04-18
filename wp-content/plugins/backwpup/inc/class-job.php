@@ -231,7 +231,7 @@ final class BackWPup_Job {
 					$this->backup_folder = $this->job[ 'backupdir' ];
 					//check backup folder
 					if ( ! empty( $this->backup_folder ) )
-						self::check_folder( $this->backup_folder );
+						self::check_folder( $this->backup_folder, TRUE );
 				}
 				//set temp folder to backup folder if not set because we need one
 				if ( ! $this->backup_folder || $this->backup_folder == '/' )
@@ -480,7 +480,7 @@ final class BackWPup_Job {
 				die( '-1' );
 
 			//check folders
-			if ( ! self::check_folder( get_site_option( 'backwpup_cfg_logfolder' ) )  || ! self::check_folder( BackWPup::get_plugin_data( 'TEMP' ) ) )
+			if ( ! self::check_folder( get_site_option( 'backwpup_cfg_logfolder' ) )  || ! self::check_folder( BackWPup::get_plugin_data( 'TEMP' ), TRUE ) )
 				die( '-2' );
 		}
 
@@ -530,14 +530,14 @@ final class BackWPup_Job {
 		//check folders
 		if ( ! self::check_folder( get_site_option( 'backwpup_cfg_logfolder' ) ) )
 			die( __( 'Log folder does not exist or is not writable for BackWPup', 'backwpup' ) );
-		if ( ! self::check_folder( BackWPup::get_plugin_data( 'TEMP' ) ) )
+		if ( ! self::check_folder( BackWPup::get_plugin_data( 'TEMP' ), TRUE ) )
 			die( __( 'Temp folder does not exist or is not writable for BackWPup', 'backwpup' ) );
 		//check running job
 		if ( file_exists( BackWPup::get_plugin_data( 'running_file' ) ) )
 			die( __( 'A BackWPup job is already running', 'backwpup' ) );
 
 		//start/restart class
-		fwrite( STDOUT, __( 'Job Started' ) . PHP_EOL );
+		fwrite( STDOUT, __( 'Job started', 'backwpup' ) . PHP_EOL );
 		fwrite( STDOUT, '----------------------------------------------------------------------' . PHP_EOL );
 		$backwpup_job_object = new self();
 		$backwpup_job_object->create( 'runcli', (int)$jobid );
@@ -558,7 +558,7 @@ final class BackWPup_Job {
 
 		if ( ! empty( $jobid ) ) {
 			//check folders
-			if ( ! self::check_folder( get_site_option( 'backwpup_cfg_logfolder' ) ) ||  ! self::check_folder( BackWPup::get_plugin_data( 'TEMP' ) ) )
+			if ( ! self::check_folder( get_site_option( 'backwpup_cfg_logfolder' ) ) ||  ! self::check_folder( BackWPup::get_plugin_data( 'TEMP' ), TRUE ) )
 				return;
 		}
 
@@ -659,18 +659,6 @@ final class BackWPup_Job {
 		if ( get_site_option( 'backwpup_cfg_jobnotranslate' ) ) {
 			add_filter( 'override_load_textdomain', create_function( '','return TRUE;') );
 			$GLOBALS[ 'l10n' ] = array();
-		}
-		//clear caches then the backups smaller and lesser problems
-		if ( function_exists( 'apc_clear_cache' ) ) { //clear APC
-			apc_clear_cache();
-		}
-		if ( class_exists('W3_Plugin_TotalCacheAdmin')  ) { //W3TC
-			$totalcacheadmin = & w3_instance('W3_Plugin_TotalCacheAdmin');
-			$totalcacheadmin->flush_all();
-		} elseif ( function_exists('wp_cache_clear_cache') ) { //WP Super Cache
-			wp_cache_clear_cache();
-		} elseif ( has_action('cachify_flush_cache') ) { //Cachify
-			do_action('cachify_flush_cache');
 		}
 		// execute function on job shutdown  register_shutdown_function( array( $this, 'shutdown' ) );
 		add_action( 'shutdown', array( $this, 'shutdown' ) );
@@ -930,10 +918,10 @@ final class BackWPup_Job {
 	 * add .htaccess or index.html file in folder to prevent directory listing
 	 *
 	 * @param string $folder the folder to check
-	 *
+	 * @param bool   $donotbackup Create a file that the folder will not backuped
 	 * @return bool ok or not
 	 */
-	public static function check_folder( $folder ) {
+	public static function check_folder( $folder, $donotbackup = FALSE ) {
 
 		$folder = untrailingslashit( str_replace( '\\', '/', $folder ) );
 		if ( empty( $folder ) )
@@ -965,6 +953,10 @@ final class BackWPup_Job {
 			file_put_contents( $folder . '/.htaccess', "<Files \"*\">" . PHP_EOL . "<IfModule mod_access.c>" . PHP_EOL . "Deny from all" . PHP_EOL . "</IfModule>" . PHP_EOL . "<IfModule !mod_access_compat>" . PHP_EOL . "<IfModule mod_authz_host.c>" . PHP_EOL . "Deny from all" . PHP_EOL . "</IfModule>" . PHP_EOL . "</IfModule>" . PHP_EOL . "<IfModule mod_access_compat>" . PHP_EOL . "Deny from all" . PHP_EOL . "</IfModule>" . PHP_EOL . "</Files>" );
 		if ( get_site_option( 'backwpup_cfg_protectfolders') && ! file_exists( $folder . '/index.php' ) )
 			file_put_contents( $folder . '/index.php', "<?php" . PHP_EOL . "header( \$_SERVER['SERVER_PROTOCOL'] . ' 404 Not Found' );" . PHP_EOL . "header( 'Status: 404 Not Found' );" . PHP_EOL );
+
+		//Create do not backup file for this folder
+		if ( $donotbackup && ! file_exists( $folder . '/.donotbackup' ) )
+			file_put_contents( $folder . '/.donotbackup', __( 'BackWPup will not backup folders and subfolders when this file is inside.', 'backwpup' ) );
 
 		return TRUE;
 	}
@@ -1123,6 +1115,9 @@ final class BackWPup_Job {
 		if ( get_site_option( 'backwpup_cfg_jobwaittimems' ) > 0 && get_site_option( 'backwpup_cfg_jobwaittimems') <= 500000 )
 			usleep( get_site_option( 'backwpup_cfg_jobwaittimems' ) );
 
+		//check free memory
+		$this->need_free_memory( '10M' );
+
 		//only run every 1 sec.
 		$time_to_update = microtime( TRUE ) - $this->timestamp_last_update;
 		if ( ! $must_write && $time_to_update < 1 )
@@ -1139,9 +1134,6 @@ final class BackWPup_Job {
 
 		//set execution time again for 5 min
 		@set_time_limit( 300 );
-
-		//check free memory
-		$this->need_free_memory( '10M' );
 
 		//check MySQL connection to WordPress Database and reconnect if needed
 		$res = $wpdb->query( 'SELECT 1' );
@@ -1412,20 +1404,14 @@ final class BackWPup_Job {
 	 */
 	public function get_mime_type( $file ) {
 
-		if ( ! is_readable( $file ) || is_dir( $file ) )
-			return FALSE;
-
-		if ( function_exists( 'fileinfo' ) ) {
-			$finfo = finfo_open( FILEINFO_MIME_TYPE );
-
-			return finfo_file( $finfo, $file );
-		}
-
-		if ( function_exists( 'mime_content_type' ) ) {
-			return mime_content_type( $file );
-		}
+		if ( is_dir( $file ) || is_link( $file ) )
+			return 'application/octet-stream';
 
 		$mime_types = array(
+			'zip'     => 'application/zip',
+			'gz'      => 'application/gzip',
+			'bz2'     => 'application/x-bzip',
+			'tar'     => 'application/x-tar',
 			'3gp'     => 'video/3gpp',
 			'ai'      => 'application/postscript',
 			'aif'     => 'audio/x-aiff',
@@ -1467,7 +1453,6 @@ final class BackWPup_Job {
 			'gram'    => 'application/srgs',
 			'grxml'   => 'application/srgs+xml',
 			'gtar'    => 'application/x-gtar',
-			'gz'      => 'application/x-gzip',
 			'hdf'     => 'application/x-hdf',
 			'hqx'     => 'application/mac-binhex40',
 			'htm'     => 'text/html',
@@ -1566,7 +1551,6 @@ final class BackWPup_Job {
 			'svg'     => 'image/svg+xml',
 			'swf'     => 'application/x-shockwave-flash',
 			't'       => 'application/x-troff',
-			'tar'     => 'application/x-tar',
 			'tcl'     => 'application/x-tcl',
 			'tex'     => 'application/x-tex',
 			'texi'    => 'application/x-texinfo',
@@ -1601,15 +1585,28 @@ final class BackWPup_Job {
 			'xul'     => 'application/vnd.mozilla.xul+xml',
 			'xwd'     => 'image/x-xwindowdump',
 			'xyz'     => 'chemical/x-xyz',
-			'zip'     => 'application/zip'
 		);
 
-		$filesuffix = pathinfo($file, PATHINFO_EXTENSION);
+		$filesuffix = pathinfo( $file, PATHINFO_EXTENSION );
 		$suffix = strtolower( $filesuffix );
 		if ( isset( $mime_types[ $suffix ] ) )
 			return $mime_types[ $suffix ];
 
-		return 'application/octet-stream';
+		if ( ! is_readable( $file ) )
+			return 'application/octet-stream';
+
+		if ( function_exists( 'fileinfo' ) ) {
+			$finfo = finfo_open( FILEINFO_MIME_TYPE );
+			$mime = finfo_file( $finfo, $file );
+		}
+
+		if ( empty( $mime ) && function_exists( 'mime_content_type' ) )
+			$mime = mime_content_type( $file );
+
+		if ( empty( $mime ) )
+			return 'application/octet-stream';
+		else
+			return $mime;
 	}
 
 
@@ -1624,11 +1621,13 @@ final class BackWPup_Job {
 	public function get_files_in_folder( $folder ) {
 
 		$files = array();
+		$folder = trailingslashit( $folder );
 
 		if ( ! is_dir( $folder ) ) {
 			$this->log( sprintf( _x( 'Folder %s not exists', 'Folder name', 'backwpup' ), $folder ), E_USER_WARNING );
 			return $files;
 		}
+
 		if ( ! is_readable( $folder ) ) {
 			$this->log( sprintf( _x( 'Folder %s not readable', 'Folder name', 'backwpup' ), $folder ), E_USER_WARNING );
 			return $files;
@@ -1636,7 +1635,7 @@ final class BackWPup_Job {
 
 		if ( $dir = opendir( $folder ) ) {
 			while ( FALSE !== ( $file = readdir( $dir ) ) ) {
-				if ( in_array( $file, array( '.', '..' ) ) )
+				if ( in_array( $file, array( '.', '..' ) ) || is_dir( $folder . $file ) )
 					continue;
 				foreach ( $this->exclude_from_backup as $exclusion ) { //exclude files
 					$exclusion = trim( $exclusion );
@@ -1645,11 +1644,11 @@ final class BackWPup_Job {
 				}
 				if ( $this->job[ 'backupexcludethumbs' ] && strpos( $folder, BackWPup_File::get_upload_dir() ) !== FALSE && preg_match( "/\-[0-9]{2,4}x[0-9]{2,4}\.(jpg|png|gif)$/i", $file ) )
 					continue;
-				if ( ! is_readable( $folder . $file ) )
-					$this->log( sprintf( __( 'File "%s" is not readable!', 'backwpup' ), $folder . $file ), E_USER_WARNING );
-				elseif ( is_link( $folder . $file ) )
+				if ( is_link( $folder . $file ) )
 					$this->log( sprintf( __( 'Link "%s" not following.', 'backwpup' ), $folder . $file ), E_USER_WARNING );
-				elseif ( ! is_dir( $folder . $file ) ) {
+				elseif ( ! is_readable( $folder . $file ) )
+					$this->log( sprintf( __( 'File "%s" is not readable!', 'backwpup' ), $folder . $file ), E_USER_WARNING );
+				else {
 					$files[ ] = $folder . $file;
 					$this->count_files_in_folder ++;
 					$this->count_filesize_in_folder = $this->count_filesize_in_folder + @filesize( $folder . $file );
@@ -1935,10 +1934,51 @@ final class BackWPup_Job {
 	 */
 	public function get_folders_to_backup( ) {
 
-		if ( empty( $this->count_folder ) )
+		$file = BackWPup::get_plugin_data( 'temp' ) . 'backwpup-' . BackWPup::get_plugin_data( 'hash' ) . '-folder.php';
+
+		if ( ! file_exists( $file ) )
 			return array();
 
-		return $this->data_storage( 'folder' );
+		$folders = array();
+
+		$file_data = file( $file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES );
+
+		foreach( $file_data as $folder ) {
+			$folder = trim( str_replace( array( '<?php', '//' ), '', $folder ) );
+			if ( ! empty( $folder ) && is_dir( $folder ) )
+				$folders[] = $folder;
+		}
+		$folders = array_unique( $folders );
+		sort( $folders );
+		$this->count_folder = count( $folders );
+
+		return $folders;
+	}
+
+
+	/**
+	 * Add a Folders to Folder list that should be backup
+	 *
+	 * @param array $folders folder to add
+	 * @param bool  $new overwrite existing file
+	 */
+	public function add_folders_to_backup( $folders = array(), $new = FALSE ) {
+
+		if ( ! is_array( $folders ) )
+			$folders = (array) $folders;
+
+		$file = BackWPup::get_plugin_data( 'temp' ) . 'backwpup-' . BackWPup::get_plugin_data( 'hash' ) . '-folder.php';
+
+		if ( ! file_exists( $file ) || $new )
+			file_put_contents( $file, '<?php' . PHP_EOL );
+
+		$content = '';
+		foreach ( $folders AS $folder ) {
+			$content .= '//' . $folder . PHP_EOL;
+		}
+
+		if ( ! empty( $content ) )
+			file_put_contents( $file, $content, FILE_APPEND );
 	}
 
 	/**
@@ -1972,7 +2012,7 @@ final class BackWPup_Job {
 	public static function clean_temp_folder() {
 
 		$temp_dir = BackWPup::get_plugin_data( 'TEMP' );
-		$do_not_delete_files = array( '.htaccess', 'index.php', '.', '..' );
+		$do_not_delete_files = array( '.htaccess', 'index.php', '.', '..', '.donotbackup' );
 
 		if ( $dir = opendir( $temp_dir ) ) {
 			while ( FALSE !== ( $file = readdir( $dir ) ) ) {

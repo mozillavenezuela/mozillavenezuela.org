@@ -7,17 +7,17 @@
 }
  ***/
 
-define('NEXTGEN_BASIC_TAG_CLOUD_MODULE_NAME', 'photocrati-nextgen_basic_tagcloud');
+define('NGG_BASIC_TAGCLOUD', 'photocrati-nextgen_basic_tagcloud');
 
 class M_NextGen_Basic_Tagcloud extends C_Base_Module
 {
     function define()
     {
         parent::define(
-			NEXTGEN_BASIC_TAG_CLOUD_MODULE_NAME,
+			NGG_BASIC_TAGCLOUD,
             'NextGen Basic Tagcloud',
             'Provides a tagcloud for NextGEN Gallery',
-            '0.5',
+            '0.7',
             'http://www.photocrati.com',
             'Photocrati Media',
             'http://www.photocrati.com'
@@ -82,7 +82,11 @@ class M_NextGen_Basic_Tagcloud extends C_Base_Module
 
 	function _register_hooks()
 	{
-		C_NextGen_Shortcode_Manager::add('tagcloud', array(&$this, 'render_shortcode'));
+        if (!defined('NGG_DISABLE_LEGACY_SHORTCODES') || !NGG_DISABLE_LEGACY_SHORTCODES)
+        {
+            C_NextGen_Shortcode_Manager::add('tagcloud', array(&$this, 'render_shortcode'));
+        }
+        C_NextGen_Shortcode_Manager::add('nggtagcloud', array(&$this, 'render_shortcode'));
 
         add_filter(
             'the_posts',
@@ -117,7 +121,7 @@ class M_NextGen_Basic_Tagcloud extends C_Base_Module
     {
 	    $params['tagcloud']     = $this->_get_param('tagcloud', 'yes', $params);
         $params['source']       = $this->_get_param('source', 'tags', $params);
-        $params['display_type'] = $this->_get_param('display_type', NEXTGEN_BASIC_TAG_CLOUD_MODULE_NAME, $params);
+        $params['display_type'] = $this->_get_param('display_type', NGG_BASIC_TAGCLOUD, $params);
 
 		$renderer = $this->get_registry()->get_utility('I_Displayed_Gallery_Renderer');
         return $renderer->display_images($params, $inner_content);

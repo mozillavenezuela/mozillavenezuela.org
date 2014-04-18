@@ -1,7 +1,7 @@
 <?php
 $settings = C_NextGen_Settings::get_instance();
 $obj = method_exists($this, 'get_class_definition_dir') ? $this : $this->object;
-$template_dir = path_join($obj->get_class_definition_dir(), 'templates');
+$template_dir = implode(DIRECTORY_SEPARATOR, array($obj->get_class_definition_dir(), 'templates'));
 $default_template_dir = $settings->mvc_template_dir;
 ?>
 

@@ -5,7 +5,11 @@ class Mixin_Url_Manipulation extends Mixin
 	function join_paths()
 	{
 		$args = func_get_args();
-		return $this->get_registry()->get_utility('I_Fs')->join_paths($args);
+        $parts = $this->_flatten_array($args);
+        foreach ($parts as &$part) {
+            $part = trim(str_replace("\\", '/', $part), "/");
+        }
+        return implode('/', $parts);
 	}
 
 	/**
@@ -20,7 +24,7 @@ class Mixin_Url_Manipulation extends Mixin
 		$parts	= parse_url($url);
 
 		// If the url has a path, then we can remove a segment
-		if (isset($parts['path'])) {
+		if (isset($parts['path']) && $segment != '/') {
 			if (substr($segment, -1) == '/') $segment = substr($segment, -1);
 			$segment = preg_quote($segment, '#');
 			if (preg_match("#{$segment}#", $parts['path'], $matches)) {
@@ -131,9 +135,10 @@ class Mixin_Url_Manipulation extends Mixin
 
 		$retval =  $this->object->join_paths(
             $prefix,
-			isset($parts['path']) ? $parts['path'] : ''
+			isset($parts['path']) ? str_replace('//', '/', trailingslashit($parts['path'])) : ''
 		);
-		if (isset($parts['query']) && $parts['query']) $retval .= "?{$parts['query']}";
+
+		if (isset($parts['query']) && $parts['query']) $retval .= untrailingslashit("?{$parts['query']}");
 
 		return $retval;
 	}
@@ -158,13 +163,13 @@ class Mixin_Url_Manipulation extends Mixin
 		$slug_regex	 = '#'.$slug.'/?$#';
 
 		// Remove all parameters
-		while (preg_match($param_regex, $retval, $matches)) {
+		while (@preg_match($param_regex, $retval, $matches)) {
 			$match_regex = '#'.preg_quote(array_shift($matches),'#').'$#';
 			$retval = preg_replace($match_regex, '', $retval);
 		}
 
 		// Remove the slug or trailing slash
-		if (preg_match($slug_regex, $retval, $matches)) {
+		if (@preg_match($slug_regex, $retval, $matches)) {
 			$match_regex = '#'.preg_quote(array_shift($matches),'#').'$#';
 			$retval = preg_replace($match_regex, '', $retval);
 		}

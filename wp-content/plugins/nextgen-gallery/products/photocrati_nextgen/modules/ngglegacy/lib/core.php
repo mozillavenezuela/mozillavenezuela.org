@@ -81,7 +81,7 @@ class nggGallery {
 	*/
 	static function create_thumbnail_folder($gallerypath, $include_Abspath = TRUE) {
 		if (!$include_Abspath) {
-			$gallerypath = WINABSPATH . $gallerypath;
+			$gallerypath = ABSPATH . $gallerypath;
 		}
 
 		if (!file_exists($gallerypath)) {

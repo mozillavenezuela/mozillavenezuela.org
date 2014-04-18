@@ -97,7 +97,7 @@ class nggAdminPanel{
 				if (preg_match_all("/<script.*wp-content.*jquery[-_\.](min\.)?js.*<\script>/", $html, $matches, PREG_SET_ORDER)) {
 					foreach ($matches as $match) {
 						$old_script = array_shift($match);
-						if (strpos($old_script, NEXTGEN_GALLERY_PLUGIN_DIR) === FALSE)
+						if (strpos($old_script, NGG_PLUGIN_DIR) === FALSE)
 							$html = str_replace($old_script, '', $html);
 					}
 				}
@@ -107,7 +107,7 @@ class nggAdminPanel{
 					$detected_jquery_ui = TRUE;
 					foreach ($matches as $match) {
 						$old_script = array_shift($match);
-						if (strpos($old_script, NEXTGEN_GALLERY_PLUGIN_DIR) === FALSE)
+						if (strpos($old_script, NGG_PLUGIN_DIR) === FALSE)
 							$html = str_replace($old_script, '', $html);
 					}
 				}
@@ -160,8 +160,6 @@ class nggAdminPanel{
 	    add_submenu_page( NGGFOLDER , __('Manage Galleries', 'nggallery'), __('Manage Galleries', 'nggallery'), 'NextGEN Manage gallery', 'nggallery-manage-gallery', array (&$this, 'show_menu'));
 	    add_submenu_page( NGGFOLDER , _n( 'Manage Albums', 'Albums', 1, 'nggallery' ), _n( 'Manage Albums', 'Manage Albums', 1, 'nggallery' ), 'NextGEN Edit album', 'nggallery-manage-album', array (&$this, 'show_menu'));
 	    add_submenu_page( NGGFOLDER , __('Manage Tags', 'nggallery'), __('Manage Tags', 'nggallery'), 'NextGEN Manage tags', 'nggallery-tags', array (&$this, 'show_menu'));
-//	    if ( !is_multisite() || wpmu_site_admin() )
-//            add_submenu_page( NGGFOLDER , __('Reset / Uninstall', 'nggallery'), __('Reset / Uninstall', 'nggallery'), 'activate_plugins', 'nggallery-setup', array (&$this, 'show_menu'));
 
 		//register the column fields
 		$this->register_columns();
@@ -172,7 +170,6 @@ class nggAdminPanel{
 
 		add_menu_page( _n( 'Gallery', 'Galleries', 1, 'nggallery' ), _n( 'Gallery', 'Galleries', 1, 'nggallery' ), 'nggallery-wpmu', NGGFOLDER, array (&$this, 'show_network_settings'), path_join(NGGALLERY_URLPATH, 'admin/images/nextgen_16_color.png') );
 		add_submenu_page( NGGFOLDER , __('Network settings', 'nggallery'), __('Network settings', 'nggallery'), 'nggallery-wpmu', NGGFOLDER,  array (&$this, 'show_network_settings'));
-        // add_submenu_page( NGGFOLDER , __('Reset / Uninstall', 'nggallery'), __('Reset / Uninstall', 'nggallery'), 'activate_plugins', 'nggallery-setup', array (&$this, 'show_menu'));
 	}
 
     /**
@@ -250,10 +247,6 @@ class nggAdminPanel{
 			case "nggallery-style" :
 				include_once ( dirname (__FILE__) . '/style.php' );		// nggallery_admin_style
 				nggallery_admin_style();
-				break;
-			case "nggallery-setup" :
-				include_once ( dirname (__FILE__) . '/setup.php' );		// nggallery_admin_setup
-				nggallery_admin_setup();
 				break;
 			case "nggallery-roles" :
 				include_once ( dirname (__FILE__) . '/roles.php' );		// nggallery_admin_roles
@@ -361,6 +354,9 @@ class nggAdminPanel{
     						'imageCount' => '1'
     			) );
     			wp_enqueue_script( 'shutter' );
+
+                // includes tooltip styling
+                wp_enqueue_style('nextgen_admin_page', $router->get_static_url('photocrati-nextgen_admin#nextgen_admin_page.css'));
 			break;
 			case "nggallery-manage-album" :
                 wp_enqueue_script( 'jquery-ui-autocomplete' );

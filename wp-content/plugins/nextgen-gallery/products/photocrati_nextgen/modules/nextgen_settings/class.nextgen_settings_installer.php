@@ -11,7 +11,7 @@ class C_NextGen_Settings_Installer
 		$this->site_settings = C_NextGen_Global_Settings::get_instance();
 
 		$this->_global_settings = array(
-			'gallerypath' => 'wp-content/blogs.dir/%BLOG_ID%/files/',
+            'gallerypath'   => implode(DIRECTORY_SEPARATOR, array('wp-content', 'uploads', 'sites', '%BLOG_ID%', 'nggallery')).DIRECTORY_SEPARATOR,
 			'wpmuCSSfile' => 'nggallery.css',
 			'wpmuStyle'   => FALSE,
 			'wpmuRoles'   => FALSE,
@@ -24,7 +24,7 @@ class C_NextGen_Settings_Installer
 		);
 
 		$this->_local_settings = array(
-			'gallerypath'	 => 'wp-content/gallery/',
+			'gallerypath'	 => 'wp-content'.DIRECTORY_SEPARATOR.'gallery'.DIRECTORY_SEPARATOR,
 			'deleteImg'      => True,              // delete Images
 			'swfUpload'      => True,              // activate the batch upload
 			'usePermalinks'  => False,             // use permalinks for parameters

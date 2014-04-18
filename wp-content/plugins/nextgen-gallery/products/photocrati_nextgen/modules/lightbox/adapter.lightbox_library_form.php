@@ -17,7 +17,7 @@ class A_Lightbox_Library_Form extends Mixin
     {
         return array(
             'lightbox_library_code',
-            'lightbox_library_css_stylesheets',
+            'lightbox_library_styles',
             'lightbox_library_scripts'
         );
     }
@@ -40,13 +40,13 @@ class A_Lightbox_Library_Form extends Mixin
      * @param $lightbox
      * @return mixed
      */
-    function _render_lightbox_library_css_stylesheets_field($lightbox)
+    function _render_lightbox_library_styles_field($lightbox)
     {
         return $this->_render_textarea_field(
             $lightbox,
-            'css_stylesheets',
+            'styles',
             'Stylesheet URL',
-            $lightbox->css_stylesheets
+            $lightbox->styles
         );
     }
 

@@ -104,7 +104,7 @@ class C_Widget_Gallery extends WP_Widget
         $view = $factory->create('mvc_view', '');
 
         // IE8 webslice support if needed
-        if ($instance['webslice'])
+        if (!empty($instance['webslice']))
         {
             $before_widget .= '<div class="hslice" id="ngg-webslice">';
             $before_title  = str_replace('class="' , 'class="entry-title ', $before_title);
@@ -116,7 +116,7 @@ class C_Widget_Gallery extends WP_Widget
         $params = array(
             'slug' => 'widget-' . $args['widget_id'],
             'source' => $source,
-            'display_type' => NEXTGEN_GALLERY_BASIC_THUMBNAILS,
+            'display_type' => NGG_BASIC_THUMBNAILS,
             'images_per_page' => $instance['items'],
             'maximum_entity_count' => $instance['items'],
             'template' => $view->get_template_abspath('photocrati-widget#display_gallery'),
@@ -127,6 +127,7 @@ class C_Widget_Gallery extends WP_Widget
             'image_width' => $instance['width'],
             'image_height' => $instance['height'],
             'ngg_triggers_display' => 'never',
+            'use_imagebrowser_effect' => FALSE,
             'widget_setting_title'         => $title,
             'widget_setting_before_widget' => $before_widget,
             'widget_setting_before_title'  => $before_title,

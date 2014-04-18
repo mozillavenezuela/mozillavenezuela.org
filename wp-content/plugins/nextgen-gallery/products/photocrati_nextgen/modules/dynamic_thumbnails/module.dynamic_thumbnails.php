@@ -13,7 +13,7 @@ class M_Dynamic_Thumbnails extends C_Base_Module
 			'photocrati-dynamic_thumbnails',
 			'Dynamic Thumbnails',
 			'Adds support for dynamic thumbnails',
-			'0.4',
+			'0.5',
 			'http://www.nextgen-gallery.com',
 			'Photocrati Media',
 			'http://www.photocrati.com'

@@ -2,6 +2,10 @@
 define('__EXTOBJ_STATIC__', '__STATICALLY_CALLED__');
 define('__EXTOBJ_NO_INIT__', '__NO_INIT__');
 
+if (!defined('EXTENSIBLE_OBJECT_ENFORCE_INTERFACES')) {
+    define('EXTENSIBLE_OBJECT_ENFORCE_INTERFACES', TRUE);
+}
+
 
 /**
  * Provides helper methods for Pope objects
@@ -162,7 +166,7 @@ class ExtensibleObject extends PopeHelpers
                 // call_user_func_array(array($this, 'define'), $args);
             }
 
-            $this->_enforce_interface_contracts();
+            if (EXTENSIBLE_OBJECT_ENFORCE_INTERFACES) $this->_enforce_interface_contracts();
 
 			if ($init_instance)
             {

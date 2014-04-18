@@ -4,14 +4,25 @@ class A_NextGen_Basic_Tagcloud_Form extends Mixin_Display_Type_Form
 {
 	function get_display_type_name()
 	{
-		return NEXTGEN_BASIC_TAG_CLOUD_MODULE_NAME;
+		return NGG_BASIC_TAGCLOUD;
 	}
 
 
     function _get_field_names()
     {
         return array(
+            'nextgen_basic_tagcloud_number',
             'nextgen_basic_tagcloud_display_type'
+        );
+    }
+
+    function _render_nextgen_basic_tagcloud_number_field($display_type)
+    {
+        return $this->_render_number_field(
+            $display_type,
+            'number',
+            'Maximum number of tags',
+            $display_type->settings['number']
         );
     }
 
@@ -25,7 +36,6 @@ class A_NextGen_Basic_Tagcloud_Form extends Mixin_Display_Type_Form
         $mapper = $this->object->get_registry()->get_utility('I_Display_Type_Mapper');
         $display_types = $mapper->find_all();
         foreach ($display_types as $dt) {
-			if (!isset($dt->name)) die(var_dump($dt));
             if (in_array($dt->name, $skip_types)) continue;
             $types[$dt->name] = str_replace('NextGEN Basic ', '', $dt->title);
         }

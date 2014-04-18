@@ -4,7 +4,8 @@ Template Page for the album overview (extended)
 
 Follow variables are useable :
 
-	$album     	 : Contain information about the album
+	$album     	 : Contain information about the first album
+    $albums    	 : Contain information about all albums
 	$galleries   : Contain all galleries inside this album
 	$pagination  : Contain the pagination content
 

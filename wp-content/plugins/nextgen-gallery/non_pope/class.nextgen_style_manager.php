@@ -10,18 +10,14 @@ class C_NextGen_Style_Manager
 
 	function __construct()
 	{
-		$this->default_dir = realpath((implode(DIRECTORY_SEPARATOR, array(
-			untrailingslashit(dirname(__FILE__)),
-			'..',
-			'products',
-			'photocrati_nextgen',
-			'modules',
-			'ngglegacy',
-			'css'
-		))));
+        $this->default_dir = implode(DIRECTORY_SEPARATOR, array(
+            NGG_MODULE_DIR,
+            'ngglegacy',
+            'css'
+        ));
 
 		$this->new_dir = implode(DIRECTORY_SEPARATOR, array(
-			untrailingslashit(WP_CONTENT_DIR),
+			rtrim(WP_CONTENT_DIR, "/\\"),
 			'ngg_styles'
 		));
 
@@ -32,37 +28,33 @@ class C_NextGen_Style_Manager
 		$this->add_directory($this->new_dir);
 
 		// We check the parent theme directory. Needed for child themes
-		$this->add_directory(implode(DIRECTORY_SEPARATOR, array(
-			untrailingslashit(get_template_directory()),
-		)), TRUE);
+		$this->add_directory(rtrim(get_template_directory(), "/\\"), TRUE);
 
 		// We also check parent_theme/nggallery
 		$this->add_directory(implode(DIRECTORY_SEPARATOR, array(
-			untrailingslashit(get_template_directory()),
+            rtrim(get_template_directory(), "/\\"),
 			'nggallery'
 		)), TRUE);
 
 		// We also check parent_theme/ngg_styles
 		$this->add_directory(implode(DIRECTORY_SEPARATOR, array(
-			untrailingslashit(get_template_directory()),
+            rtrim(get_template_directory(), "/\\"),
 			'ngg_styles'
 		)), TRUE);
 
 		// We check the root directory of the theme. Users shouldn't store here,
 		// but they might
-		$this->add_directory(implode(DIRECTORY_SEPARATOR, array(
-			untrailingslashit(get_stylesheet_directory()),
-		)), TRUE);
+		$this->add_directory(rtrim(get_stylesheet_directory(), "/\\"), TRUE);
 
 		// We also check the theme/nggallery directory
 		$this->add_directory(implode(DIRECTORY_SEPARATOR, array(
-			untrailingslashit(get_stylesheet_directory()),
+            rtrim(get_stylesheet_directory(), "/\\"),
 			'nggallery'
 		)), TRUE);
 
 		// We also check the theme/ngg_styles directory
 		$this->add_directory(implode(DIRECTORY_SEPARATOR, array(
-			untrailingslashit(get_stylesheet_directory()),
+            rtrim(get_stylesheet_directory(), "/\\"),
 			'ngg_styles'
 		)), TRUE);
 	}
@@ -99,13 +91,13 @@ class C_NextGen_Style_Manager
 	 */
 	function is_default_dir($dir)
 	{
-		return untrailingslashit($dir) == $this->default_dir;
+		return rtrim($dir, "/\\") == $this->default_dir;
 	}
 
 	function get_new_dir($filename)
 	{
 		return implode(DIRECTORY_SEPARATOR, array(
-			untrailingslashit($this->new_dir),
+			rtrim($this->new_dir, "/\\"),
 			$filename
 		));
 	}
@@ -165,13 +157,13 @@ class C_NextGen_Style_Manager
 		if (!$selected) $selected = $this->get_selected_stylesheet();
 
 		$retval = implode(DIRECTORY_SEPARATOR, array(
-			untrailingslashit($this->default_dir),
+			rtrim($this->default_dir, "/\\"),
 			$selected
 		));
 
 		foreach ($this->directories as $dir) {
 			$path = implode(DIRECTORY_SEPARATOR, array(
-				untrailingslashit($dir),
+				rtrim($dir, "/\\"),
 				$selected
 			));
 
@@ -193,12 +185,12 @@ class C_NextGen_Style_Manager
 		if (!$selected) $selected = $this->get_selected_stylesheet();
 
 		$retval =  str_replace(
-			trailingslashit(ABSPATH),
-			trailingslashit(site_url()),
+			C_Fs::get_instance()->get_document_root(),
+            site_url(),
 			$this->find_selected_stylesheet_abspath($selected)
 		);
 
-		return str_replace('\\', '/', $retval);
+		return rtrim(str_replace('\\', '/', $retval), "/");
 	}
 
 
@@ -210,7 +202,7 @@ class C_NextGen_Style_Manager
 
 		foreach (array_reverse($dir) as $dir) {
 			$path = implode(DIRECTORY_SEPARATOR, array(
-				untrailingslashit($dir),
+				rtrim($dir, "/\\"),
 				'*.css'
 			));
 			$files = glob($path);

@@ -35,6 +35,7 @@ class C_Gallery_Mapper extends C_CustomTable_DataMapper_Driver
 		$this->define_column('pageid', 	'INT', 0);
 		$this->define_column('previewpic', 'INT', 0);
 		$this->define_column('author', 	'INT', 0);
+        $this->define_column('extras_post_id', 'BIGINT', 0);
 	}
 
 	function initialize($object_name=FALSE)

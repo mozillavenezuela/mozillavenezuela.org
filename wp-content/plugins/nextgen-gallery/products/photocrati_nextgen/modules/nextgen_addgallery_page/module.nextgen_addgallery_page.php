@@ -5,7 +5,7 @@
 }
 **/
 
-define('NEXTGEN_ADD_GALLERY_SLUG', 'ngg_addgallery');
+define('NGG_ADD_GALLERY_SLUG', 'ngg_addgallery');
 
 class M_NextGen_AddGallery_Page extends C_Base_Module
 {
@@ -15,7 +15,7 @@ class M_NextGen_AddGallery_Page extends C_Base_Module
             'photocrati-nextgen_addgallery_page',
             'NextGEN Add Gallery Page',
             'Provides admin page for adding a gallery and uploading images',
-            '0.3',
+            '0.5',
             'http://www.nextgen-gallery.com',
             'Photocrati Media',
             'http://www.photocrati.com'
@@ -50,12 +50,14 @@ class M_NextGen_AddGallery_Page extends C_Base_Module
     {
         if (is_admin()) {
             $router = $this->_get_registry()->get_utility('I_Router');
-            wp_register_script('plupload.queue', $router->get_static_url('photocrati-nextgen_addgallery_page#plupload_queue/jquery.plupload.queue.js'), array('plupload-all'));
-            wp_register_style('plupload.queue', $router->get_static_url('photocrati-nextgen_addgallery_page#plupload_queue/css/jquery.plupload.queue.css'));
+            wp_register_script('browserplus', 'http://bp.yahooapis.com/2.4.21/browserplus-min.js');
+            wp_register_script('ngg.plupload.moxie', $router->get_static_url('photocrati-nextgen_addgallery_page#plupload-2.1.1/moxie.min.js'));
+            wp_register_script('ngg.plupload.full',  $router->get_static_url('photocrati-nextgen_addgallery_page#plupload-2.1.1/plupload.full.min.js'), array('ngg.plupload.moxie'));
+            wp_register_script('ngg.plupload.queue', $router->get_static_url('photocrati-nextgen_addgallery_page#plupload-2.1.1/jquery.plupload.queue/jquery.plupload.queue.min.js'), array('ngg.plupload.full'));
+            wp_register_style('ngg.plupload.queue',  $router->get_static_url('photocrati-nextgen_addgallery_page#plupload-2.1.1/jquery.plupload.queue/css/jquery.plupload.queue.css'));
             wp_register_style('nextgen_addgallery_page', $router->get_static_url('photocrati-nextgen_addgallery_page#styles.css'));
             wp_register_script('jquery.filetree', $router->get_static_url('photocrati-nextgen_addgallery_page#jquery.filetree/jquery.filetree.js'), array('jquery'));
             wp_register_style('jquery.filetree', $router->get_static_url('photocrati-nextgen_addgallery_page#jquery.filetree/jquery.filetree.css'));
-            wp_register_script('browserplus', 'http://bp.yahooapis.com/2.4.21/browserplus-min.js');
         }
     }
 }

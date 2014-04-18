@@ -4,7 +4,7 @@ class A_NextGen_Basic_ImageBrowser_Form extends Mixin_Display_Type_Form
 {
 	function get_display_type_name()
 	{
-		return NEXTGEN_GALLERY_NEXTGEN_BASIC_IMAGEBROWSER;
+		return NGG_BASIC_IMAGEBROWSER;
 	}
 
 	/**

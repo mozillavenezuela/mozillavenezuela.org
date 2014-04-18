@@ -4,7 +4,7 @@ class A_NextGen_Basic_Singlepic extends Mixin
 {
     function initialize()
     {
-        if ($this->object->name == NEXTGEN_BASIC_SINGLEPIC_MODULE_NAME)
+        if ($this->object->name == NGG_BASIC_SINGLEPIC)
         {
             $this->object->add_pre_hook(
 				'validation',

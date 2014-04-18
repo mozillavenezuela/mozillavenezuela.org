@@ -33,14 +33,15 @@ class C_Page_Manager extends C_Component
 
 class Mixin_Page_Manager extends Mixin
 {
-	function add($slug, $adapter, $parent=NULL, $add_menu=TRUE, $before = NULL)
+	function add($slug, $properties=array())
 	{
-		$this->object->_pages[$slug] = array(
-			'adapter'	=>	$adapter,
-			'parent'	=>	$parent,
-			'add_menu'	=>	$add_menu,
-			'before' => $before
-		);
+		if (!isset($properties['adapter'])) $properties['adapter']	= NULL;
+		if (!isset($properties['parent']))	$properties['parent']	= NULL;
+		if (!isset($properties['add_menu']))$properties['add_menu']	= TRUE;
+		if (!isset($properties['before']))	$properties['before']	= NULL;
+		if (!isset($properties['url']))		$properties['url']		= NULL;
+
+		$this->object->_pages[$slug] = $properties;
 	}
 	
 	function move_page($slug, $other_slug, $after = false)
@@ -70,7 +71,7 @@ class Mixin_Page_Manager extends Mixin
 		}
 	}
 
-	function remove_page($slug)
+	function remove($slug)
 	{
 		unset($this->object->_pages[$slug]);
 	}
@@ -85,23 +86,56 @@ class Mixin_Page_Manager extends Mixin
 		$registry		= $this->get_registry();
 		$controllers	= array();
 		foreach ($this->object->_pages as $slug => $properties) {
-			$registry->add_adapter(
-				'I_NextGen_Admin_Page',
-				$properties['adapter'],
-				$slug
-			);
-			$controllers[$slug] = $registry->get_utility(
-				'I_NextGen_Admin_Page',
-				$slug
-			);
+
+			$page_title 	= "Unnamed Page";
+			$menu_title		= "Unnamed Page";
+			$permission		= NULL;
+			$callback 		= NULL;
+
+			// There's two type of pages we can have. Some are powered by our controllers, and others
+			// are powered by WordPress, such as a custom post type page.
+
+			// Is this powered by a controller? If so, we expect an adapter
+			if ($properties['adapter']) {
+
+				// Register the adapter and instantiate the controller
+				$registry->add_adapter(
+					'I_NextGen_Admin_Page',
+					$properties['adapter'],
+					$slug
+				);
+				$controllers[$slug] = $registry->get_utility(
+					'I_NextGen_Admin_Page',
+					$slug
+				);
+
+				$menu_title = $controllers[$slug]->get_page_heading();
+				$page_title = $controllers[$slug]->get_page_title();
+				$permission = $controllers[$slug]->get_required_permission();
+				$callback 	= array(&$controllers[$slug], 'index_action');
+			}
+
+			// Is this page powered by another url, such as one that WordPres provides?
+			elseif ($properties['url']) {
+				$slug = $properties['url'];
+				if (isset($properties['menu_title'])) {
+					$menu_title = $properties['menu_title'];
+				}
+				if (isset($properties['permission'])) {
+					$permission = $properties['permission'];
+				}
+			}
+
+			// Are we to add a menu?
 			if ($properties['add_menu']) {
+
 				add_submenu_page(
 					$properties['parent'],
-					$controllers[$slug]->get_page_title(),
-					$controllers[$slug]->get_page_heading(),
-					$controllers[$slug]->get_required_permission(),
+					$page_title,
+					$menu_title,
+					$permission,
 					$slug,
-					array(&$controllers[$slug], 'index_action')
+					$callback
 				);
 				
 				if ($properties['before']) {

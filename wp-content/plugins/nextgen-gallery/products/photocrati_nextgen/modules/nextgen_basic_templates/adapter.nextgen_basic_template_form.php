@@ -23,10 +23,10 @@ class A_NextGen_Basic_Template_Form extends Mixin
             case 'photocrati-nextgen_basic_imagebrowser':
                 $prefix = 'imagebrowser';
                 break;
-            case NEXTGEN_GALLERY_NEXTGEN_BASIC_COMPACT_ALBUM:
+            case NGG_BASIC_COMPACT_ALBUM:
                 $prefix = 'album';
                 break;
-            case NEXTGEN_GALLERY_NEXTGEN_BASIC_EXTENDED_ALBUM:
+            case NGG_BASIC_EXTENDED_ALBUM:
                 $prefix = 'album';
                 break;
             default:
@@ -139,7 +139,7 @@ class A_NextGen_Basic_Template_Form extends Mixin
         $gallery->description = html_entity_decode(stripslashes($orig_gallery->galdesc));
         $gallery->pageid = $orig_gallery->pageid;
 
-        if ($displayed_gallery->display_settings['ajax_pagination'])
+        if (!empty($displayed_gallery->display_settings['ajax_pagination']))
             $gallery_id = $displayed_gallery->transient_id;
         else
             $gallery_id = $displayed_gallery->id();
@@ -210,9 +210,11 @@ class A_NextGen_Basic_Template_Form extends Mixin
             $this->module_version,
             TRUE
         );
-		$atp = $this->object->get_registry()->get_utility('I_Attach_To_Post_Controller');
+	
+	$atp = $this->object->get_registry()->get_utility('I_Attach_To_Post_Controller');
 	
 	if ($atp != null) {
-		$atp->mark_script('ngg_template_settings');	}
+		$atp->mark_script('ngg_template_settings');
+	}
 	}
 }

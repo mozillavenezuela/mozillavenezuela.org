@@ -19,7 +19,11 @@ class A_Watermarks_Form extends Mixin
 	function _get_watermark_fonts()
 	{
 		$retval = array();
-		foreach (scandir(path_join(NGGALLERY_ABSPATH, 'fonts')) as $filename) {
+        $path = implode(DIRECTORY_SEPARATOR, array(
+           rtrim(NGGALLERY_ABSPATH, "/\\"),
+            'fonts'
+        ));
+		foreach (scandir($path) as $filename) {
 			if (strpos($filename, '.') === 0) continue;
 			else $retval[] = $filename;
 		}
@@ -62,9 +66,14 @@ class A_Watermarks_Form extends Mixin
 	 */
 	function _render_watermark_image_fields()
 	{
-		return $this->object->render_partial('photocrati-nextgen_other_options#watermark_image_fields', array(
+        $message = 'An absolute or relative (to the site document root) file system path';
+        if (ini_get('allow_url_fopen'))
+            $message = 'An absolute or relative (to the site document root) file system path or an HTTP url';
+
+        return $this->object->render_partial('photocrati-nextgen_other_options#watermark_image_fields', array(
 			'image_url_label'			=>	_('Image URL:'),
 			'watermark_image_url'		=>	$this->object->get_model()->wmPath,
+            'watermark_image_text'      =>  _($message)
 		), TRUE);
 	}
 
@@ -92,19 +101,27 @@ class A_Watermarks_Form extends Mixin
 		), TRUE);
 	}
 
+    function _get_preview_image()
+    {
+        $registry = $this->object->get_registry();
+        $storage  = $registry->get_utility('I_Gallery_Storage');
+        $image    = $registry->get_utility('I_Image_Mapper')->find_first();
+        $imagegen = $registry->get_utility('I_Dynamic_Thumbnails_Manager');
+        $size     = $imagegen->get_size_name(array(
+            'height'    => 250,
+            'crop'      => FALSE,
+            'watermark' => TRUE
+        ));
+        $url = $image ? $storage->get_image_url($image, $size) : NULL;
+        $abspath = $image ? $storage->get_image_abspath($image, $size) : NULL;
+        return (array('url' => $url, 'abspath' => $abspath));
+    }
+
 	function render()
 	{
 		$settings	= $this->get_model();
 		$registry	= $this->object->get_registry();
-		$storage	= $registry->get_utility('I_Gallery_Storage');
-		$image		= $registry->get_utility('I_Image_Mapper')->find_first();
-		$imagegen	= $registry->get_utility('I_Dynamic_Thumbnails_Manager');
-		$size		= $imagegen->get_size_name(array(
-			'height'	=>	250,
-			'crop'		=>	FALSE,
-			'watermark'	=>	TRUE
-		));
-		$thumb_url	= $image ? $storage->get_image_url($image, $size) : NULL;
+        $image      = $this->object->_get_preview_image();
 
 		return $this->render_partial('photocrati-nextgen_other_options#watermarks_tab', array(
 			'notice'					=>	_('Please note : You can only activate the watermark under -> Manage Gallery . This action cannot be undone.'),
@@ -119,7 +136,7 @@ class A_Watermarks_Form extends Mixin
 			'offset_y'					=>	$settings->wmYpos,
 			'hidden_label'				=>	_('(Show Customization Options)'),
 			'active_label'				=>	_('(Hide Customization Options)'),
-            'thumbnail_url'             => $thumb_url,
+            'thumbnail_url'             => $image['url'],
             'preview_label'             => _('Preview of saved settings:'),
             'refresh_label'             => _('Refresh preview image'),
             'refresh_url'               => $settings->ajax_url
@@ -130,6 +147,9 @@ class A_Watermarks_Form extends Mixin
 	{
 		if (($settings = $this->object->param('watermark_options'))) {
 			$this->object->get_model()->set($settings)->save();
+            $image = $this->object->_get_preview_image();
+            if (is_file($image['abspath']))
+                @unlink($image['abspath']);
 		}
 	}
 }

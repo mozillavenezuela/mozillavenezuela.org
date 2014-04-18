@@ -6,7 +6,7 @@
  }
  */
 
-define('NEXTGEN_GALLERY_ATTACH_TO_POST_SLUG', 'ngg_attach_to_post');
+define('NGG_ATTACH_TO_POST_SLUG', 'nextgen-attach_to_post');
 
 class M_Attach_To_Post extends C_Base_Module
 {
@@ -23,7 +23,7 @@ class M_Attach_To_Post extends C_Base_Module
 			'photocrati-attach_to_post',
 			'Attach To Post',
 			'Provides the "Attach to Post" interface for displaying galleries and albums',
-			'0.8',
+			'0.10',
 			'http://www.nextgen-gallery.com',
 			'Photocrati Media',
 			'http://www.photocrati.com',
@@ -44,7 +44,7 @@ class M_Attach_To_Post extends C_Base_Module
 		
 		if (strpos($uri, '/nextgen-attach_to_post') !== false) {
 			define('WP_ADMIN', true);
-		}
+        }
     }
 
     /**
@@ -127,7 +127,27 @@ class M_Attach_To_Post extends C_Base_Module
 		add_action('ngg_after_new_images_added',array(&$this, 'images_added_event'));
 		add_action('ngg_page_event',			array(&$this, 'nextgen_page_event'));
         add_action('ngg_manage_tags',           array(&$this, 'manage_tags_event'));
+
+        // We use two hooks here because we need it to execute for both the post-new.php
+        // page and ATP interface
+        add_action('plugins_loaded',            array(&$this, 'fix_ie11'), 1);
+        add_action('admin_init',                array(&$this, 'fix_ie11'), PHP_INT_MAX-1);
+        add_action('admin_enqueue_scripts',     array(&$this, 'fix_ie11'), 1);
+        add_action('admin_enqueue_scripts',     array(&$this, 'fix_ie11'), PHP_INT_MAX-1);
 	}
+
+    /**
+     * WordPress sets the X-UA-Compatible header to IE=edge. Unfortunately, this causes problems with Plupload,
+     * so we have the send this header
+     */
+    function fix_ie11()
+    {
+        if ((array_search('attach_to_post', array_keys($_REQUEST)) !== FALSE OR strpos($_SERVER['REQUEST_URI'], NGG_ATTACH_TO_POST_SLUG) !== FALSE OR strpos($_SERVER['REQUEST_URI'], 'wp-admin/post.php') !== FALSE OR strpos($_SERVER['REQUEST_URI'], 'wp-admin/post-new.php') !== FALSE)) {
+            if (!headers_sent()) {
+                header('X-UA-Compatible: IE=EmulateIE10');
+            }
+        }
+    }
 
 	/**
      * Substitutes the gallery placeholder content with the gallery type frontend
@@ -146,6 +166,7 @@ class M_Attach_To_Post extends C_Base_Module
 			$router->remove_url_segment('index.php', $router->get_base_url()),
 			'/nextgen-attach_to_post/preview'
 		));
+        $router->debug = TRUE;
 		$preview_url = preg_quote($preview_url['host'] . $preview_url['path'], '#');
 
 		$alt_preview_url = parse_url($router->join_paths(
@@ -248,8 +269,15 @@ class M_Attach_To_Post extends C_Base_Module
 	 */
 	function add_attach_to_post_tinymce_plugin($plugins)
 	{
-		$router = $this->get_registry()->get_utility('I_Router');
-		$plugins[$this->attach_to_post_tinymce_plugin] = $router->get_static_url('photocrati-attach_to_post#ngg_attach_to_post_tinymce_plugin.js');
+        global $wp_version;
+        $router = $this->get_registry()->get_utility('I_Router');
+
+        if ($wp_version >= 3.9)
+            $file = $router->get_static_url('photocrati-attach_to_post#ngg_attach_to_post_tinymce_plugin.js');
+        else
+            $file = $router->get_static_url('photocrati-attach_to_post#ngg_attach_to_post_tinymce_plugin_wp38_compat.js');
+
+		$plugins[$this->attach_to_post_tinymce_plugin] = $file;
 		return $plugins;
 	}
 

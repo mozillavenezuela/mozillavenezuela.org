@@ -181,7 +181,7 @@ class nggOptions {
     	if ( isset($_POST['clearcache']) ) {
     		check_admin_referer('ngg_settings');
 
-    		$path = WINABSPATH . $ngg->options['gallerypath'] . 'cache/';
+    		$path = ABSPATH . $ngg->options['gallerypath'] . 'cache/';
 
     		if (is_dir($path))
     	    	if ($handle = opendir($path)) {

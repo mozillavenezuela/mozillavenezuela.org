@@ -59,6 +59,29 @@ if (!class_exists('C_Photocrati_Installer'))
 			}
 		}
 
+        static function can_do_upgrade()
+        {
+            $proceed = FALSE;
+
+            // Proceed if no other process has started the installer routines
+            if (!($doing_upgrade = get_option('ngg_doing_upgrade', FALSE))) {
+                update_option('ngg_doing_upgrade', time());
+                $proceed = TRUE;
+            }
+
+            // Or, force proceeding if we have a stale ngg_doing_upgrade record
+            elseif ($doing_upgrade === TRUE OR time() - $doing_upgrade > 120) {
+                update_option('ngg_doing_upgrade', time());
+                $proceed = TRUE;
+            }
+            return $proceed;
+        }
+
+        static function done_upgrade()
+        {
+            update_option('ngg_doing_upgrade', FALSE);
+        }
+
 		static function update($reset=FALSE)
 		{
 			$local_settings     = C_NextGen_Settings::get_instance();
@@ -96,11 +119,17 @@ if (!class_exists('C_Photocrati_Installer'))
                 }
             }
 
-            $last_module_list    = $reset ? array() : $local_settings->get('pope_module_list', array());
+            $last_module_list = self::_get_last_module_list($reset);
 			$current_module_list = self::_generate_module_info();
 
-            if (count(($modules = array_diff($current_module_list, $last_module_list))) > 0)
+            if (count(($modules = array_diff($current_module_list, $last_module_list))) > 0 && self::can_do_upgrade())
             {
+                // Clear APC cache
+                if (function_exists('apc_clear_cache')) {
+                    @apc_clear_cache('opcode');
+                    apc_clear_cache();
+                }
+
 				// The cache should be flushed
 				C_Photocrati_Cache::flush();
 
@@ -125,7 +154,7 @@ if (!class_exists('C_Photocrati_Installer'))
 				}
 
 				// Update the module list
-				$local_settings->set('pope_module_list', $current_module_list);
+                update_option('pope_module_list', $current_module_list);
 
                 // NOTE & TODO: if the above section that declares $global_settings_to_keep is removed this should also
                 // Since a hard-reset of the settings was forced we must again re-apply our previously saved values
@@ -138,6 +167,8 @@ if (!class_exists('C_Photocrati_Installer'))
 				// Save any changes settings
 				$global_settings->save();
 				$local_settings->save();
+
+                self::done_upgrade();
             }
 
             // Another workaround to an issue caused by NextGen's lack of multisite compatibility. It's possible
@@ -153,13 +184,29 @@ if (!class_exists('C_Photocrati_Installer'))
             }
 		}
 
+        static function _get_last_module_list($reset=FALSE)
+        {
+            // Return empty array to reset
+            if ($reset) return array();
+
+            // First try getting the list from a single WP option, "pope_module_list"
+            $retval = get_option('pope_module_list', array());
+            if (!$retval) {
+                $local_settings     = C_NextGen_Settings::get_instance();
+                $retval = $local_settings->get('pope_module_list', array());
+                $local_settings->delete('pope_module_list');
+            }
+
+            return $retval;
+        }
+
 		static function _generate_module_info()
 		{
 			$retval = array();
 			$registry = C_Component_Registry::get_instance();
 			foreach ($registry->get_module_list() as $module_id) {
 				$module_version = $registry->get_module($module_id)->module_version;
-				$retval[$module_id] = "{$module_id}|{$module_version}";
+				$retval[] = "{$module_id}|{$module_version}";
 			}
 			return $retval;
 		}

@@ -1,4 +1,9 @@
-#iframely, #iframely body{
+/* keep the ATP background white */
+html#iframely {
+    background: white !important;
+}
+
+#iframely, #iframely body {
 	padding: 0px;
 	width: 100%;
 	height: 100%;

@@ -107,20 +107,24 @@ class A_NextGen_Basic_ImageBrowser_Controller extends Mixin_NextGen_Basic_Galler
         // 'show' is set when using the imagebrowser as an alternate view to a thumbnail or slideshow
         // for which the basic-gallery module will rewrite the show parameter into existence as long as 'image'
         // is set. We remove 'show' here so navigation appears fluid.
+        $current_url = $application->get_routed_url(TRUE);
+        if ($this->object->param('ajax_pagination_referrer'))
+            $current_url = $this->object->param('ajax_pagination_referrer');
+
         $prev_image_link = $this->object->set_param_for(
-            $application->get_routed_url(TRUE),
+            $current_url,
             'pid',
             $picture_list[$back_pid]->image_slug
         );
-        $prev_image_link = trailingslashit($this->object->remove_param_for($prev_image_link, 'show', $displayed_gallery->id()));
+        $prev_image_link = ($this->object->remove_param_for($prev_image_link, 'show', $displayed_gallery->id()));
 
         $next_pid = ($key < ($total - 1)) ? $picture_array[$key + 1] : reset($picture_array);
         $next_image_link = $this->object->set_param_for(
-            $application->get_routed_url(TRUE),
+            $current_url,
             'pid',
             $picture_list[$next_pid]->image_slug
         );
-        $next_image_link = trailingslashit($this->object->remove_param_for($next_image_link, 'show', $displayed_gallery->id()));
+        $next_image_link = ($this->object->remove_param_for($next_image_link, 'show', $displayed_gallery->id()));
 
         // css class
         $anchor = 'ngg-imagebrowser-' . $displayed_gallery->id() . '-' . (get_the_ID() == false ? 0 : get_the_ID());
@@ -135,6 +139,10 @@ class A_NextGen_Basic_ImageBrowser_Controller extends Mixin_NextGen_Basic_Galler
             'db'   => $meta->get_saved_meta()
         );
         $meta_results['exif'] = ($meta_results['exif'] == false) ? $meta_results['db'] : $meta_results['exif'];
+
+        // disable triggers IF we're rendering inside of an ajax-pagination request; var set in common.js
+        if (!empty($_POST['ajax_referrer']))
+            $displayed_gallery->display_settings['ngg_triggers_display'] = 'never';
 
         if (!empty($display_settings['template']))
         {

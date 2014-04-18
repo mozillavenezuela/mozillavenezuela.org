@@ -91,6 +91,6 @@ class Mixin_Display_Type_Instance_Methods extends Mixin
 	
 	function get_order()
 	{
-		return NEXTGEN_DISPLAY_PRIORITY_BASE;
+		return NGG_DISPLAY_PRIORITY_BASE;
 	}
 }

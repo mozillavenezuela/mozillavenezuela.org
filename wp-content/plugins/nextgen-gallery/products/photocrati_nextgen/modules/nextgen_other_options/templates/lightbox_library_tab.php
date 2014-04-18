@@ -28,7 +28,7 @@
     <?php } ?>
 
     <tr>
-		<td colspan="2">
+		<td>
 			<a href="#"
 			   id="lightbox_library_advanced_toggle"
 			   data-hidden_label="<?php echo esc_attr(_('(Show Advanced Settings)'))?>"
@@ -37,6 +37,7 @@
                 <?php echo_h(_("(Show Advanced Settings)"))?>
 			</a>
 		</td>
+        <td>&nbsp;</td>
 	</tr>
 
     <?php foreach ($adv_fields as $name => $form) { ?>

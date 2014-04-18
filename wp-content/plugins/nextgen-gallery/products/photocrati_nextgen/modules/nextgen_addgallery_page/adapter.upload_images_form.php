@@ -10,9 +10,9 @@ class A_Upload_Images_Form extends Mixin
 
     function enqueue_static_resources()
     {
-        wp_enqueue_style('plupload.queue');
+        wp_enqueue_style('ngg.plupload.queue');
         wp_enqueue_script('browserplus');
-        wp_enqueue_script('plupload.queue');
+        wp_enqueue_script('ngg.plupload.queue');
 
     }
 

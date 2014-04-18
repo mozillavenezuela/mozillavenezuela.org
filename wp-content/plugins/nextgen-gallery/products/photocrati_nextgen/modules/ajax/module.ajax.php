@@ -14,7 +14,7 @@ class M_Ajax extends C_Base_Module
 			'photocrati-ajax',
 			'AJAX',
 			'Provides AJAX functionality',
-			'0.5',
+			'0.7',
 			'http://www.photocrati.com',
 			'Photocrati Media',
 			'http://www.photocrati.com'
@@ -71,6 +71,12 @@ class M_Ajax extends C_Base_Module
             'wp_site_static_url' => str_replace('/index.php', '', str_replace('/index.php', '', $site_url))
         );
         wp_localize_script('photocrati_ajax', 'photocrati_ajax', $vars);
+
+		wp_register_script('persist-js', 	$router->get_static_url('photocrati-ajax#persist.js'));
+		wp_register_script('store-js',	 	$router->get_static_url('photocrati-ajax#store.js'));
+		wp_register_script('ngg-store-js',	$router->get_static_url('photocrati-ajax#ngg_store.js'), array('jquery', 'persist-js', 'store-js'));
+
+		wp_enqueue_script('ngg-store-js');
 	}
 
     function get_type_list()

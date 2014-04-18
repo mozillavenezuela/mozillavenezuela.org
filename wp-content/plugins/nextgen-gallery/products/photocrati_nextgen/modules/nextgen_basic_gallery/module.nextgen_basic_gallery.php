@@ -7,12 +7,12 @@
 */
 
 define(
-    'NEXTGEN_GALLERY_BASIC_THUMBNAILS',
+    'NGG_BASIC_THUMBNAILS',
     'photocrati-nextgen_basic_thumbnails'
 );
 
 define(
-    'NEXTGEN_GALLERY_BASIC_SLIDESHOW',
+    'NGG_BASIC_SLIDESHOW',
     'photocrati-nextgen_basic_slideshow'
 );
 
@@ -25,7 +25,7 @@ class M_NextGen_Basic_Gallery extends C_Base_Module
             'photocrati-nextgen_basic_gallery',
             'NextGEN Basic Gallery',
             "Provides NextGEN Gallery's basic thumbnail/slideshow integrated gallery",
-            '0.7',
+            '0.9',
             'http://www.nextgen-gallery.com',
             'Photocrati Media',
             'http://www.photocrati.com'
@@ -38,7 +38,6 @@ class M_NextGen_Basic_Gallery extends C_Base_Module
     function get_type_list()
     {
         return array(
-            'A_Ajax_Pagination_Actions' => 'adapter.ajax_pagination_actions.php',
             'A_Nextgen_Basic_Gallery_Forms' => 'adapter.nextgen_basic_gallery_forms.php',
             'C_Nextgen_Basic_Gallery_Installer' => 'class.nextgen_basic_gallery_installer.php',
             'A_Nextgen_Basic_Gallery_Mapper' => 'adapter.nextgen_basic_gallery_mapper.php',
@@ -62,12 +61,12 @@ class M_NextGen_Basic_Gallery extends C_Base_Module
             $this->get_registry()->add_adapter(
                 'I_Form',
                 'A_NextGen_Basic_Slideshow_Form',
-                NEXTGEN_GALLERY_BASIC_SLIDESHOW
+                NGG_BASIC_SLIDESHOW
             );
             $this->get_registry()->add_adapter(
                 'I_Form',
                 'A_NextGen_Basic_Thumbnail_Form',
-                NEXTGEN_GALLERY_BASIC_THUMBNAILS
+                NGG_BASIC_THUMBNAILS
             );
         }
         
@@ -75,12 +74,12 @@ class M_NextGen_Basic_Gallery extends C_Base_Module
         $this->get_registry()->add_adapter(
             'I_Display_Type_Controller',
             'A_NextGen_Basic_Slideshow_Controller',
-            NEXTGEN_GALLERY_BASIC_SLIDESHOW
+            NGG_BASIC_SLIDESHOW
         );
         $this->get_registry()->add_adapter(
             'I_Display_Type_Controller',
             'A_NextGen_Basic_Thumbnails_Controller',
-            NEXTGEN_GALLERY_BASIC_THUMBNAILS
+            NGG_BASIC_THUMBNAILS
         );
         
         // Provide defaults for the display types
@@ -106,13 +105,6 @@ class M_NextGen_Basic_Gallery extends C_Base_Module
             'I_Router',
             'A_NextGen_Basic_Gallery_Routes'
         );
-        
-        
-        // Provides AJAX pagination actions required by the display types
-        $this->get_registry()->add_adapter(
-            'I_Ajax_Controller',
-            'A_Ajax_Pagination_Actions'
-        );
 
         if (is_admin()) {
             // Adds the settings forms
@@ -125,13 +117,19 @@ class M_NextGen_Basic_Gallery extends C_Base_Module
     
     function _register_hooks()
 	{
-		C_NextGen_Shortcode_Manager::add('nggallery', array(&$this, 'render'));
-		C_NextGen_Shortcode_Manager::add('nggtags',   array(&$this, 'render_based_on_tags'));
-		C_NextGen_Shortcode_Manager::add('random',    array(&$this, 'render_random_images'));
-		C_NextGen_Shortcode_Manager::add('recent',    array(&$this, 'render_recent_images'));
-		C_NextGen_Shortcode_Manager::add('thumb',	   array(&$this, 'render_thumb_shortcode'));
-		C_NextGen_Shortcode_Manager::add('slideshow',		 array(&$this, 'render_slideshow'));
-		C_NextGen_Shortcode_Manager::add('nggslideshow',	 array(&$this, 'render_slideshow'));
+        if (!defined('NGG_DISABLE_LEGACY_SHORTCODES') || !NGG_DISABLE_LEGACY_SHORTCODES)
+        {
+            C_NextGen_Shortcode_Manager::add('random',    array(&$this, 'render_random_images'));
+            C_NextGen_Shortcode_Manager::add('recent',    array(&$this, 'render_recent_images'));
+            C_NextGen_Shortcode_Manager::add('thumb',     array(&$this, 'render_thumb_shortcode'));
+            C_NextGen_Shortcode_Manager::add('slideshow', array(&$this, 'render_slideshow'));
+        }
+        C_NextGen_Shortcode_Manager::add('nggallery',    array(&$this, 'render'));
+        C_NextGen_Shortcode_Manager::add('nggtags',      array(&$this, 'render_based_on_tags'));
+        C_NextGen_Shortcode_Manager::add('nggslideshow', array(&$this, 'render_slideshow'));
+        C_NextGen_Shortcode_Manager::add('nggrandom',    array(&$this, 'render_random_images'));
+        C_NextGen_Shortcode_Manager::add('nggrecent',    array(&$this, 'render_recent_images'));
+        C_NextGen_Shortcode_Manager::add('nggthumb',     array(&$this, 'render_thumb_shortcode'));
 	}
 
     /**
@@ -156,7 +154,7 @@ class M_NextGen_Basic_Gallery extends C_Base_Module
 	function render($params, $inner_content=NULL)
     {
         $params['gallery_ids']     = $this->_get_param('id', NULL, $params);
-        $params['display_type']    = $this->_get_param('display_type', NEXTGEN_GALLERY_BASIC_THUMBNAILS, $params);
+        $params['display_type']    = $this->_get_param('display_type', NGG_BASIC_THUMBNAILS, $params);
         if (isset($params['images']))
         {
             $params['images_per_page'] = $this->_get_param('images', NULL, $params);
@@ -172,7 +170,7 @@ class M_NextGen_Basic_Gallery extends C_Base_Module
     {
         $params['tag_ids']      = $this->_get_param('gallery', $this->_get_param('album', array(), $params), $params);
         $params['source']       = $this->_get_param('source', 'tags', $params);
-        $params['display_type'] = $this->_get_param('display_type', NEXTGEN_GALLERY_BASIC_THUMBNAILS, $params);
+        $params['display_type'] = $this->_get_param('display_type', NGG_BASIC_THUMBNAILS, $params);
         unset($params['gallery']);
 
 		$renderer = $this->get_registry()->get_utility('I_Displayed_Gallery_Renderer');
@@ -184,7 +182,7 @@ class M_NextGen_Basic_Gallery extends C_Base_Module
 		$params['source']             = $this->_get_param('source', 'random', $params);
         $params['images_per_page']    = $this->_get_param('max', NULL, $params);
         $params['disable_pagination'] = $this->_get_param('disable_pagination', TRUE, $params);
-        $params['display_type']       = $this->_get_param('display_type', NEXTGEN_GALLERY_BASIC_THUMBNAILS, $params);
+        $params['display_type']       = $this->_get_param('display_type', NGG_BASIC_THUMBNAILS, $params);
 
         // inside if because Mixin_Displayed_Gallery_Instance_Methods->get_entities() doesn't handle NULL container_ids
         // correctly
@@ -205,7 +203,7 @@ class M_NextGen_Basic_Gallery extends C_Base_Module
 		        $params['source']             = $this->_get_param('source', 'recent', $params);
         $params['images_per_page']    = $this->_get_param('max', NULL, $params);
         $params['disable_pagination'] = $this->_get_param('disable_pagination', TRUE, $params);
-        $params['display_type']       = $this->_get_param('display_type', NEXTGEN_GALLERY_BASIC_THUMBNAILS, $params);
+        $params['display_type']       = $this->_get_param('display_type', NGG_BASIC_THUMBNAILS, $params);
 
         if (isset($params['id']))
         {
@@ -223,7 +221,7 @@ class M_NextGen_Basic_Gallery extends C_Base_Module
 	{
 		$params['entity_ids']   = $this->_get_param('id', NULL, $params);
         $params['source']       = $this->_get_param('source', 'galleries', $params);
-        $params['display_type'] = $this->_get_param('display_type', NEXTGEN_GALLERY_BASIC_THUMBNAILS, $params);
+        $params['display_type'] = $this->_get_param('display_type', NGG_BASIC_THUMBNAILS, $params);
         unset($params['id']);
 
         $renderer = $this->get_registry()->get_utility('I_Displayed_Gallery_Renderer');
@@ -233,7 +231,7 @@ class M_NextGen_Basic_Gallery extends C_Base_Module
 	function render_slideshow($params, $inner_content=NULL)
 	{
 		$params['gallery_ids']    = $this->_get_param('id', NULL, $params);
-        $params['display_type']   = $this->_get_param('display_type', NEXTGEN_GALLERY_BASIC_SLIDESHOW, $params);
+        $params['display_type']   = $this->_get_param('display_type', NGG_BASIC_SLIDESHOW, $params);
         $params['gallery_width']  = $this->_get_param('w', NULL, $params);
         $params['gallery_height'] = $this->_get_param('h', NULL, $params);
         unset($params['id'], $params['w'], $params['h']);

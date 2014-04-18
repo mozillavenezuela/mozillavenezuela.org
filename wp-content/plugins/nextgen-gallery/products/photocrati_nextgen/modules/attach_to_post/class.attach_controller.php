@@ -180,9 +180,7 @@ class Mixin_Attach_To_Post extends Mixin
 	 */
 	function index_action($return=FALSE)
 	{
-        if ($this->object->_displayed_gallery->is_new()) $this->object->expires("+2 hour");
-        
-    $this->object->_is_rendering = true;
+        $this->object->do_not_cache();
     
 		// Enqueue resources
 		return $this->object->render_view('photocrati-attach_to_post#attach_to_post', array(

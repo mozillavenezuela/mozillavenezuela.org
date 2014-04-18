@@ -23,7 +23,7 @@ class Hook_NextGen_Basic_ImageBrowser_Defaults extends Hook
 {
 	function set_defaults($entity)
 	{
-		if (isset($entity->name) && $entity->name == NEXTGEN_GALLERY_NEXTGEN_BASIC_IMAGEBROWSER)
+		if (isset($entity->name) && $entity->name == NGG_BASIC_IMAGEBROWSER)
         {
 			$this->object->_set_default_value($entity, 'settings', 'template', '');
 

@@ -2,17 +2,17 @@
 Contributors: photocrati
 Tags:gallery,image,images,photo,photos,picture,pictures,slideshow,flash,media,thumbnails,photo-albums,nextgen-gallery,nextgen
 Requires at least: 3.6.1
-Tested up to: 3.8
+Tested up to: 3.8.1
 Stable tag: trunk
 License: GPLv2
 
-The most popular WordPress gallery plugin and one of the most popular plugins of all time with over 7.5 million downloads.
+The most popular WordPress gallery plugin and one of the most popular plugins of all time with over 9 million downloads.
 
 == Description ==
 
 = WordPress Gallery Plugin =
 
-NextGEN Gallery is the most popular **WordPress gallery plugin**, and one of the most popular WordPress plugins of all time, with over 7.5 million downloads.
+NextGEN Gallery is the most popular **WordPress gallery plugin**, and one of the most popular WordPress plugins of all time, with over 9 million downloads.
 
 It provides a powerful engine for uploading and managing galleries of images, with the ability to batch upload, import meta data, add/delete/rearrange/sort images, edit thumbnails, group galleries into albums, and more. It also provides two front-end display styles (slideshows and thumbnail galleries), both of which come with a wide array of options for controlling size, style, timing, transitions, controls, lightbox effects, and more.
 
@@ -199,10 +199,83 @@ For more information, feel free to visit the official website for the NextGEN Ga
 
 == Changelog ==
 
+= V2.0.61 - 04.01.2014 =
+* Fixed:   Compatibility with WP 3.9
+* Fixed:   Exception thrown when using Reset button
+
+= V2.0.59 - 03.18.2014 =
+* Changed: Separated pope_module_list from ngg_options record in options table
+* Fixed:   Removed code causing jQuery compatibility issues in WP Admin
+* Fixed:   Allow third-parties to override jQuery with Google's CDN
+* Fixed:   When resetting the 'jquery' handle, ensure that jquery-migrate is a dependency
+* Fixed:   Silenced many PHP warnings
+* Fixed:   Datamapper->count() not returning the correct count
+* Fixed:   Compatibility with Gravity Forms
+
+= V2.0.58 - 03.09.2014 =
+* Fixed:   Reset jQuery to WP defaults when modified by a third-party
+* Fixed:   Compatibility with WP jQuery Lightbox plugin
+* Fixed:   Compatibility with Peekaboo theme
+
+= V2.0.57 - 03.05.2014 =
+* NEW:     Re-introduced the Reset button
+* NEW:     Tooltip added for Page Link to functionality
+* NEW:     Displayed Gallery Triggers moved from NextGEN Pro to NextGEN Gallery (not in use)
+* NEW:     Added NGG_Store, a client-side persistence layer (not in use)
+* NEW:     Added NGG_CRON_SCHEDULE constant. Set to the number of seconds between the execution of NextGEN Gallery cron jobs
+* NEW:     Added NGG_RENDERING_CACHE_TTL constant. TTL measured in seconds.
+* NEW:     Added NGG_DISPLAYED_GALLERY_CACHE_TTL constant. TTL measured in seconds.
+* NEW:     Added NGG_DISABLE_LEGACY_SHORTCODES constant. When TRUE, [slideshow] becomes [nggslideshow].
+* NEW:     Added Font Awesome, available for NextGEN Gallery extensions
+* Changed: Transients are removed every 30 minutes instead of 60 minutes
+* Changed: Admin Page & Form components refactored to allow custom POST processing
+* Changed: Default path for NEW multisite installations to wp-content/uploads/sites/%BLOG_ID%/nggallery/
+* Fixed:   Ability to upload ZIP files on Windows hosts
+* Fixed:   Support for filenames with non-ASCII characters
+* Fixed:   Dynamic updates in the Attach to Post interface (interframe communication)
+* Fixed:   Attach to Post interface freezing in IE11
+* Fixed:   Path issues on Windows Servers
+* Fixed:   Module installer integrity
+* Fixed:   Database query performance. No more joins to the WP options table
+* Fixed:   Lightboxes storing absolute paths for static resources
+* Fixed:   Displayed gallery cache not regularly flushed
+* Fixed:   SQL query performance problems. Honor max_packet_allowed variable for MySQL
+* Fixed:   Multiple database queries generated for determining next available image slug
+* Fixed:   Corrupted MediaRSS feeds
+* Fixed:   Padding on Gallery Settings and Other Options pages
+* Fixed:   Routing issues on subdirectory installs
+* Fixed:   Importing galleries using the Attach to Post Interface
+* Fixed:   Gallery path calculations on Windows web servers
+* Fixed:   Sub-album urls not processed correctly
+* Fixed:   Apply maximum entity count to existing displayed galleries
+* Fixed:   NextGEN Gallery Thumbnail Widget shouldn't use ImageBrowser effect
+* Fixed:   Ability to set shuffle parameter for ImageRotator slideshows
+* Fixed:   PHP warning about HTMLDocument when displaying a SinglePic
+* Fixed:   Sanitization of gallery title
+* Fixed:   Home URL now used instead of Site URL in MediaRSS feed
+* Fixed:   Attach to Post interface broken when WPML is installed
+* Fixed:   Attach to Post interface instructing browser to cache the page
+* Fixed:   Watermarking not working in low-memory environments
+* Fixed:   Maximum images limit not being applied for galleries already created.
+* Fixed:   Double forward slashes in static urls
+* Fixed:   Don't sleep when checking if the installer is running
+* Fixed:   Don't enforce Pope interface contracts
+* Fixed:   Remove custom table extra records from wp_options table
+* Fixed:   Scan folder for new images not working
+* Fixed:   Incorrect page permalink used for "Page Link To" functionality
+* Fixed:   Pagination broken when Basic Thumbnail gallery on the same page as Basic Album
+* Fixed:   parse_url() warnings generated for PHP 5.3.3 and earlier
+* Fixed:   Compatibility with Headway Themes
+* Fixed:   Compatibility with web servers which don't provide PHP a document root
+* Fixed:   Third-party incompatibilities caused by the Photocrati Resource Manager
+* Fixed:   Compatibility with the Flattr plugin
+* Fixed:   Compatibility with the Weaver II theme
+* Fixed:   Interface tweaks for WordPress 3.8
+
 = V2.0.40 - 11.26.2013 =
 * NEW:     Added the ability to apply lightbox effects to non-NGG images
 * NEW:     Added NGG_HIDE_STRICT_ERRORS constant. Define and set to TRUE to hide strict errors
-* NEW:     Added NEXTGEN_GALLERY_IMPORT_ROOT constant. Define and set to TRUE to browse from a custom directory
+* NEW:     Added NGG_IMPORT_ROOT constant. Define and set to TRUE to browse from a custom directory
 * NEW:     Added NGG_DEBUG constant. Define and set to TRUE to display helpful messages for debugging
 * NEW:     Each custom table record will have an associated custom post record for expansion
 * NEW:     Display helpful error messages when there's a problem uploading images

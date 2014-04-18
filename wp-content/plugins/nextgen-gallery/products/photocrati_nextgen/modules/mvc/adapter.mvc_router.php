@@ -17,9 +17,9 @@ class A_MVC_Router extends Mixin
 		// Find the module directory
 		$fs = $this->object->get_registry()->get_utility('I_Fs');
 
-		return $fs->join_paths(
-			$base_url,
-			$fs->find_static_abspath($path, $module, TRUE)
-		);
+        return $this->join_paths(
+            $base_url,
+            str_replace("\\", '/', $fs->find_static_abspath($path, $module, TRUE))
+        );
 	}
 }

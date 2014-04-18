@@ -169,7 +169,7 @@ class C_CustomTable_DataMapper_Driver_Mixin extends Mixin
 	 * Returns the generated SQL query to be executed
 	 * @return string
 	 */
-	function get_generated_query()
+	function get_generated_query($no_entities=FALSE)
 	{
 		$sql = array();
 
@@ -202,7 +202,7 @@ class C_CustomTable_DataMapper_Driver_Mixin extends Mixin
 
 		// Or generate SQL query
 		if (!$sql)
-            $sql = $this->object->get_generated_query();
+            $sql = $this->object->get_generated_query($no_entities);
 
 		// If we have a SQL statement to execute, then heck, execute it!
 		if ($sql)
@@ -226,7 +226,7 @@ class C_CustomTable_DataMapper_Driver_Mixin extends Mixin
                     foreach ($this->_wpdb()->last_result as $row) {
 						if ($row) {
 							if (isset($row->$id_field)) {
-								$retval[] = $this->object->_convert_to_entity($this->scrub_result($row));
+								$retval[] = $this->object->_convert_to_entity($row);
 							}
 						}
                     }

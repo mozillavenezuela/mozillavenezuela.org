@@ -8,7 +8,7 @@ class A_NextGen_Basic_SinglePic_Form extends Mixin_Display_Type_Form
 	 */
 	function get_display_type_name()
 	{
-		return NEXTGEN_BASIC_SINGLEPIC_MODULE_NAME;
+		return NGG_BASIC_SINGLEPIC;
 	}
 
 	/**

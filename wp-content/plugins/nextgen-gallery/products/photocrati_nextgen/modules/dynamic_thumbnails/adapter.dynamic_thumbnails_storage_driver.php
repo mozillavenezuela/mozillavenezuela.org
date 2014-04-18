@@ -22,7 +22,9 @@ class A_Dynamic_Thumbnails_Storage_Driver extends Mixin
 					$params = $dynthumbs->get_params_from_name($size, true);
 					$image_filename = $dynthumbs->get_image_name($image, $params);
 
-					$image_path = path_join($folder_path, $image_filename);
+					$image_path = implode(DIRECTORY_SEPARATOR, array(
+                        rtrim($folder_path, "\\/"), $image_filename
+                    ));
 
 					if ($check_existance)
 					{
@@ -51,10 +53,10 @@ class A_Dynamic_Thumbnails_Storage_Driver extends Mixin
 		$dynthumbs = $this->object->get_registry()->get_utility('I_Dynamic_Thumbnails_Manager');
 
 		if ($dynthumbs && $dynthumbs->is_size_dynamic($size)) {
-
 			$abspath = $this->object->get_image_abspath($image, $size, true);
 
-		if ($abspath == null) {
+            // If abspath is NULL, then we assume we're dealing with a dynamic image
+		    if ($abspath == null) {
 				$params = $dynthumbs->get_params_from_name($size, true);
 				$retval = $dynthumbs->get_image_url($image, $params);
 			}

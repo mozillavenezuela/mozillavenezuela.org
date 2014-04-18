@@ -16,13 +16,10 @@ class Hook_NextGen_Basic_TagCloud_Defaults extends Hook
 {
 	function set_defaults($entity)
 	{
-		if (isset($entity->name) && $entity->name == NEXTGEN_BASIC_TAG_CLOUD_MODULE_NAME) {
-			$this->object->_set_default_value(
-				$entity,
-				'settings',
-				'display_type',
-				'photocrati-nextgen_basic_thumbnails'
-			);
+		if (isset($entity->name) && $entity->name == NGG_BASIC_TAGCLOUD)
+        {
+			$this->object->_set_default_value($entity, 'settings', 'display_type', NGG_BASIC_THUMBNAILS);
+            $this->object->_set_default_value($entity, 'settings', 'number', 45);
 		}
 	}
 }

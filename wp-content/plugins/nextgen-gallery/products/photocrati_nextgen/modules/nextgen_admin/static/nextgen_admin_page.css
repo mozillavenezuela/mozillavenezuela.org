@@ -35,5 +35,20 @@ label.tooltip {
     background-image: url('information.png');
     background-repeat: no-repeat;
     padding-left: 18px;
-    padding-bottom: 1px;
+    padding-bottom: 4px;
+}
+
+#poststuff .ui-accordion h3 {
+	padding-left: 25px;
+}
+
+#lightbox_effects_content table tr td:first-child {
+    vertical-align: top;
+    text-align: right;
+    padding-right: 7px;
+    padding-top: 5px;
+}
+
+#lightbox_effects_content tr {
+    height: 28px;
 }

@@ -372,6 +372,9 @@ class Mixin_DataMapper_Driver_Base extends Mixin
 		// Cast columns to their appropriate data type
 		$this->cast_columns($stdObject);
 
+		// Strip slashes
+		$this->strip_slashes($stdObject);
+
 		// Unserialize columns
 		$this->unserialize_columns($stdObject);
 
@@ -380,6 +383,47 @@ class Mixin_DataMapper_Driver_Base extends Mixin
 
 		return $stdObject;
 	}
+
+
+	function strip_slashes($stdObject)
+	{
+		foreach (get_object_vars($stdObject) as $key => $value) {
+			if (is_string($value)) {
+				$stdObject->$key = str_replace("\\'", "'", str_replace('\"', '"', str_replace("\\\\", "\\", $value)));
+			}
+			elseif(is_object($value)) {
+				$stdObject->$key = $this->strip_slashes_deep($value);
+			}
+            elseif(is_array($value)) {
+                $stdObject->$key = $this->strip_slashes_deep($value);
+            }
+		}
+
+		return $stdObject;
+	}
+
+	function strip_slashes_deep($input)
+	{
+		$retval = $input;
+
+		if (is_object($input)) {
+			foreach (get_object_vars($input) as $key => $value) {
+				$retval->$key = $this->strip_slashes_deep($value);
+			}
+		}
+		elseif(is_array($input)) {
+			foreach ($input as $key => $value) {
+				$retval[$key] = $this->strip_slashes_deep($value);
+			}
+		}
+		elseif(is_string($input)) {
+			$retval = str_replace("\\'", "'", str_replace('\"', '"', str_replace("\\\\", "\\", $input)));
+
+		}
+
+		return $retval;
+	}
+
 
 	/**
 	 * Converts a stdObject entity to a model
@@ -536,28 +580,6 @@ class Mixin_DataMapper_Driver_Base extends Mixin
 		}
 	}
 
-    function scrub_result($result)
-    {
-        if (is_object($result))
-        {
-            $new_result = new stdClass();
-            foreach ($result as $key => $value) {
-                $new_value = $this->scrub_result($value);
-                $new_result->$key = $new_value;
-            }
-            return $new_result;
-        }
-        else if (is_array($result)) {
-            $new_array = array();
-            foreach ($result as $key => $value) {
-                $new_array[$key] = $this->scrub_result($value);
-            }
-            return $new_array;
-        } else {
-            return stripslashes($result);
-        }
-    }
-
 	function define_column($name, $type, $default_value=NULL)
 	{
 		$this->object->_columns[$name] = array(
@@ -620,15 +642,16 @@ class C_DataMapper_Driver_Base extends C_Component
 		$this->add_mixin('Mixin_DataMapper_Driver_Base');
 		$this->implement('I_DataMapper_Driver');
 		$this->_object_name = $object_name;
-
-		if ($this->has_method('define_columns')) {
-			$this->define_columns();
-		}
 	}
 
 	function initialize()
 	{
 		parent::initialize();
+
+		if ($this->has_method('define_columns')) {
+			$this->define_columns();
+		}
+
 		$this->lookup_columns();
 	}
 

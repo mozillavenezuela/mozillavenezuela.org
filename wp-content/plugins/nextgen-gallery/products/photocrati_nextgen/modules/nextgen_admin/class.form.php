@@ -3,6 +3,7 @@
 class C_Form extends C_MVC_Controller
 {
 	static $_instances = array();
+	var $page = NULL;
 
 	/**
 	 * Gets an instance of a form
@@ -66,7 +67,8 @@ class Mixin_Form_Instance_Methods extends Mixin
 	 */
 	function save_action($attributes=array())
 	{
-		if ($this->object->has_method('get_model')) {
+		if (!$attributes) $attributes = array();
+		if ($this->object->has_method('get_model') && $this->object->get_model()) {
 			return $this->object->get_model()->save($attributes);
 		}
 		else return TRUE;
@@ -93,6 +95,11 @@ class Mixin_Form_Instance_Methods extends Mixin
             ),
             TRUE
         );
+	}
+
+	function get_model()
+	{
+		return $this->page->has_method('get_model') ? $this->page->get_model() : NULL;
 	}
 }
 

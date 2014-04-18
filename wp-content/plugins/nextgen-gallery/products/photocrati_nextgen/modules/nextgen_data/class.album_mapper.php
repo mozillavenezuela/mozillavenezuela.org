@@ -31,6 +31,7 @@ class C_Album_Mapper extends C_CustomTable_DataMapper_Driver
 		$this->define_column('albumdesc', 'TEXT');
 		$this->define_column('sortorder', 'TEXT');
 		$this->define_column('pageid', 'BIGINT', 0);
+        $this->define_column('extras_post_id', 'BIGINT', 0);
 
 		// Mark the columns which should be unserialized
 		$this->add_serialized_column('sortorder');
@@ -87,10 +88,9 @@ class Mixin_Album_Mapper extends Mixin
         $this->object->_set_default_value($entity, 'sortorder', array());
         $this->object->_set_default_value($entity, 'previewpic', 0);
 		$this->object->_set_default_value($entity, 'exclude', 0);
-        $this->object->_set_default_value(
-            $entity,
-            'slug',
-            nggdb::get_unique_slug( sanitize_title( $entity->name ), 'album' )
-        );
+
+        if (isset($entity->name) && !isset($entity->slug)) {
+            $entity->slug = nggdb::get_unique_slug( sanitize_title( $entity->name ), 'album' );
+        }
     }
 }

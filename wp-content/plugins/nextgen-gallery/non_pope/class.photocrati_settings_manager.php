@@ -140,6 +140,7 @@ if (!class_exists('C_Photocrati_Settings_Manager_Base')) {
 		function reset()
 		{
 			$this->_options = array();
+            $this->_defaults = array();
 		}
 
 		/**

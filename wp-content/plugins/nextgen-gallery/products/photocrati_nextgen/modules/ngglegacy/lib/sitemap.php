@@ -44,11 +44,11 @@ class nggSitemaps {
   		remove_all_shortcodes();
 
         // We cannot parse at this point a album, just galleries & single images
-		C_NextGen_Shortcode_Manager::add( 'singlepic', array(&$this, 'add_images' ) );
-		C_NextGen_Shortcode_Manager::add( 'thumb', array(&$this, 'add_images' ) );
-		C_NextGen_Shortcode_Manager::add( 'nggallery', array(&$this, 'add_gallery') );
-		C_NextGen_Shortcode_Manager::add( 'imagebrowser', array(&$this, 'add_gallery' ) );
-		C_NextGen_Shortcode_Manager::add( 'slideshow', array(&$this, 'add_gallery' ) );
+        C_NextGen_Shortcode_Manager::add('singlepic',    array(&$this, 'add_images'));
+        C_NextGen_Shortcode_Manager::add('thumb',        array(&$this, 'add_images'));
+        C_NextGen_Shortcode_Manager::add('nggallery',    array(&$this, 'add_gallery'));
+        C_NextGen_Shortcode_Manager::add('imagebrowser', array(&$this, 'add_gallery'));
+        C_NextGen_Shortcode_Manager::add('slideshow',    array(&$this, 'add_gallery'));
 
         // Search now for shortcodes
         do_shortcode( $p->post_content );

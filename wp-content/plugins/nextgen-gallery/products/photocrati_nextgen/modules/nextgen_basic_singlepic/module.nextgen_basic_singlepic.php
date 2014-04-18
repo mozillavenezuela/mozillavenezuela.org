@@ -7,17 +7,17 @@
 }
  ***/
 
-define('NEXTGEN_BASIC_SINGLEPIC_MODULE_NAME', 'photocrati-nextgen_basic_singlepic');
+define('NGG_BASIC_SINGLEPIC', 'photocrati-nextgen_basic_singlepic');
 
 class M_NextGen_Basic_Singlepic extends C_Base_Module
 {
     function define()
     {
         parent::define(
-            NEXTGEN_BASIC_SINGLEPIC_MODULE_NAME,
+            NGG_BASIC_SINGLEPIC,
             'NextGen Basic Singlepic',
             'Provides a singlepic gallery for NextGEN Gallery',
-            '0.5',
+            '0.7',
             'http://www.photocrati.com',
             'Photocrati Media',
             'http://www.photocrati.com'
@@ -60,8 +60,34 @@ class M_NextGen_Basic_Singlepic extends C_Base_Module
 
 	function _register_hooks()
 	{
-		C_NextGen_Shortcode_Manager::add('singlepic',    array(&$this, 'render_singlepic'));
+        if (!defined('NGG_DISABLE_LEGACY_SHORTCODES') || !NGG_DISABLE_LEGACY_SHORTCODES)
+        {
+            C_NextGen_Shortcode_Manager::add('singlepic', array(&$this, 'render_singlepic'));
+        }
+        C_NextGen_Shortcode_Manager::add('nggsinglepic', array(&$this, 'render_singlepic'));
+
+        // enqueue the singlepic CSS if an inline image has the ngg-singlepic class
+        add_filter('the_content', array(&$this, 'enqueue_singlepic_css'), PHP_INT_MAX, 1);
 	}
+
+    /**
+     * Examines 'the_content' string for img.ngg-singlepic and enqueues styling when found
+     *
+     * @param string $content
+     * @return string $content
+     */
+    function enqueue_singlepic_css($content)
+    {
+        if (preg_match("#<img.*ngg-singlepic.*>#", $content, $matches)) {
+            $router = $this->get_registry()->get_utility('I_Router');
+            wp_enqueue_style(
+                'nextgen_basic_singlepic_style',
+                $router->get_static_url(NGG_BASIC_SINGLEPIC . '#nextgen_basic_singlepic.css')
+            );
+        }
+
+        return $content;
+    }
 
     /**
      * Gets a value from the parameter array, and if not available, uses the default value
@@ -78,7 +104,7 @@ class M_NextGen_Basic_Singlepic extends C_Base_Module
 
 	function render_singlepic($params, $inner_content=NULL)
 	{
-		$params['display_type'] = $this->_get_param('display_type', NEXTGEN_BASIC_SINGLEPIC_MODULE_NAME, $params);
+		$params['display_type'] = $this->_get_param('display_type', NGG_BASIC_SINGLEPIC, $params);
         $params['image_ids'] = $this->_get_param('id', NULL, $params);
         unset($params['id']);
 

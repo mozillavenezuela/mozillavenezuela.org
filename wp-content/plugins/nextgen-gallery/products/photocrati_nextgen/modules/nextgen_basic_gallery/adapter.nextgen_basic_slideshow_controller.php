@@ -10,7 +10,7 @@ class A_NextGen_Basic_Slideshow_Controller extends Mixin_NextGen_Basic_Gallery_C
 	function index_action($displayed_gallery, $return=FALSE)
 	{   
 		// Get the images to be displayed
-        $current_page = (int)$this->param('page', 1);
+        $current_page = (int)$this->param('nggpage', 1);
 
 		// TODO: Shouldn't we be using maximum_entity_count instead?
         $limit = FALSE;
@@ -39,7 +39,7 @@ class A_NextGen_Basic_Slideshow_Controller extends Mixin_NextGen_Basic_Gallery_C
 			// Are we displayed a flash slideshow?
 			if ($displayed_gallery->display_settings['flash_enabled'])
             {
-				include_once(path_join(NGGALLERY_ABSPATH, implode(DIRECTORY_SEPARATOR, array('lib', 'swfobject.php'))));
+				include_once(NGGALLERY_ABSPATH . implode(DIRECTORY_SEPARATOR, array('lib', 'swfobject.php')));
                 $transient_id = $displayed_gallery->transient_id;
 				$params['mediarss_link'] = $this->get_router()->get_url(
 					'/nextgen-mediarss?template=playlist_feed&source=displayed_gallery&transient_id=' . $transient_id, false
@@ -49,7 +49,7 @@ class A_NextGen_Basic_Slideshow_Controller extends Mixin_NextGen_Basic_Gallery_C
             // Are we to generate a thumbnail link?
             if ($displayed_gallery->display_settings['show_thumbnail_link']) {
                 $params['thumbnail_link'] = $this->object->get_url_for_alternate_display_type(
-                    $displayed_gallery, NEXTGEN_GALLERY_BASIC_THUMBNAILS
+                    $displayed_gallery, NGG_BASIC_THUMBNAILS
                 );
             }
                 

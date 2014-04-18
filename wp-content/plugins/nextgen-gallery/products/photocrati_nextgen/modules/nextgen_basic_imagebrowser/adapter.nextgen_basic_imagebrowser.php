@@ -7,7 +7,7 @@ class A_NextGen_Basic_ImageBrowser extends Mixin
 {
 	function initialize()
 	{
-		if ($this->object->name == NEXTGEN_GALLERY_NEXTGEN_BASIC_IMAGEBROWSER) {
+		if ($this->object->name == NGG_BASIC_IMAGEBROWSER) {
 			$this->object->add_pre_hook(
 				'validation',
 				__CLASS__,

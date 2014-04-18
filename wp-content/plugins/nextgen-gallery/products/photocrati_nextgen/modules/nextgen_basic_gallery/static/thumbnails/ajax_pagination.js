@@ -7,7 +7,7 @@ jQuery(function($){
          */
         init:                     function(){
             var self = this;
-            jQuery('body').on('click', 'a.page-numbers, a.prev, a.next', function(e){
+            $('body').on('click', 'a.page-numbers, a.prev, a.next', function(e){
               var $this     = $(this);
               var $gallery  = $this.parents('.ngg-galleryoverview:first');
               var gallery_id= $gallery.attr('id').replace('ngg-gallery-','').replace(/-\d+$/, '');
@@ -19,27 +19,17 @@ jQuery(function($){
 
               self.toggle_busy(true);
 
-              // Create a request to render a displayed gallery
-              var params = self.get_querystring_params_from_url($this.attr('href'));
-              params['action']                   = 'get_displayed_gallery_page';
-              params['displayed_gallery_id']     = gallery_id;
-              params['page']                     = $this.data('pageid');
-              params['ajax_pagination_referrer'] = document.URL;
-
-              $.get(photocrati_ajax.url, params, function(response){
-
-                  // Ensure that the server returned JSON
-                  if (typeof(response) != 'object') response = JSON.parse(response);
-                  if (response) {
-                      $gallery.replaceWith(response.html);
-                  }
+              $.get($this.attr('href'), function(response){
+                  var html = $(response);
+                  $gallery.replaceWith(html.find('div[id*="ngg-gallery-'+gallery_id+'"]'));
 
                   // Let the user know that we've refreshed the content
                   $(document).trigger('refreshed');
-              }).always(function() { 
+
+
+              }).always(function() {
                   self.toggle_busy(false);
               });
-
             });
         },
 

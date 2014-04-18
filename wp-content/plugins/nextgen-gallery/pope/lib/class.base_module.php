@@ -145,7 +145,7 @@ abstract class C_Base_Module extends C_Component
         {
             return $path;
         }
-        return trim($base, '/') . '/' . ltrim($path, '/');
+        return trim($base, "/\\") . DIRECTORY_SEPARATOR . ltrim($path, "/\\");
     }
 
     /**

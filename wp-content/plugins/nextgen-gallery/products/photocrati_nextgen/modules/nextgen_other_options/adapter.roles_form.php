@@ -9,9 +9,11 @@ class A_Roles_Form extends Mixin
 
 	function render()
 	{
-		$view = path_join(NGGALLERY_ABSPATH, implode(DIRECTORY_SEPARATOR, array(
-			'admin', 'roles.php'
-		)));
+        $view = implode(DIRECTORY_SEPARATOR, array(
+            rtrim(NGGALLERY_ABSPATH, "/\\"),
+            'admin',
+            'roles.php'
+        ));
 		include_once ( $view );
 		ob_start();
 		nggallery_admin_roles();

@@ -97,7 +97,9 @@ class C_DataMapper_Model extends C_Component
 	 */
 	function set_defaults()
 	{
-		$this->get_mapper()->set_defaults($this);
+		$mapper = $this->get_mapper();
+		if ($mapper->has_method('set_defaults'))
+			$mapper->set_defaults($this);
 	}
 
 	/**

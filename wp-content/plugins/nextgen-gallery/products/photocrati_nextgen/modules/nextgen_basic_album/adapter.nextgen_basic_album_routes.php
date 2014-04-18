@@ -26,13 +26,16 @@ class A_NextGen_Basic_Album_Routes extends Mixin
 
 		// If we're viewing an album, rewrite the urls
 		$regex = "/photocrati-nextgen_basic_\\w+_album/";
-		if (preg_match($regex, $display_type)) {
-			$app->rewrite("{*}{$slug}/page/{\\d}{*}",		 "{1}{$slug}/page--{2}{3}", FALSE, TRUE);
-			$app->rewrite("{*}{$slug}/pid--{*}",		     "{1}{$slug}/pid--{2}", FALSE, TRUE); // avoid conflicts with imagebrowser
-			$app->rewrite("{*}{$slug}/{\\w}",                "{1}{$slug}/album--{2}");
-			$app->rewrite("{*}{$slug}/{\\w}/{\\w}",          "{1}{$slug}/album--{2}/gallery--{3}");
-			$app->rewrite("{*}{$slug}/{\\w}/{\\w}/{\\w}{*}", "{1}{$slug}/album--{2}/gallery--{3}/{4}{5}");
-		}
+        if (preg_match($regex, $display_type)) {
+            $app->rewrite("{*}{$slug}/page/{\\d}{*}",		 "{1}{$slug}/nggpage--{2}{3}", FALSE, TRUE);
+            $app->rewrite("{*}{$slug}/pid--{*}",		     "{1}{$slug}/pid--{2}", FALSE, TRUE); // avoid conflicts with imagebrowser
+            $app->rewrite("{*}{$slug}/{\\w}/{\\w}/{\\w}{*}", "{1}{$slug}/album--{2}/gallery--{3}/{4}{5}", FALSE, TRUE);
+            $app->rewrite("{*}{$slug}/{\\w}/{\\w}",          "{1}{$slug}/album--{2}/gallery--{3}", FALSE, TRUE);
+
+            // TODO: We're commenting this out as it was causing a problem with sub-album requests not
+            // working when placed beside paginated galleries. But we still need to figure out why, and fix that
+            // $app->rewrite("{*}{$slug}/{\\w}", "{1}{$slug}/album--{2}", FALSE, TRUE);
+        }
 		elseif (preg_match($regex, $original_display_type)) {
 			$app->rewrite("{*}{$slug}/album--{\\w}",                    "{1}{$slug}/{2}");
 			$app->rewrite("{*}{$slug}/album--{\\w}/gallery--{\\w}",     "{1}{$slug}/{2}/{3}");

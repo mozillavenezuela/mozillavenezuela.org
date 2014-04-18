@@ -1885,3 +1885,8 @@ body .ui-tooltip {
     filter: Alpha(Opacity = 40);
 	filter: -\9;
 }
+
+/* necessary w/WP 3.8s new admin design */
+.ui-widget select {
+    height: 2em;
+}

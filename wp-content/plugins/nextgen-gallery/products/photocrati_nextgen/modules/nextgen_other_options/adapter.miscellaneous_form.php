@@ -66,6 +66,10 @@ class A_Miscellaneous_Form extends Mixin
 			$local_settings->set('useMediaRSS', $settings['useMediaRSS']);
 			unset($settings['useMediaRSS']);
 
+            // It's important the router_param_slug never be empty
+            if (empty($settings['router_param_slug']))
+                $settings['router_param_slug'] = 'nggallery';
+
 			// If the router slug has changed, then flush the cache
 			if ($settings['router_param_slug'] != $this->object->get_model()->router_param_slug) {
 				C_Photocrati_Cache::flush();

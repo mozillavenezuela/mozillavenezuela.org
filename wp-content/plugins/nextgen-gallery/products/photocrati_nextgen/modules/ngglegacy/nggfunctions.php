@@ -249,9 +249,9 @@ function nggShowGallery($galleryID, $template = '', $images_per_page = FALSE)
     );
 
     if (apply_filters('ngg_show_imagebrowser_first', FALSE, $galleryID))
-        $args['display_type'] = NEXTGEN_GALLERY_NEXTGEN_BASIC_IMAGEBROWSER;
+        $args['display_type'] = NGG_BASIC_IMAGEBROWSER;
     else
-        $args['display_type'] = NEXTGEN_GALLERY_BASIC_THUMBNAILS;
+        $args['display_type'] = NGG_BASIC_THUMBNAILS;
 
     if (!empty($template))
         $args['template'] = $template;
@@ -279,7 +279,7 @@ function nggShowSlideshow($galleryID, $width, $height)
         'container_ids'  => $galleryID,
         'gallery_width'  => $width,
         'gallery_height' => $height,
-        'display_type'   => NEXTGEN_GALLERY_BASIC_SLIDESHOW
+        'display_type'   => NGG_BASIC_SLIDESHOW
     );
 
     echo C_Component_Registry::get_instance()

@@ -147,33 +147,103 @@ p#ngg-inlinebutton {
 	top:-25pt;
 }
 
-.fixed tbody th.column-cb {
-	padding:7px 0 22px;
+#gallery_fields {
+	width: 100%;
 }
 
-.fixed .column-thumbnail{
-	width:85px;
+#gallery_fields td{
+	padding: 5px;
+    min-width: 105px;
 }
 
-.fixed .column-thumbnail img{
-	max-height:80px;
-	max-width:80px;
+#gallery_fields input[type=text],
+#gallery_fields textarea,
+#gallery_fields select {
+	min-width: 220px;
+	width: 99%;
 }
 
-.fixed .column-id {
-	width: 5em;
+#ngg-listimages .row_actions,
+#ngg-listimages .row_actions td {
+	border-top: none;
+	/* background-color: #F9F9F9; */
+	padding-top: 0px;
+	padding-bottom: 0px;
 }
 
-.fixed .column-title {
-	width: 25%;
+#ngg-listimages .row_actions.alternate,
+#ngg-listimages .row_actions.alternate td {
+	/* background-color: #FCFCFC; */
 }
 
-.fixed .column-description {
-	width: 40%;
+#ngg-listimages .row-actions {
+	padding-left: 0px;
+	margin-bottom: -2px;
+	position: relative;
+	bottom: 4px;
 }
 
-.fixed .column-exclude, .fixed .column-action, .fixed .column-delete {
-	width: 10%;
+#ngg-listimages .iedit,
+#ngg-listimages .iedit td,
+#ngg-listimages .iedit th {
+	border: none;
+}
+
+#ngg-listimages .iedit td {
+	padding-top: 8px;
+}
+
+#ngg-listimages .column select {
+	width: 100%;
+}
+
+#ngg-listimages .column-1 input {
+	margin: 0 0 0 8px;
+}
+
+#ngg-listimages .column-1,
+#ngg-listimages .column-2 {
+	width: 3%;
+	min-width: 33px;
+}
+
+#ngg-listimages .column-3 {
+	min-width: 80px;
+	width: 8%;
+}
+
+#ngg-listimages .column-3 .thumb {
+	max-height: 80px;
+	max-width: 80px;
+}
+
+#ngg-listimages .column-4 {
+	width: 22%;
+	max-width: 220px;
+
+}
+
+#ngg-listimages .column-4 .meta {
+	font-size: 11px;
+}
+
+#ngg-listimages .column-4 label input[type=checkbox] {
+	position: relative;
+	top: -2px;
+}
+
+#ngg-listimages .column-5 input[type=text],
+#ngg-listimages .column-5 textarea,
+#ngg-listimages .column-6 textarea {
+	width: 100%;
+}
+
+#ngg-listimages .column-5 textarea {
+	height: 57px;
+}
+
+#ngg-listimages .column-6 textarea {
+	height: 80px;
 }
 
 /* SETTINGS FOR PROGRESS BAR */

@@ -224,8 +224,9 @@ class C_NggLegacy_Thumbnail {
 		    $MB = 1048576;  // number of bytes in 1M
 		    $K64 = 65536;    // number of bytes in 64K
 		    $TWEAKFACTOR = 1.68;  // Or whatever works for you
+            $bits = (!empty($imageInfo['bits']) ? $imageInfo['bits'] : 32); // imgInfo[bits] is not always available
 		    $memoryNeeded = round( ( $imageInfo[0] * $imageInfo[1]
-		                                           * $imageInfo['bits']
+		                                           * $bits
 		                                           * $CHANNEL / 8
 		                             + $K64
 		                           ) * $TWEAKFACTOR
@@ -952,15 +953,25 @@ class C_NggLegacy_Thumbnail {
     function watermarkImage( $relPOS = 'botRight', $xPOS = 0, $yPOS = 0) {
     	
 		// if it's a resource ID take it as watermark text image
-    	if(is_resource($this->watermarkImgPath)) {
+    	if (is_resource($this->watermarkImgPath))
+        {
     		$this->workingImage = $this->watermarkImgPath;
-    	} else {
-		// Would you really want to use anything other than a png? 
-		$this->workingImage = @imagecreatefrompng($this->watermarkImgPath);
-		// if it's not a valid file die...
-		if (empty($this->workingImage) or (!$this->workingImage))
-			return;
-		}
+    	}
+        else {
+            // (possibly) search for the file from the document root
+            if (!is_file($this->watermarkImgPath))
+            {
+                $fs = C_Fs::get_instance();
+                if (is_file($fs->join_paths($fs->get_document_root(), $this->watermarkImgPath)))
+                    $this->watermarkImgPath = $fs->get_document_root() . $this->watermarkImgPath;
+            }
+
+            // Would you really want to use anything other than a png?
+            $this->workingImage = @imagecreatefrompng($this->watermarkImgPath);
+            // if it's not a valid file die...
+            if (empty($this->workingImage) or (!$this->workingImage))
+                return;
+        }
 		
 		imagealphablending($this->workingImage, false);
 		imagesavealpha($this->workingImage, true);

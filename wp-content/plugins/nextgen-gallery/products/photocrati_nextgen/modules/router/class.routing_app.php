@@ -497,8 +497,20 @@ class Mixin_Routing_App extends Mixin
 		}
 
 		// Lastly, check the $_REQUEST
-		if (!$found && !$url && isset($_REQUEST[$key]))
-            $retval = $this->object->recursive_stripslashes($_REQUEST[$key]);
+		if (!$found && !$url && isset($_REQUEST[$key])) {
+			$found = TRUE;
+      $retval = $this->object->recursive_stripslashes($_REQUEST[$key]);
+		}
+
+		if (!$found && isset($_SERVER['REQUEST_URI'])) {
+			$params = array();
+			parse_str(@parse_url($_SERVER['REQUEST_URI'], PHP_URL_QUERY), $params);
+			
+			if (isset($params[$key])) {
+				$found = TRUE;
+				$retval = $this->object->recursive_stripslashes($params[$key]);
+			}
+		}
 
 		return $retval;
 	}
@@ -527,6 +539,7 @@ class Mixin_Routing_App extends Mixin
                 $param_slug && strpos($parts['path'], $param_slug) === FALSE ? $param_slug : '',
 				$this->object->create_parameter_segment($key, $value, $id, $use_prefix)
 			);
+            $parts['path'] = str_replace('//', '/', $parts['path']);
 			$retval = $this->object->construct_url_from_parts($parts);
 		}
 
@@ -539,7 +552,7 @@ class Mixin_Routing_App extends Mixin
 			$retval = $this->object->get_routed_url();
 		}
 
-		return trailingslashit($retval);
+		return $retval;
 	}
 
 	/**
@@ -579,7 +592,7 @@ class Mixin_Routing_App extends Mixin
 				$regex = implode('', array(
 					'#',
 					$id ? "{$preg_id}{$param_sep}" : '',
-					"(({$param_prefix})?[-_]?)?{$preg_key}({$param_sep}|=)[^\/&]+&?#i"
+					"(({$param_prefix}{$param_sep})?)?{$preg_key}({$param_sep}|=)[^\/&]+&?#i"
 				));
 				$qs = preg_replace($regex, '', $this->get_router()->get_querystring());
 				$this->object->get_router()->set_querystring($qs);
@@ -741,7 +754,7 @@ class Mixin_Routing_App extends Mixin
 		$sep			= preg_quote($settings->router_param_separator,'#');
 
 		// If we detect the MVC_PARAM_SLUG, then we assume that we have parameters
-		if ($settings->router_param_slug && strpos($request_uri, '/'.$settings->router_param_slug) !== FALSE) {
+        if ($settings->router_param_slug && strpos($request_uri, '/'.$settings->router_param_slug.'/') !== FALSE) {
 			$retval = TRUE;
 		}
 

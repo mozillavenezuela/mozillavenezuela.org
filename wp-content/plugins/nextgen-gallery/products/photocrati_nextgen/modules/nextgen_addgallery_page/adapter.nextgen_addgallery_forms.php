@@ -13,7 +13,7 @@ class A_NextGen_AddGallery_Forms extends Mixin
 
         foreach ($forms as $form => $adapter) {
             $registry->add_adapter('I_Form', $adapter, $form);
-            $this->object->add_form(NEXTGEN_ADD_GALLERY_SLUG, $form);
+            $this->object->add_form(NGG_ADD_GALLERY_SLUG, $form);
         }
     }
 }

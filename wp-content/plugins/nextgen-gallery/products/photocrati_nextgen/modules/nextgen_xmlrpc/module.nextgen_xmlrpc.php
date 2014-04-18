@@ -13,7 +13,7 @@ class M_NextGen_XmlRpc extends C_Base_Module
 			'photocrati-nextgen_xmlrpc',
 			'NextGEN Gallery XML-RPC',
 			'Provides an XML-RPC API for NextGEN Gallery',
-			'0.2',
+			'0.4',
 			'http://www.nextgen-gallery.com',
 			'Photocrati Media',
 			'http://www.photocrati.com'
@@ -57,7 +57,7 @@ class M_NextGen_XmlRpc extends C_Base_Module
 	 */
 	function get_version()
 	{
-		return array('version' => NEXTGEN_GALLERY_PLUGIN_VERSION);
+		return array('version' => NGG_PLUGIN_VERSION);
 	}
 
 	/**
@@ -464,7 +464,7 @@ class M_NextGen_XmlRpc extends C_Base_Module
 	{
 		$retval = $this->get_gallery($args, TRUE);
 
-		if (!($retval instanceof IXR_Error)) {
+		if (!($retval instanceof IXR_Error) and is_object($retval)) {
 			$retval = $retval->destroy();
 		}
 

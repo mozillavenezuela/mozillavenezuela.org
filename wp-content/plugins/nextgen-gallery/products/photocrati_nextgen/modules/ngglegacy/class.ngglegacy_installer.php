@@ -33,6 +33,8 @@ class C_NggLegacy_Installer
 
 	function uninstall($hard=FALSE)
 	{
+		include_once('admin/install.php');
+
 		delete_option('ngg_init_check');
 		delete_option('ngg_update_exists');
 		delete_option( 'ngg_options' );
@@ -90,7 +92,7 @@ class C_NggLegacy_Installer
 		// add charset & collate like wp core
 		$charset_collate = '';
 
-		if ( version_compare(mysql_get_server_info(), '4.1.0', '>=') ) {
+		if ( version_compare($wpdb->get_var("SELECT VERSION() AS `mysql_version`"), '4.1.0', '>=') ) {
 			if ( ! empty($wpdb->charset) )
 				$charset_collate = "DEFAULT CHARACTER SET $wpdb->charset";
 			if ( ! empty($wpdb->collate) )
@@ -101,6 +103,6 @@ class C_NggLegacy_Installer
 		$sql = str_replace($charset_collate, '', str_replace(';', '', $sql));
 
 		// Execute the query
-		dbDelta($sql. ' '. $charset_collate. ';');
+		return dbDelta($sql. ' '. $charset_collate. ';');
 	}
 }

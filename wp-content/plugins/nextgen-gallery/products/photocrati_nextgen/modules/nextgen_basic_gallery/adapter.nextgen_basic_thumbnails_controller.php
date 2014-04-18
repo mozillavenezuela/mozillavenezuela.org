@@ -27,7 +27,7 @@ class A_NextGen_Basic_Thumbnails_Controller extends Mixin_NextGen_Basic_Gallery_
             $gallery_id = $transient_id;
 
         if (!$display_settings['disable_pagination'])
-            $current_page = (int)$this->param('page', $gallery_id, 1);
+            $current_page = (int)$this->param('nggpage', $gallery_id, 1);
         else
             $current_page = 1;
 
@@ -121,7 +121,7 @@ class A_NextGen_Basic_Thumbnails_Controller extends Mixin_NextGen_Basic_Gallery_
                 // origin_url is necessary for ajax operations. slideshow_link_origin will NOT always exist.
                 $origin_url = $this->object->param('ajax_pagination_referrer');
                 $slideshow_link = $this->object->get_url_for_alternate_display_type(
-                    $displayed_gallery, NEXTGEN_GALLERY_BASIC_SLIDESHOW, $origin_url
+                    $displayed_gallery, NGG_BASIC_SLIDESHOW, $origin_url
                 );
             }
 

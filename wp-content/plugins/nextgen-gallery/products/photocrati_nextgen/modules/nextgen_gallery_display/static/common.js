@@ -29,7 +29,7 @@
                         action: 'render_displayed_gallery',
                         displayed_gallery_id: transient_id,
                         ajax_referrer: $link.attr('href')
-                    }
+                    };
 
                     // Notify the user that we're busy
                     obj.do_ajax(request);

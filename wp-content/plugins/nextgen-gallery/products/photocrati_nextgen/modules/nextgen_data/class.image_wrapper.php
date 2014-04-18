@@ -432,8 +432,8 @@ class C_Image_Wrapper
         $retval .= ' data-src="'         . $this->__get('imageURL')     . '"';
         $retval .= ' data-thumbnail="'   . $this->__get('thumbnailURL') . '"';
         $retval .= ' data-image-id="'    . $this->__get('pid')          . '"';
-        $retval .= ' data-title="'       . $this->__get('alttext')      . '"';
-        $retval .= ' data-description="' . $this->__get('description')  . '"';
+        $retval .= ' data-title="'       . esc_attr($this->__get('alttext'))      . '"';
+        $retval .= ' data-description="' . esc_attr($this->__get('description'))  . '"';
 
         $this->_cache['thumbcode'] = $retval;
         return $retval;

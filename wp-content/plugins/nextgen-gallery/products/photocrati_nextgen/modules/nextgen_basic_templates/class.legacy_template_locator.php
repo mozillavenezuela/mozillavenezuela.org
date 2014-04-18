@@ -58,6 +58,7 @@ class Mixin_Legacy_Template_Locator extends Mixin
                 continue;
             $files[$label] = $tmp;
         }
+
         return $files;
     }
 
@@ -87,11 +88,11 @@ class Mixin_Legacy_Template_Locator extends Mixin
         if (is_array($prefix))
         {
             $str = implode('|', $prefix);
-            $regex_iterator = new RegexIterator($iterator, "/({$str})-.+\.php$/i", RecursiveRegexIterator::GET_MATCH);
+            $regex_iterator = new RegexIterator($iterator, "/({$str})-.+\\.php$/i", RecursiveRegexIterator::GET_MATCH);
         }
         elseif (is_string($prefix))
         {
-            $regex_iterator = new RegexIterator($iterator, "#(.*)[/\\\]{$prefix}\-?.*\.php$#i", RecursiveRegexIterator::GET_MATCH);
+            $regex_iterator = new RegexIterator($iterator, "#(.*)[/\\\\]{$prefix}\\-?.*\\.php$#i", RecursiveRegexIterator::GET_MATCH);
         }
         else {
             $regex_iterator = new RegexIterator($iterator, '/^.+\.php$/i', RecursiveRegexIterator::GET_MATCH);
@@ -130,13 +131,16 @@ class Mixin_Legacy_Template_Locator extends Mixin
             foreach ($this->object->get_template_directories() as $dir) {
                 if ($template_abspath)
                     break;
-                $filename = path_join($dir, $custom_template);
+                $filename = implode(DIRECTORY_SEPARATOR, array(rtrim($dir, "/\\"), $custom_template));
                 if (@file_exists($filename))
                 {
                     $template_abspath = $filename;
                 }
                 elseif (strpos($custom_template, '-template') === FALSE) {
-                    $filename = path_join($dir, str_replace('.php', '', $custom_template) . '-template.php');
+                    $filename = implode(DIRECTORY_SEPARATOR, array(
+                        rtrim($dir, "/\\"),
+                        str_replace('.php', '', $custom_template) . '-template.php'
+                    ));
                     if (@file_exists($filename))
                         $template_abspath = $filename;
                 }

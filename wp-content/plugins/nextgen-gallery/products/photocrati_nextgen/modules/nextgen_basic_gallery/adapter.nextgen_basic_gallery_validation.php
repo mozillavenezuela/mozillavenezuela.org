@@ -4,14 +4,14 @@ class A_NextGen_Basic_Gallery_Validation extends Mixin
 {
     function initialize()
     {
-        if ($this->object->name == NEXTGEN_GALLERY_BASIC_THUMBNAILS) {
+        if ($this->object->name == NGG_BASIC_THUMBNAILS) {
             $this->object->add_pre_hook(
                 'validation',
                 get_class(),
                 'Hook_NextGen_Basic_Thumbnail_Validation'
             );
         }
-        else if ($this->object->name == NEXTGEN_GALLERY_BASIC_SLIDESHOW) {
+        else if ($this->object->name == NGG_BASIC_SLIDESHOW) {
             $this->object->add_pre_hook(
                 'validation',
                 get_class(),

@@ -148,7 +148,7 @@ class nggdb {
             $this->galleries[$key]->counter = 0;
             $this->galleries[$key]->title = stripslashes($this->galleries[$key]->title);
             $this->galleries[$key]->galdesc  = stripslashes($this->galleries[$key]->galdesc);
-			$this->galleries[$key]->abspath = WINABSPATH . $this->galleries[$key]->path;
+			$this->galleries[$key]->abspath = ABSPATH . $this->galleries[$key]->path;
             wp_cache_add($key, $this->galleries[$key], 'ngg_gallery');
         }
 
@@ -196,7 +196,7 @@ class nggdb {
             $gallery->title = stripslashes($gallery->title);
             $gallery->galdesc  = stripslashes($gallery->galdesc);
 
-            $gallery->abspath = WINABSPATH . $gallery->path;
+            $gallery->abspath = ABSPATH . $gallery->path;
             //TODO:Possible failure , $id could be a number or name
             wp_cache_add($id, $gallery, 'ngg_gallery');
 
@@ -1064,47 +1064,58 @@ class nggdb {
      * Computes a unique slug for the gallery,album or image, when given the desired slug.
      *
      * @since 1.7.0
-     * @author taken from WP Core includes/post.php
      * @param string $slug the desired slug (post_name)
      * @param string $type ('image', 'album' or 'gallery')
      * @param int (optional) $id of the object, so that it's not checked against itself
      * @return string unique slug for the object, based on $slug (with a -1, -2, etc. suffix)
      */
-    static function get_unique_slug( $slug, $type, $id = 0 ) {
+    static function get_unique_slug( $slug, $type, $id = 0 )
+    {
+        global $wpdb;
 
-    	global $wpdb;
+        $slug    = stripslashes($slug);
+        $retval  = $slug;
 
+        // We have to create a somewhat complex query to find the next available slug. The query could easily
+        // be simplified if we could use MySQL REGEX, but there are still hosts using MySQL 5.0, and REGEX is
+        // only supported in MySQL 5.1 and higher
+        $field = '';
+        $table = '';
         switch ($type) {
             case 'image':
-        		$check_sql = "SELECT image_slug FROM $wpdb->nggpictures WHERE image_slug = %s AND NOT pid = %d LIMIT 1";
-            break;
+                $field = 'image_slug';
+                $table = $wpdb->nggpictures;
+                break;
             case 'album':
-        		$check_sql = "SELECT slug FROM $wpdb->nggalbum WHERE slug = %s AND NOT id = %d LIMIT 1";
-            break;
+                $field = 'slug';
+                $table = $wpdb->nggalbum;
+                break;
             case 'gallery':
-        		$check_sql = "SELECT slug FROM $wpdb->nggallery WHERE slug = %s AND NOT gid = %d LIMIT 1";
-            break;
-            default:
-                return false;
+                $field = 'slug';
+                $table = $wpdb->nggallery;
+                break;
         }
 
-        //if you didn't give us a name we take the type
-        $slug = empty($slug) ? $type: $slug;
+        // Generate SQL query
+        $query = array();
+        $query[] = "SELECT {$field}, SUBSTR({$field}, %d) AS 'i' FROM {$table}";
+        $query[] = "WHERE ({$field} LIKE '{$slug}-%%' AND CONVERT(SUBSTR({$field}, %d), SIGNED) BETWEEN 1 AND %d) OR {$field} = %s";
+        $query[] = "ORDER BY i DESC LIMIT 1";
+        $query = $wpdb->prepare(implode(" ", $query), strlen("{$slug}-")+1, strlen("{$slug}-")+1, PHP_INT_MAX, $slug);
 
-   		// Slugs must be unique across all objects.
-        $slug_check = $wpdb->get_var( $wpdb->prepare( $check_sql, $slug, $id ) );
+        // If the above query returns a result, it means that the slug is already taken
+        if (($last_slug = $wpdb->get_var($query))) {
 
-		if ( $slug_check ) {
-			$suffix = 2;
-			do {
-				$alt_name = substr ($slug, 0, 200 - ( strlen( $suffix ) + 1 ) ) . "-$suffix";
-				$slug_check = $wpdb->get_var( $wpdb->prepare($check_sql, $alt_name, $id ) );
-				$suffix++;
-			} while ( $slug_check );
-			$slug = $alt_name;
-		}
+            // If the last known slug has an integer attached, then it means that we need to increment that integer
+            $quoted_slug = preg_quote($slug, '/');
+            if (preg_match("/{$quoted_slug}-(\\d+)/", $last_slug, $matches)) {
+                $i = intval($matches[1]) + 1;
+                $retval = "{$slug}-{$i}";
+            }
+            else $retval = "{$slug}-1";
+        }
 
-       	return $slug;
+        return $retval;
     }
 
 }

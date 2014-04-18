@@ -7,7 +7,7 @@ class A_NextGen_Basic_Slideshow_Form extends Mixin_Display_Type_Form
 {
 	function get_display_type_name()
 	{
-		return NEXTGEN_GALLERY_BASIC_SLIDESHOW;
+		return NGG_BASIC_SLIDESHOW;
 	}
 
     function enqueue_static_resources()
@@ -17,10 +17,12 @@ class A_NextGen_Basic_Slideshow_Form extends Mixin_Display_Type_Form
             $this->get_static_url('photocrati-nextgen_basic_gallery#slideshow/nextgen_basic_slideshow_settings.js'),
             array('jquery.nextgen_radio_toggle')
         );
-		$atp = $this->object->get_registry()->get_utility('I_Attach_To_Post_Controller');
+	
+	$atp = $this->object->get_registry()->get_utility('I_Attach_To_Post_Controller');
 	
 	if ($atp != null) {
-		$atp->mark_script('nextgen_basic_slideshow_settings-js');	}
+		$atp->mark_script('nextgen_basic_slideshow_settings-js');
+	}
     }
 
     /**

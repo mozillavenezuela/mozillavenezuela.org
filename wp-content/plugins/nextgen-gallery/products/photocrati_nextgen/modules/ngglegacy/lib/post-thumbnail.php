@@ -201,7 +201,7 @@ class nggPostThumbnail {
 				
 				$upload_dir = wp_upload_dir();
 				$basedir = $upload_dir['basedir'];
-				$thumbs_dir = path_join($basedir, 'ngg_featured');
+                $thumbs_dir = implode(DIRECTORY_SEPARATOR, array($basedir, 'ngg_featured'));
 				$gallery_abspath = $storage->get_gallery_abspath($image->galleryid);
 				$image_abspath = $storage->get_full_abspath($image);
 				$target_path = null;

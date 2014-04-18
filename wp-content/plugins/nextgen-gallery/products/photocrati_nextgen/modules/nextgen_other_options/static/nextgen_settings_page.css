@@ -15,10 +15,6 @@
 .gallery_page_ngg_other_options table td.column2 {
 	width: 200px;
 }
-.gallery_page_ngg_other_options .image_options label {
-	position: relative;
-	bottom: 2px;
-}
 
 .gallery_page_ngg_other_options textarea {
 	height: 100px;

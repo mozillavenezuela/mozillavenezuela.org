@@ -22,8 +22,8 @@ class Hook_NextGen_Basic_Album_Defaults extends Hook
     function set_defaults($entity)
     {
 		if (isset($entity->name) && in_array($entity->name, array(
-		  NEXTGEN_GALLERY_NEXTGEN_BASIC_COMPACT_ALBUM,
-		  NEXTGEN_GALLERY_NEXTGEN_BASIC_EXTENDED_ALBUM))) {
+		  NGG_BASIC_COMPACT_ALBUM,
+		  NGG_BASIC_EXTENDED_ALBUM))) {
 
 			// Set defaults for both display (album) types
             $settings = C_NextGen_Settings::get_instance();
@@ -32,7 +32,7 @@ class Hook_NextGen_Basic_Album_Defaults extends Hook
             $this->object->_set_default_value($entity, 'settings', 'template', '');
 
             // Thumbnail dimensions -- only used by extended albums
-            if ($entity->name == NEXTGEN_GALLERY_NEXTGEN_BASIC_EXTENDED_ALBUM)
+            if ($entity->name == NGG_BASIC_EXTENDED_ALBUM)
             {
                 $this->_set_default_value($entity, 'settings', 'override_thumbnail_settings', 0);
                 $this->_set_default_value($entity, 'settings', 'thumbnail_width',   $settings->thumbwidth);
@@ -42,8 +42,8 @@ class Hook_NextGen_Basic_Album_Defaults extends Hook
                 $this->_set_default_value($entity, 'settings', 'thumbnail_watermark', 0);
             }
 
-            if (defined('NEXTGEN_GALLERY_BASIC_THUMBNAILS'))
-                $this->object->_set_default_value($entity, 'settings', 'gallery_display_type', NEXTGEN_GALLERY_BASIC_THUMBNAILS);
+            if (defined('NGG_BASIC_THUMBNAILS'))
+                $this->object->_set_default_value($entity, 'settings', 'gallery_display_type', NGG_BASIC_THUMBNAILS);
         }
     }
 }

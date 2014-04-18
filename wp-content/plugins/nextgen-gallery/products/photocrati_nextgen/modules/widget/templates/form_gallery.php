@@ -73,7 +73,11 @@
     $thumbnails_template_width_id = $self->get_field_id('width');
     $thumbnails_template_height_name = $self->get_field_name('height');
     $thumbnails_template_width_name = $self->get_field_name('width');
-    include(path_join(NGGALLERY_ABSPATH, implode(DIRECTORY_SEPARATOR, array('admin', 'thumbnails-template.php'))));
+    include(implode(DIRECTORY_SEPARATOR, array(
+        rtrim(NGGALLERY_ABSPATH, "/\\"),
+        'admin',
+        'thumbnails-template.php'
+    )));
     ?>
 </p>
 

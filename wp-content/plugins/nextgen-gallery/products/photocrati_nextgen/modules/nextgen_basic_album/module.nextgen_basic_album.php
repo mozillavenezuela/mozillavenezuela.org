@@ -7,8 +7,8 @@
 }
  */
 
-define('NEXTGEN_GALLERY_NEXTGEN_BASIC_COMPACT_ALBUM', 'photocrati-nextgen_basic_compact_album');
-define('NEXTGEN_GALLERY_NEXTGEN_BASIC_EXTENDED_ALBUM', 'photocrati-nextgen_basic_extended_album');
+define('NGG_BASIC_COMPACT_ALBUM', 'photocrati-nextgen_basic_compact_album');
+define('NGG_BASIC_EXTENDED_ALBUM', 'photocrati-nextgen_basic_extended_album');
 
 class M_NextGen_Basic_Album extends C_Base_Module
 {
@@ -18,7 +18,7 @@ class M_NextGen_Basic_Album extends C_Base_Module
             'photocrati-nextgen_basic_album',
             'NextGEN Basic Album',
             "Provides support for NextGEN's Basic Album",
-            '0.5',
+            '0.7',
             'http://nextgen-gallery.com',
             'Photocrati Media',
             'http://www.photocrati.com'
@@ -42,8 +42,8 @@ class M_NextGen_Basic_Album extends C_Base_Module
 			'I_Display_Type_Controller',
 			'A_NextGen_Basic_Album_Controller',
 			array(
-				NEXTGEN_GALLERY_NEXTGEN_BASIC_COMPACT_ALBUM,
-				NEXTGEN_GALLERY_NEXTGEN_BASIC_EXTENDED_ALBUM,
+				NGG_BASIC_COMPACT_ALBUM,
+				NGG_BASIC_EXTENDED_ALBUM,
 				$this->module_id
 			)
 		);
@@ -65,12 +65,12 @@ class M_NextGen_Basic_Album extends C_Base_Module
             $this->get_registry()->add_adapter(
                 'I_Form',
                 'A_NextGen_Basic_Compact_Album_Form',
-                NEXTGEN_GALLERY_NEXTGEN_BASIC_COMPACT_ALBUM
+                NGG_BASIC_COMPACT_ALBUM
             );
             $this->get_registry()->add_adapter(
                 'I_Form',
                 'A_NextGen_Basic_Extended_Album_Form',
-                NEXTGEN_GALLERY_NEXTGEN_BASIC_EXTENDED_ALBUM
+                NGG_BASIC_EXTENDED_ALBUM
             );
         }
 
@@ -90,8 +90,11 @@ class M_NextGen_Basic_Album extends C_Base_Module
 
 	function _register_hooks()
 	{
-		C_NextGen_Shortcode_Manager::add('album',    array(&$this, 'ngglegacy_shortcode'));
-		C_NextGen_Shortcode_Manager::add('nggalbum', array(&$this, 'ngglegacy_shortcode'));
+        if (!defined('NGG_DISABLE_LEGACY_SHORTCODES') || !NGG_DISABLE_LEGACY_SHORTCODES)
+        {
+            C_NextGen_Shortcode_Manager::add('album', array(&$this, 'ngglegacy_shortcode'));
+        }
+        C_NextGen_Shortcode_Manager::add('nggalbum', array(&$this, 'ngglegacy_shortcode'));
 	}
 
     /**
@@ -117,7 +120,7 @@ class M_NextGen_Basic_Album extends C_Base_Module
     {
         $params['source']           = $this->_get_param('source', 'albums', $params);
         $params['container_ids']    = $this->_get_param('id', NULL, $params);
-        $params['display_type']     = $this->_get_param('display_type', NEXTGEN_GALLERY_NEXTGEN_BASIC_COMPACT_ALBUM, $params);
+        $params['display_type']     = $this->_get_param('display_type', NGG_BASIC_COMPACT_ALBUM, $params);
 
         unset($params['id']);
 

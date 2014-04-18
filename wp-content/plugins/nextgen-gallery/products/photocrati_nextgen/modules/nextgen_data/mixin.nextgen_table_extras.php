@@ -63,7 +63,7 @@ class Mixin_NextGen_Table_Extras extends Mixin
 
 		// If the custom post entity already exists then it needs
 		// an ID
-		if (isset($entity->custom_post_id)) $custom_post_entity->ID = $entity->custom_post_id;
+		if (isset($entity->extras_post_id)) $custom_post_entity->ID = $entity->extras_post_id;
 
 		// If a property isn't a column for the table, then
 		// it belongs to the custom post record
@@ -79,17 +79,6 @@ class Mixin_NextGen_Table_Extras extends Mixin
 		$custom_post_entity->post_name = self::CUSTOM_POST_NAME;
 
 		return $custom_post_entity;
-	}
-
-	/**
-	 * Gets the name of the WordPress option that holds the ID of the associated custom post ID record
-	 * @param $entity
-	 * @return string
-	 */
-	function _get_option_name($entity)
-	{
-		$primary_key = $this->object->get_primary_key_column();
-		return $this->get_table_name().'_'.$entity->$primary_key;
 	}
 
 	/**
@@ -112,9 +101,7 @@ class Mixin_NextGen_Table_Extras extends Mixin
 
 			// Add the custom post id property
 			else {
-				$option_name = $this->_get_option_name($entity);
-				update_option($option_name, $custom_post_id);
-				$entity->custom_post_id = $custom_post_id;
+				$entity->extras_post_id = $custom_post_id;
 			}
 		}
 
@@ -127,9 +114,8 @@ class Mixin_NextGen_Table_Extras extends Mixin
 		$retval = FALSE;
 		$custom_post_entity = $this->create_custom_post_entity($entity);
 		$custom_post_id = $this->object->_custom_post_mapper->save($custom_post_entity);
+        $entity->extras_post_id = $custom_post_id;
 		$retval = $this->call_parent('_update', $entity);
-		$entity->custom_post_id = $custom_post_id;
-		update_option($this->_get_option_name($entity), $custom_post_id);
 		foreach ($this->get_extra_columns() as $key) {
 			if (isset($custom_post_entity->$key)) $entity->$key = $custom_post_entity->$key;
 		}
@@ -139,9 +125,8 @@ class Mixin_NextGen_Table_Extras extends Mixin
 
 	function destroy($entity)
 	{
-		if (isset($entity->custom_post_id)) {
-			wp_delete_post($entity->custom_post_id, TRUE);
-			delete_option($this->_get_option_name($entity));
+		if (isset($entity->extras_post_id)) {
+			wp_delete_post($entity->extras_post_id, TRUE);
 		}
 
 		return $this->call_parent('destroy', $entity);
@@ -157,11 +142,14 @@ class Mixin_NextGen_Table_Extras extends Mixin
 			global $wpdb;
 			$table_name = $this->object->get_table_name();
 			$primary_key = "{$table_name}.{$this->object->get_primary_key_column()}";
+			if (stripos($this->object->_select_clause, 'DISTINCT') === FALSE) {
+				$this->object->_select_clause = str_replace('SELECT', 'SELECT DISTINCT', $this->object->_select_clause);
+			}
 			$this->object->group_by($primary_key);
 			$sql = $this->call_parent('get_generated_query');
 			$from = 'FROM `'.$this->object->get_table_name().'`';
-			$sql = str_replace('FROM', ", `{$wpdb->options}`.`option_value` AS 'custom_post_id', GROUP_CONCAT(CONCAT_WS('@@', meta_key, meta_value)) AS 'extras' FROM", $sql);
-			$sql = str_replace($from, "{$from} LEFT OUTER JOIN `{$wpdb->options}` ON `{$wpdb->options}`.option_name = CONCAT('{$table_name}_', {$primary_key}) LEFT OUTER JOIN `{$wpdb->postmeta}` ON `{$wpdb->postmeta}`.`post_id` = `{$wpdb->options}`.`option_value` ", $sql);
+			$sql = str_replace('FROM', ", GROUP_CONCAT(CONCAT_WS('@@', meta_key, meta_value)) AS 'extras' FROM", $sql);
+			$sql = str_replace($from, "{$from} LEFT OUTER JOIN `{$wpdb->postmeta}` ON `{$wpdb->postmeta}`.`post_id` = `extras_post_id` ", $sql);
 		}
 		else $sql = $this->call_parent('get_generated_query');
 
@@ -183,10 +171,10 @@ class Mixin_NextGen_Table_Extras extends Mixin
 		}
 
 		// Cast custom_post_id as integer
-		if (isset($entity->custom_post_id)) {
-			$entity->custom_post_id = intval($entity->custom_post_id);
+		if (isset($entity->extras_post_id)) {
+			$entity->extras_post_id = intval($entity->extras_post_id);
 		}
-		else $entity->custom_post_id = 0;
+		else $entity->extras_post_id = 0;
 
 		$retval = $this->call_parent('_convert_to_entity', $entity);
 

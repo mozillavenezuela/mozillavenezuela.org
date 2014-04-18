@@ -8,8 +8,8 @@ class A_NextGen_Basic_Album extends Mixin
     function initialize()
     {
 		$ngglegacy_albums = array(
-			NEXTGEN_GALLERY_NEXTGEN_BASIC_COMPACT_ALBUM,
-			NEXTGEN_GALLERY_NEXTGEN_BASIC_EXTENDED_ALBUM
+			NGG_BASIC_COMPACT_ALBUM,
+			NGG_BASIC_EXTENDED_ALBUM
 		);
 		if (in_array($this->object->name, $ngglegacy_albums)) {
             $this->object->add_pre_hook(
@@ -22,7 +22,7 @@ class A_NextGen_Basic_Album extends Mixin
     
 		function get_order()
 		{
-			return NEXTGEN_DISPLAY_PRIORITY_BASE + NEXTGEN_DISPLAY_PRIORITY_STEP;
+			return NGG_DISPLAY_PRIORITY_BASE + NGG_DISPLAY_PRIORITY_STEP;
 		}
 }
 

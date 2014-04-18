@@ -17,7 +17,7 @@
                 $image_title = substr_replace($image_title, '...', 15, -10);
             ?>
 		<track>
-			<title><![CDATA[<?php echo_h($image_title)?>]]></title>
+			<title><![CDATA[<?php echo strip_tags($image_title); ?>]]></title>
 			<location><![CDATA[<?php echo nextgen_esc_url($image_url)?>]]></location>
 		</track>
 		<?php endforeach ?>

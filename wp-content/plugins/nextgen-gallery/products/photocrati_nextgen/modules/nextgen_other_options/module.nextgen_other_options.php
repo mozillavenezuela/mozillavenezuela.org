@@ -6,7 +6,7 @@
 }
  */
 
-define('NEXTGEN_OTHER_OPTIONS_SLUG', 'ngg_other_options');
+define('NGG_OTHER_OPTIONS_SLUG', 'ngg_other_options');
 
 class M_NextGen_Other_Options extends C_Base_Module
 {
@@ -16,7 +16,7 @@ class M_NextGen_Other_Options extends C_Base_Module
 			'photocrati-nextgen_other_options',
 			'Other Options',
 			'NextGEN Gallery Others Options Page',
-			'0.5',
+			'0.7',
 			'http://www.nextgen-gallery.com',
 			'Photocrati Media',
 			'http://www.photocrati.com'

@@ -4,6 +4,8 @@ class C_NextGen_Shortcode_Manager
 {
 	private static $_instance = NULL;
 	private $_shortcodes = array();
+    private $_runlevel = 0;
+    private $_has_warned = FALSE;
 
 	/**
 	 * Gets an instance of the class
@@ -44,7 +46,7 @@ class C_NextGen_Shortcode_Manager
 	 */
 	private function __construct()
 	{
-		add_filter('the_content', array(&$this, 'deactivate_all'), 1);
+		add_filter('the_content', array(&$this, 'deactivate_all'), -(PHP_INT_MAX-1));
 		add_filter('the_content', array(&$this, 'parse_content'), PHP_INT_MAX-1);
 	}
 
@@ -53,6 +55,26 @@ class C_NextGen_Shortcode_Manager
 	 */
 	function deactivate_all($content)
 	{
+        // There is a bug in Wordpress itself: when a hook recurses any hooks meant to execute after it are discarded.
+        // For example the following code, despite expectations, will NOT display 'bar' as bar() is never executed.
+        // See https://core.trac.wordpress.org/ticket/17817 for more information.
+        /* function foo() {
+         *     remove_action('foo', 'foo');
+         * }
+         * function bar() {
+         *     echo('bar');
+         * }
+         * add_action('foo', 'foo');
+         * add_action('foo', 'bar');
+         * do_action('foo');
+         */
+        $this->_runlevel += 1;
+        if ($this->_runlevel > 1 && defined('WP_DEBUG') && WP_DEBUG && !is_admin() && !$this->_has_warned)
+        {
+            $this->_has_warned = TRUE;
+            error_log('Sorry, but recursing filters on "the_content" breaks NextGEN Gallery. Please see https://core.trac.wordpress.org/ticket/17817');
+        }
+
 		foreach (array_keys($this->_shortcodes) as $shortcode) {
 			$this->deactivate($shortcode);
 		}
@@ -77,8 +99,12 @@ class C_NextGen_Shortcode_Manager
 	 */
 	function parse_content($content)
 	{
+        $this->_runlevel--;
 		$this->activate_all();
-		return do_shortcode($content);
+		$content = do_shortcode($content);
+        $content = apply_filters('ngg_content', $content);
+
+        return $content;
 	}
 
 	/**

@@ -104,7 +104,7 @@ class Mixin_Display_Type_Mapper extends Mixin
 		if (!isset($entity->settings)) $entity->settings = array();
 		$this->_set_default_value($entity, 'preview_image_relpath', '');
 		$this->_set_default_value($entity, 'default_source', '');
-        $this->_set_default_value($entity, 'view_order', NEXTGEN_DISPLAY_PRIORITY_BASE);
+        $this->_set_default_value($entity, 'view_order', NGG_DISPLAY_PRIORITY_BASE);
         $this->_set_default_value($entity, 'settings', 'use_lightbox_effect', TRUE);
 	}
 }

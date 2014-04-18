@@ -17,7 +17,21 @@ function nggallery_manage_gallery_main() {
     $order = ( isset ( $_GET['order'] ) && $_GET['order'] == 'desc' ) ? 'DESC' : 'ASC';
     $orderby = ( isset ( $_GET['orderby'] ) && ( in_array( $_GET['orderby'], array('gid', 'title', 'author') )) ) ? $_GET['orderby'] : 'gid';
 
-	$gallerylist = $nggdb->find_all_galleries( $orderby, $order , TRUE, $items_per_page, $start, false);
+	$mapper = C_Gallery_Mapper::get_instance();
+	$total_number_of_galleries = $mapper->count();
+	$gallerylist = $mapper->select()->order_by($orderby, $order)->limit($items_per_page, $start)->run_query();
+
+    // Need for upgrading from 2.0.40 to 2.0.52 or later.
+    // For some reason, the installer doesn't always run.
+    // TODO: Remove in 2.1
+    if (!$gallerylist){
+        global $wpdb;
+        if ($wpdb->get_results("SELECT gid FROM {$wpdb->nggallery} LIMIT 1")) {
+            $installer = new C_NggLegacy_Installer();
+            $installer->install();
+            $gallerylist = $mapper->select()->order_by($orderby, $order)->limit($items_per_page, $start)->run_query();
+        }
+    }
 	$wp_list_table = new _NGG_Galleries_List_Table('nggallery-manage-gallery');
 
 	?>
@@ -185,7 +199,7 @@ function nggallery_manage_gallery_main() {
 			</div>
 
 
-        <?php $ngg->manage_page->pagination( 'top', $_GET['paged'], $nggdb->paged['total_objects'], $nggdb->paged['objects_per_page']  ); ?>
+        <?php $ngg->manage_page->pagination( 'top', $_GET['paged'], $total_number_of_galleries, $items_per_page  ); ?>
 
 		</div>
 		<table class="wp-list-table widefat fixed" cellspacing="0">
@@ -207,6 +221,7 @@ if($gallerylist) {
 	$gallery_columns = $wp_list_table->get_columns();
 	$hidden_columns  = get_hidden_columns('nggallery-manage-gallery');
 	$num_columns     = count($gallery_columns) - count($hidden_columns);
+	$image_mapper	 = C_Image_Mapper::get_instance();
 
 	foreach($gallerylist as $gallery) {
 		$alternate = ( !isset($alternate) || $alternate == 'class="alternate"' ) ? '' : 'class="alternate"';
@@ -270,6 +285,12 @@ if($gallerylist) {
         			<?php
     			break;
     			case 'quantity' :
+					$gallery->counter = count(
+						$image_mapper->select($image_mapper->get_primary_key_column())->
+							where(array("galleryid = %d", $gallery->{$gallery->id_field}))->
+							run_query(FALSE, TRUE)
+					);
+
     			    ?>
         			<td <?php echo $attributes ?>><?php echo $gallery->counter; ?></td>
         			<?php
@@ -291,7 +312,7 @@ if($gallerylist) {
 			</tbody>
 		</table>
         <div class="tablenav bottom">
-		<?php $ngg->manage_page->pagination( 'bottom', $_GET['paged'], $nggdb->paged['total_objects'], $nggdb->paged['objects_per_page']  ); ?>
+		<?php $ngg->manage_page->pagination( 'bottom', $_GET['paged'], $total_number_of_galleries, $items_per_page  ); ?>
         </div>
 		</form>
 	</div>

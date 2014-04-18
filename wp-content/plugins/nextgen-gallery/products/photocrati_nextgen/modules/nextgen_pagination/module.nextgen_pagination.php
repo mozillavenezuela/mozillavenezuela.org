@@ -12,7 +12,7 @@ class M_NextGen_Pagination extends C_Base_Module
             'photocrati-nextgen_pagination',
             "Pagination",
             "Provides pagination for display types",
-            '0.1',
+            '0.3',
             "http://www.nextgen-gallery.com",
             "Photocrati Media",
             "http://www.photocrati.com"

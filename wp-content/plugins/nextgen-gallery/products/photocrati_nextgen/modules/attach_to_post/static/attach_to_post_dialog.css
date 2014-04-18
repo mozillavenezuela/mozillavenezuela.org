@@ -1,9 +1,26 @@
+/* TinyMCE 4 rules */
+#ngg_attach_to_post_dialog-title {
+    display: none;
+}
+
+#ngg_attach_to_post_dialog-head {
+    min-height: 0;
+    height: 0;
+}
+
+#ngg_attach_to_post_dialog-head .mce-close {
+    position: absolute;
+    top: 6px !important;
+    right: 20px !important;
+    z-index: 2;
+}
 
 .ngg_attach_to_post_window {
 	position: relative;
 	border: none !important;
 }
 
+/* TinyMCE 3 rules */
 .ngg_attach_to_post_window .mceResize,
 .ngg_attach_to_post_window .mceTop,
 .ngg_attach_to_post_window .mceBottom,

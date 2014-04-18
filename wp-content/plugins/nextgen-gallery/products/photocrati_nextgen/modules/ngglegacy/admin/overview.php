@@ -97,7 +97,7 @@ function ngg_AboutMetaBox()
 {
 	?>
     <div id="poststuff">
-        <p><?php _e("NextGEN Gallery is one of the most popular Wordpress plugins of all time with over 7 million downloads. It is developed and supported by Photocrati Media. We'd like to offer a special thanks to Alex Rabe, who first developed the plugin and maintained it through 2011.", 'nggallery'); ?></p>
+        <p><?php _e("NextGEN Gallery is one of the most popular Wordpress plugins of all time with over 9 million downloads. It is developed and supported by Photocrati Media. We'd like to offer a special thanks to Alex Rabe, who first developed the plugin and maintained it through 2011.", 'nggallery'); ?></p>
         <p><?php _e("<strong>NEED  HELP?</strong> If you need help or assistance please visit the <a href='http://wordpress.org/support/plugin/nextgen-gallery'>NextGEN Gallery forums on WordPress.org</a>. Please note that we actively monitor and  participate in the forums, but given that NextGEN Gallery is a free  product, we don't guarantee replies to support queries.", 'nggallery'); ?></p>
         <p><?php _e("<strong>EXTENDING NEXTGEN?</strong> There are many third party plugins that add displays and functionality for NextGEN Gallery. See our <a href='http://www.nextgen-gallery.com/nextgen-gallery-extension-plugins/'>Complete List of NextGEN Extension  Plugins</a>.", 'nggallery'); ?></p>
 	</div>
@@ -287,8 +287,23 @@ function ngg_overview_right_now() {
 	$galleries = intval( $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->nggallery") );
 	$albums    = intval( $wpdb->get_var("SELECT COUNT(*) FROM $wpdb->nggalbum") );
 ?>
-<div class="table table_content">
-	<p class="sub"><?php _e('At a Glance', 'nggallery'); ?></p>
+<style type='text/css'>
+    #ngg_overview_right_now p {
+        padding: 0 0 6px 10px;
+        margin: 0;
+    }
+    #ngg_overview_right_now table {
+        margin-left: 10px;
+    }
+    #ngg_overview_right_now td {
+        padding: 4px;
+    }
+    #ngg_overview_right_now td:first-child {
+        font-size: 16px;
+    }
+</style>
+<div class="table table_content" id='ngg_overview_right_now'>
+	<p><?php _e('At a Glance', 'nggallery'); ?></p>
 	<table>
 		<tbody>
 			<tr class="first">

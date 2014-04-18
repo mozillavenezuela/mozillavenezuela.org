@@ -2,10 +2,15 @@
     height: 100%;
 }
 
+.gallery_page_ngg_display_settings table tr {
+    height: 28px;
+}
+
 .gallery_page_ngg_display_settings table tr td:first-child {
     vertical-align: top;
     text-align: right;
     padding-right: 7px;
+    padding-top: 5px;
 }
 
 .gallery_page_ngg_display_settings textarea {

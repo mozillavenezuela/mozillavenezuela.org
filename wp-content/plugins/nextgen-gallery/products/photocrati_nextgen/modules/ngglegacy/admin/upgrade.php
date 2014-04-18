@@ -39,7 +39,7 @@ function ngg_convert_filestructure() {
 	if ( is_array($gallerylist) ) {
 		$errors = array();
 		foreach($gallerylist as $gallery) {
-			$gallerypath = WINABSPATH.$gallery->path;
+			$gallerypath = ABSPATH.$gallery->path;
 
 			// old mygallery check, convert the wrong folder/ file name now
 			if (@is_dir($gallerypath . '/tumbs')) {

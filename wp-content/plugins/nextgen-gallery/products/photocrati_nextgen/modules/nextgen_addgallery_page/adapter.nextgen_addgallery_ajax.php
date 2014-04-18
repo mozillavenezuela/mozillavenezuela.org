@@ -4,7 +4,11 @@ class A_NextGen_AddGallery_Ajax extends Mixin
 {
 	function cookie_dump_action()
 	{
-		return array('success' => 1);
+        foreach ($_COOKIE as $key => &$value) {
+            if (is_string($value)) $value = stripslashes($value);
+        }
+
+		return array('success' => 1, 'cookies' => $_COOKIE);
 	}
 
     function upload_image_action()
@@ -90,7 +94,7 @@ class A_NextGen_AddGallery_Ajax extends Mixin
         {
 		      if (($dir = urldecode($this->param('dir')))) {
 		          $fs = $this->get_registry()->get_utility('I_Fs');
-		          $root = NEXTGEN_GALLERY_IMPORT_ROOT;
+		          $root = NGG_IMPORT_ROOT;
 
 		          $browse_path = $fs->join_paths($root, $dir);
 		          if (@file_exists($browse_path)) {
@@ -99,7 +103,7 @@ class A_NextGen_AddGallery_Ajax extends Mixin
 		              if( count($files) > 2 ) { /* The 2 accounts for . and .. */
 		                  $html[] = "<ul class=\"jqueryFileTree\" style=\"display: none;\">";
 		                  foreach( $files as $file ) {
-		                      $file_path = path_join($browse_path, $file);
+                              $file_path = $fs->join_paths($browse_path, $file);
 		                      $rel_file_path = str_replace($root, '', $file_path);
 		                      if(@file_exists($file_path) && $file != '.' && $file != '..' && is_dir($file_path) ) {
 		                          $html[] = "<li class=\"directory collapsed\"><a href=\"#\" rel=\"" . htmlentities($rel_file_path) . "/\">" . htmlentities($file) . "</a></li>";
@@ -136,7 +140,7 @@ class A_NextGen_AddGallery_Ajax extends Mixin
 				  $fs	   = C_Fs::get_instance();
 		          try {
 					$keep_files = $this->param('keep_location') == 'on';
-		              $retval = $storage->import_gallery_from_fs($fs->join_paths(NEXTGEN_GALLERY_IMPORT_ROOT, $folder), false, !$keep_files);
+		              $retval = $storage->import_gallery_from_fs($fs->join_paths(NGG_IMPORT_ROOT, $folder), false, !$keep_files);
 		              if (!$retval) $retval = array('error' => "Could not import folder. No images found.");
 		          }
 				  catch (E_NggErrorException $ex) {

@@ -69,7 +69,8 @@ jQuery(function($){
 
 		text_field: 'title',
 
-        initialize: function(){
+        initialize: function(options) {
+            this.options = options || {};
 			_.each(this.options, function(value, key){
 				this[key] = value;
 			}, this);
@@ -145,7 +146,8 @@ jQuery(function($){
 
             model: null,
 
-            initialize: function(){
+            initialize: function(options) {
+                this.options = options || {};
 				_.each(this.options, function(value, key){
 					this[key] = value;
 				}, this);
@@ -170,7 +172,8 @@ jQuery(function($){
 	Ngg.Views.Chosen								= Backbone.View.extend({
 		tagName: 'span',
 
-		initialize: function(){
+		initialize: function(options) {
+            this.options = options || {};
 			this.collection = this.options.collection;
 			if (!this.options.multiple) this.options.include_blank = true;
 			this.select_tag = new Ngg.Views.SelectTag(this.options);
@@ -296,6 +299,7 @@ jQuery(function($){
 			var self = this;
 			this.in_progress = true;
 			$.post(this.fetch_url, this._create_request(limit, offset), function(response){
+                if (typeof(_) == 'undefined') return;
 				if (!_.isObject(response)) response = JSON.parse(response);
 
 				if (response.items) {
@@ -919,7 +923,8 @@ jQuery(function($){
 				this.entities.reset();
 			},
 
-			initialize: function(){
+			initialize: function(options) {
+                this.options = options || {};
 				_.each(this.options, function(value, key){
 					this[key] = value;
 				}, this);
@@ -937,7 +942,8 @@ jQuery(function($){
 		ExcludeButtons: Backbone.View.extend({
 			className: 'header_row',
 
-			initialize: function(){
+			initialize: function(options) {
+                this.options = options || {};
 				_.each(this.options, function(value, key){
 					this[key] = value;
 				}, this);
@@ -973,7 +979,8 @@ jQuery(function($){
 					click: 'clicked'
 				},
 
-				initialize: function(){
+				initialize: function(options) {
+                    this.options = options || {};
 					_.each(this.options, function(value, key){
 						this[key] = value;
 					}, this);
@@ -996,7 +1003,8 @@ jQuery(function($){
 		SortButtons: Backbone.View.extend({
 			className: 'header_row',
 
-			initialize: 		function(){
+			initialize: function(options) {
+                this.options = options || {};
 				_.each(this.options, function(value, key){
 					this[key] = value;
 				}, this);
@@ -1136,7 +1144,8 @@ jQuery(function($){
 			Button: Backbone.View.extend({
 				tagName: 'a',
 
-				initialize: function(){
+				initialize: function(options) {
+                    this.options = options || {};
 					_.each(this.options, function(value, key){
 						this[key] = value;
 					}, this);
@@ -1171,7 +1180,8 @@ jQuery(function($){
 				drop: 'item_dropped'
 			},
 
-			initialize: function(){
+			initialize: function(options) {
+                this.options = options || {};
 				_.each(this.options, function(value, key){
 					this[key] = value;
 				}, this);
@@ -1227,7 +1237,8 @@ jQuery(function($){
 					this.model.set('exclude', e.target.checked);
 				},
 
-				initialize: function(){
+				initialize: function(options) {
+                    this.options = options || {};
 					_.each(this.options, function(value, key){
 						this[key] = value;
 					}, this);
@@ -1491,8 +1502,8 @@ jQuery(function($){
 			this.display_types = new Ngg.DisplayTab.Models.Display_Type_Collection(
 				<?php echo $display_types ?>
 			);
-			this.display_type_order_base = <?php echo NEXTGEN_DISPLAY_PRIORITY_BASE; ?>;
-			this.display_type_order_step = <?php echo NEXTGEN_DISPLAY_PRIORITY_STEP; ?>;
+			this.display_type_order_base = <?php echo NGG_DISPLAY_PRIORITY_BASE; ?>;
+			this.display_type_order_step = <?php echo NGG_DISPLAY_PRIORITY_STEP; ?>;
 			this.entities = new Ngg.DisplayTab.Models.Entity_Collection();
 			this.entities.extra_data.displayed_gallery = this.displayed_gallery;
 			this.image_key = "<?php echo $image_primary_key ?>";
@@ -1683,6 +1694,8 @@ jQuery(function($){
     });
     Ngg.DisplayTab.instance = new Ngg.DisplayTab.App();
     Ngg.DisplayTab.instance.render();
+    
+    window.Ngg = Ngg;
 
     // Invoke styling libraries
     $('span.tooltip, label.tooltip').tooltip();

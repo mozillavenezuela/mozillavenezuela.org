@@ -43,7 +43,10 @@ class Mixin_NextGen_Basic_Pagination extends Mixin
         $return = array('prev' => '', 'next' => '', 'output' => '');
 
         if ($maxElement <= 0)
+        {
+            $return['output'] = "<div class='ngg-clear'></div>";
             return $return;
+        }
 
         $total = $totalElement;
 
@@ -54,7 +57,7 @@ class Mixin_NextGen_Basic_Pagination extends Mixin
             if (1 < $page)
             {
                 $newpage = (1 == $page - 1) ? 1 : $page - 1;
-				$return['prev'] = $this->object->set_param_for($current_url, 'page', $newpage);
+				$return['prev'] = $this->object->set_param_for($current_url, 'nggpage', $newpage);
                 $r .=  '<a class="prev" data-pageid="' . $newpage . '" id="ngg-prev-' . $newpage . '" href="' . $return['prev'] . '">' . $prev_symbol . '</a>';
             }
 
@@ -71,7 +74,7 @@ class Mixin_NextGen_Basic_Pagination extends Mixin
                         if ($page_num < 3 || ($page_num >= $page - 3 && $page_num <= $page + 3) || $page_num > $total_pages - 3)
                         {
                             $newpage = (1 == $page_num ) ? 1 : $page_num;
-							$link = $this->object->set_param_for($current_url, 'page', $newpage);
+							$link = $this->object->set_param_for($current_url, 'nggpage', $newpage);
                             $r .= '<a class="page-numbers" data-pageid="' . $newpage . '" href="' . $link . '">' . ($page_num) . '</a>';
                         }
                     }
@@ -81,7 +84,7 @@ class Mixin_NextGen_Basic_Pagination extends Mixin
             if (($page) * $maxElement < $total || -1 == $total)
             {
                 $newpage = $page + 1;
-				$return['next'] = $this->object->set_param_for($current_url, 'page', $newpage);
+				$return['next'] = $this->object->set_param_for($current_url, 'nggpage', $newpage);
                 $r .=  '<a class="next" data-pageid="' . $newpage . '" id="ngg-next-' . $newpage . '" href="' . $return['next'] . '">' . $next_symbol . '</a>';
             }
 

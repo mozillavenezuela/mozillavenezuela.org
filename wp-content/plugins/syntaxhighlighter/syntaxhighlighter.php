@@ -4,9 +4,9 @@
 
 Plugin Name:  SyntaxHighlighter Evolved
 Plugin URI:   http://www.viper007bond.com/wordpress-plugins/syntaxhighlighter/
-Version:      3.1.7
+Version:      3.1.9
 Description:  Easily post syntax-highlighted code to your site without having to modify the code at all. Uses Alex Gorbatchev's <a href="http://alexgorbatchev.com/wiki/SyntaxHighlighter">SyntaxHighlighter</a>. <strong>TIP:</strong> Don't use the Visual editor if you don't want your code mangled. TinyMCE will "clean up" your HTML.
-Author:       Viper007Bond
+Author:       Alex Mills (Viper007Bond)
 Author URI:   http://www.viper007bond.com/
 
 **************************************************************************
@@ -21,7 +21,7 @@ Thanks to:
 
 class SyntaxHighlighter {
 	// All of these variables are private. Filters are provided for things that can be modified.
-	var $pluginver            = '3.1.7';  // Plugin version
+	var $pluginver            = '3.1.9';  // Plugin version
 	var $agshver              = false;    // Alex Gorbatchev's SyntaxHighlighter version (dynamically set below due to v2 vs v3)
 	var $shfolder             = false;    // Controls what subfolder to load SyntaxHighlighter from (v2 or v3)
 	var $settings             = array();  // Contains the user's settings
@@ -68,9 +68,7 @@ class SyntaxHighlighter {
 		// Admin hooks
 		add_action( 'admin_init',                         array( $this, 'register_setting' ) );
 		add_action( 'admin_menu',                         array( $this, 'register_settings_page' ) );
-		add_action( 'admin_head',                         array( $this, 'output_shortcodes_for_tinymce' ) );
 		add_filter( 'mce_external_plugins',               array( $this, 'add_tinymce_plugin' ) );
-		add_filter( 'tiny_mce_version',                   array( $this, 'break_tinymce_cache' ) );
 		add_filter( 'save_post',                          array( $this, 'mark_as_encoded' ),                               10, 2 );
 		add_filter( 'plugin_action_links',                array( $this, 'settings_link' ),                                 10, 2 );
 
@@ -278,7 +276,17 @@ class SyntaxHighlighter {
 
 	// Add the custom TinyMCE plugin which wraps plugin shortcodes in <pre> in TinyMCE
 	function add_tinymce_plugin( $plugins ) {
-		$plugins['syntaxhighlighter'] = plugins_url('syntaxhighlighter/syntaxhighlighter_mce.js');
+		global $tinymce_version;
+
+		add_action( 'admin_print_footer_scripts', array( $this, 'output_shortcodes_for_tinymce' ), 9 );
+
+		if ( substr( $tinymce_version, 0, 1 ) < 4 ) {
+			$plugins['syntaxhighlighter'] = plugins_url('syntaxhighlighter/syntaxhighlighter_mce.js');
+		} else {
+			$plugins['syntaxhighlighter'] = plugins_url('syntaxhighlighter/syntaxhighlighter_mce-4.js?ver=' . $this->pluginver );
+			wp_enqueue_script( 'syntaxhighlighter', plugins_url( '/syntaxhighlighter.js', __FILE__ ), array(), false, true );
+		}
+
 		return $plugins;
 	}
 
@@ -1172,7 +1180,7 @@ class SyntaxHighlighter {
 		<li><?php printf( _x( '%s &#8212; Toggle collapsing the code box by default, requiring a click to expand it. Good for large code posts.', 'collapse parameter', 'syntaxhighlighter' ), '<code>collapse</code>' ); ?></li>
 		<li><?php printf( _x( '%s &#8212; An interger specifying what number the first line should be (for the line numbering).', 'firstline parameter', 'syntaxhighlighter' ), '<code>firstline</code>' ); ?></li>
 		<li><?php printf( _x( '%s &#8212; Toggle the left-side line numbering.', 'gutter parameter', 'syntaxhighlighter' ), '<code>gutter</code>' ); ?></li>
-		<li><?php printf( _x( '%1$s &#8212; A comma-sperated list of line numbers to highlight. You can also specify a range. Example: %2$s', 'highlight parameter', 'syntaxhighlighter' ), '<code>highlight</code>', '<code>2,5-10,12</code>' ); ?></li>
+		<li><?php printf( _x( '%1$s &#8212; A comma-separated list of line numbers to highlight. You can also specify a range. Example: %2$s', 'highlight parameter', 'syntaxhighlighter' ), '<code>highlight</code>', '<code>2,5-10,12</code>' ); ?></li>
 		<li><?php printf( _x( "%s &#8212; Toggle highlighting any extra HTML/XML. Good for when you're mixing HTML/XML with another language, such as having PHP inside an HTML web page. The above preview has it enabled for example. This only works with certain languages.", 'htmlscript parameter', 'syntaxhighlighter' ), '<code>htmlscript</code>' ); ?></li>
 		<li><?php printf( _x( '%s &#8212; Toggle light mode which disables the gutter and toolbar all at once.', 'light parameter', 'syntaxhighlighter' ), '<code>light</code>' ); ?></li>
 		<li><?php printf( _x( '%s &#8212; Controls line number padding. Valid values are <code>false</code> (no padding), <code>true</code> (automatic padding), or an integer (forced padding).', 'padlinenumbers parameter', 'syntaxhighlighter' ), '<code>padlinenumbers</code>' ); ?></li>

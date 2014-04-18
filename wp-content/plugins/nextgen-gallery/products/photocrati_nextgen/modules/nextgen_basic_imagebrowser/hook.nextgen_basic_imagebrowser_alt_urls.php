@@ -23,10 +23,7 @@ class Hook_NextGen_Basic_Imagebrowser_Alt_URLs extends Hook {
             $controller  = $this->object->get_registry()->get_utility('I_Display_Type_Controller');
             $application = $router->get_routed_app();
 
-            if ($router->param('ajax_pagination_referrer'))
-                $url = $router->param('ajax_pagination_referrer');
-            else
-                $url = $application->get_routed_url(TRUE);
+            $url = $application->get_routed_url(TRUE);
 
             $url = $controller->set_param_for($url, 'pid', $image->image_slug);
             $url = $controller->remove_param_for($url, 'show');

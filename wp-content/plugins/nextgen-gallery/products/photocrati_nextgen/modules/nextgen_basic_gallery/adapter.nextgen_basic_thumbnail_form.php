@@ -4,7 +4,7 @@ class A_NextGen_Basic_Thumbnail_Form extends Mixin_Display_Type_Form
 {
 	function get_display_type_name()
 	{
-		return NEXTGEN_GALLERY_BASIC_THUMBNAILS;
+		return NGG_BASIC_THUMBNAILS;
 	}
 
 	/**
@@ -23,10 +23,12 @@ class A_NextGen_Basic_Thumbnail_Form extends Mixin_Display_Type_Form
 			$this->object->get_static_url('photocrati-nextgen_basic_gallery#thumbnails/nextgen_basic_thumbnails_settings.js'),
 			array('jquery.nextgen_radio_toggle')
 		);
-			$atp = $this->object->get_registry()->get_utility('I_Attach_To_Post_Controller');
+	
+		$atp = $this->object->get_registry()->get_utility('I_Attach_To_Post_Controller');
 	
 		if ($atp != null) {
-			$atp->mark_script('nextgen_basic_thumbnails_settings');		}
+			$atp->mark_script('nextgen_basic_thumbnails_settings');
+		}
 	}
 
 	/**

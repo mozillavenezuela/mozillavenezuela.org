@@ -1,6 +1,8 @@
 <tr>
 	<td class="column1">
-		<label for="watermark_image_url">
+		<label for="watermark_image_url"
+               title="<?php echo esc_attr($watermark_image_text); ?>"
+               class="tooltip">
 			<?php echo_h($image_url_label)?>
 		</label>
 	</td>

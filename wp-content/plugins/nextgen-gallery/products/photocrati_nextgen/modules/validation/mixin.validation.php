@@ -49,6 +49,10 @@ class Mixin_Validation extends Mixin
      */
     function add_error($msg, $property='*')
     {
+        if (!isset($this->object->_errors)) {
+            $this->object->_errors = array();
+        }
+
 		$errors = &$this->object->_errors;
 
         if (!isset($errors[$property])) {

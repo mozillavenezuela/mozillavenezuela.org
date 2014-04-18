@@ -39,7 +39,7 @@ function media_upload_nextgen() {
         $mapper   = $registry->get_utility('I_Displayed_Gallery_Mapper');
         $factory  = $registry->get_utility('I_Component_Factory');
         $args = array(
-            'display_type' => NEXTGEN_BASIC_SINGLEPIC_MODULE_NAME
+            'display_type' => NGG_BASIC_SINGLEPIC
         );
         $displayed_gallery = $factory->create('displayed_gallery', $args, $mapper);
         $width  = $displayed_gallery->display_settings['width'];
@@ -200,7 +200,7 @@ if ($chromeless)
 	<br style="clear:both;" />
 </div>
 </form>
-
+<br style="clear:both;"/>
 <form enctype="multipart/form-data" method="post" action="<?php echo esc_attr($form_action_url); ?>" class="media-upload-form" id="library-form">
 
 	<?php wp_nonce_field('ngg-media-form'); ?>

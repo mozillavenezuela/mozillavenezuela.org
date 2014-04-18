@@ -96,16 +96,16 @@ class Mixin_MediaRSS_Controller extends Mixin
 	 */
 	function _get_feed_copyright($displayed_gallery)
 	{
-		$site_url = $this->object->get_site_url();
+		$base_url = $this->object->get_base_url();
 		$blog_name	= get_option('blogname');
-		return "Copyright (C) {$blog_name} ({$site_url})";
+		return "Copyright (C) {$blog_name} ({$base_url})";
 	}
 
 	/**
 	 * Gets the Site URL
 	 * @return string
 	 */
-	function get_site_url()
+	function get_base_url()
 	{
 		$router		= $this->get_registry()->get_utility('I_Router');
 		return $router->get_base_url();
@@ -128,7 +128,7 @@ class Mixin_MediaRSS_Controller extends Mixin
 	 */
 	function _get_feed_link($displayed_gallery)
 	{
-		return $this->object->get_site_url();
+		return $this->object->get_base_url();
 	}
 
 

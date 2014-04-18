@@ -239,9 +239,10 @@ function ngg_ajax_file_browser() {
 	}
 
     // start from the default path
-    $root = trailingslashit ( WINABSPATH );
+    $root = rtrim(ABSPATH, "\\/").DIRECTORY_SEPARATOR;
+
     // get the current directory
-	$dir = trailingslashit ( urldecode($_POST['dir']) );
+	$dir = rtrim( urldecode($_POST['dir']),"/\\").DIRECTORY_SEPARATOR;
 
 	if( file_exists($root . $dir) ) {
 		$files = scandir($root . $dir);

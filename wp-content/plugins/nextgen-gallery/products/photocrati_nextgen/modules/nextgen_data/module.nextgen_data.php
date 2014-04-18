@@ -15,7 +15,7 @@ class M_NextGen_Data extends C_Base_Module
             'photocrati-nextgen-data',
             'NextGEN Data Tier',
             "Provides a data tier for NextGEN gallery based on the DataMapper module",
-            '0.4',
+            '0.8',
             'http://www.photocrati.com',
             'Photocrati Media',
             'http://www.photocrati.com'
@@ -89,13 +89,13 @@ class M_NextGen_Data extends C_Base_Module
 	{
 		$types = array(
 			'ngg_album'		=>	'NextGEN Gallery - Album',
-			'ngg_gallery'	=>	'NexTGEN Gallery - Gallery',
+			'ngg_gallery'	=>	'NextGEN Gallery - Gallery',
 			'ngg_pictures'	=>	'NextGEN Gallery - Image',
 		);
 
 		foreach ($types as $type => $label) {
 			register_post_type($type, array(
-				'label'		=>	$label,
+				'label'					=>	$label,
 				'publicly_queryable'	=>	FALSE,
 				'exclude_from_search'	=>	TRUE,
 			));

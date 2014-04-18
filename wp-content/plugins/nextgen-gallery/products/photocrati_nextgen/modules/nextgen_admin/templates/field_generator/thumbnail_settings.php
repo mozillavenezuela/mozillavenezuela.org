@@ -16,7 +16,7 @@
         $thumbnails_template_name = $display_type_name . '_thumbnail_dimensions';
         $thumbnails_template_width_name = $display_type_name . '[thumbnail_width]';
         $thumbnails_template_height_name = $display_type_name . '[thumbnail_height]';
-        include(path_join(NGGALLERY_ABSPATH, implode(DIRECTORY_SEPARATOR, array('admin', 'thumbnails-template.php'))));
+        include(NGGALLERY_ABSPATH . implode(DIRECTORY_SEPARATOR, array('admin', 'thumbnails-template.php')));
         ?>
     </td>
 </tr>

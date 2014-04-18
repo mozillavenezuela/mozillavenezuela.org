@@ -8,8 +8,11 @@ class A_WordPress_Router extends Mixin
 	function initialize()
 	{
 		// Set context to path if subdirectory install
-		$parts = parse_url($this->object->get_base_url());
-		if (isset($parts['path'])) $this->object->context = $parts['path'];
+		$parts = parse_url($this->object->get_base_url(FALSE));
+		if (isset($parts['path'])) {
+            $parts = explode('/index.php', $parts['path']);
+			$this->object->context = array_shift($parts);
+		}
 
 
 		$this->object->add_post_hook(
