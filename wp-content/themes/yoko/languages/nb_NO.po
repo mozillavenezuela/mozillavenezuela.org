@@ -1,0 +1,737 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Yoko\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2011-09-17 14:41+0100\n"
+"PO-Revision-Date: \n"
+"Last-Translator: Julius Getz Mørk <julius@getzit.no>\n"
+"Language-Team: Wolforg <contact@wolforg.eu>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Poedit-Language: French\n"
+"X-Poedit-Country: FRANCE\n"
+"X-Poedit-SourceCharset: utf-8\n"
+"X-Poedit-KeywordsList: __;_e;__ngettext:1,2;_n:1,2;__ngettext_noop:1,2;_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2\n"
+"X-Poedit-Basepath: M:\\_Backups\\MyDocuments\\Web development\\Projects\\Getzit projects\\Drøbak akvarium\\Deploy\\wp-content\\themes\\yoko\n"
+"X-Textdomain-Support: yes\n"
+"X-Poedit-SearchPath-0: M:\\_Backups\\MyDocuments\\Web development\\Projects\\Getzit projects\\Drøbak akvarium\\Deploy\\wp-content\\themes\\yoko\n"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/404.php:15
+msgid "Not Found"
+msgstr "Ikke funnet"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/404.php:19
+msgid "Apologies, but the page you requested could not be found. Perhaps searching will help."
+msgstr "Beklager, men siden du var på jakt etter ble ikke funnet. Kanskje et søk kan hjelpe."
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/archive.php:18
+#, php-format
+msgid "Daily Archives: <span>%s</span>"
+msgstr "Daglig arkiv: <span>%s</span>"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/archive.php:20
+#, php-format
+msgid "Monthly Archives: <span>%s</span>"
+msgstr "Månedlig arkiv: <span>%s</span>"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/archive.php:22
+#, php-format
+msgid "Yearly Archives: <span>%s</span>"
+msgstr "Årlig arkiv: <span>%s</span>"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/archive.php:24
+msgid "Blog Archives"
+msgstr "Arkiv"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/archive.php:41
+#: akvarium\Deploy\wp-content\themes\yoko/author.php:31
+#: akvarium\Deploy\wp-content\themes\yoko/category.php:28
+msgid "<span class=\"meta-nav\">&larr;</span> Older posts"
+msgstr "<span class=\"meta-nav\">&larr;</span> Eldre artikler"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/archive.php:42
+#: akvarium\Deploy\wp-content\themes\yoko/author.php:32
+#: akvarium\Deploy\wp-content\themes\yoko/category.php:29
+msgid "Newer posts <span class=\"meta-nav\">&rarr;</span>"
+msgstr "Nyere artikler <span class=\"meta-nav\">&rarr;</span>"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/author.php:16
+#, php-format
+msgid "Author Archives: <span class=\"vcard\">%s</span>"
+msgstr "Arkiv for forfatter: <span class=\"vcard\">%s</span>"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/category.php:14
+#, php-format
+msgid "Category Archives: %s"
+msgstr "Kategoriarkiv: %s"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/comments.php:10
+msgid "This post is password protected. Enter the password to view any comments."
+msgstr "Denne artikkelen er passordbeskyttet. Skriv inn passord for å se kommentarer."
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/comments.php:26
+#, php-format
+msgid "One Comment"
+msgid_plural "%1$s Comments"
+msgstr[0] "Én kommentar"
+msgstr[1] "%1$s kommentarer"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/comments.php:29
+msgid "Leave a reply &rarr;"
+msgstr "Gi en tilbakemelding &rarr;"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/comments.php:36
+msgid "&larr; Older Comments"
+msgstr "&larr; Eldre kommentarer"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/comments.php:37
+msgid "Newer Comments &rarr;"
+msgstr "Nyere kommentarer &rarr;"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/comments.php:53
+msgid "Comments are closed."
+msgstr "Stengt for kommentarer."
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/comments.php:60
+msgid "<p class=\"comment-notes\">Required fields are marked <span class=\"required\">*</span>.</p>"
+msgstr "<p class=\"comment-notes\">Påkrevde felter er merket <span class=\"required\">*</span>.</p>"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/comments.php:62
+msgctxt "noun"
+msgid "Message <span class=\"required\">*</span>"
+msgstr "Melding <span class=\"requis\">*</span>"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/content-aside.php:12
+#: akvarium\Deploy\wp-content\themes\yoko/content-gallery.php:13
+#: akvarium\Deploy\wp-content\themes\yoko/content-image.php:13
+#: akvarium\Deploy\wp-content\themes\yoko/content-quote.php:12
+#: akvarium\Deploy\wp-content\themes\yoko/content-single.php:18
+#: akvarium\Deploy\wp-content\themes\yoko/content-video.php:13
+#: akvarium\Deploy\wp-content\themes\yoko/content.php:15
+msgid "by"
+msgstr "av"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/content-aside.php:13
+#: akvarium\Deploy\wp-content\themes\yoko/content-gallery.php:14
+#: akvarium\Deploy\wp-content\themes\yoko/content-image.php:13
+#: akvarium\Deploy\wp-content\themes\yoko/content-quote.php:13
+#: akvarium\Deploy\wp-content\themes\yoko/content-single.php:18
+#: akvarium\Deploy\wp-content\themes\yoko/content-video.php:13
+#: akvarium\Deploy\wp-content\themes\yoko/content.php:16
+msgid "0 comments"
+msgstr "0 kommentarer"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/content-aside.php:13
+#: akvarium\Deploy\wp-content\themes\yoko/content-gallery.php:14
+#: akvarium\Deploy\wp-content\themes\yoko/content-image.php:13
+#: akvarium\Deploy\wp-content\themes\yoko/content-quote.php:13
+#: akvarium\Deploy\wp-content\themes\yoko/content-single.php:18
+#: akvarium\Deploy\wp-content\themes\yoko/content-video.php:13
+#: akvarium\Deploy\wp-content\themes\yoko/content.php:16
+msgid "1 Comment"
+msgstr "1 kommentar"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/content-aside.php:13
+#: akvarium\Deploy\wp-content\themes\yoko/content-gallery.php:14
+#: akvarium\Deploy\wp-content\themes\yoko/content-image.php:13
+#: akvarium\Deploy\wp-content\themes\yoko/content-quote.php:13
+#: akvarium\Deploy\wp-content\themes\yoko/content-single.php:18
+#: akvarium\Deploy\wp-content\themes\yoko/content-video.php:13
+#: akvarium\Deploy\wp-content\themes\yoko/content.php:16
+msgid "% Comments"
+msgstr "% kommentar"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/content-aside.php:17
+msgid "Continue reading <span class=\"meta-nav\">&rarr;</span>"
+msgstr "Les mer <span class=\"meta-nav\">&rarr;</span>"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/content-aside.php:18
+#: akvarium\Deploy\wp-content\themes\yoko/content-gallery.php:53
+#: akvarium\Deploy\wp-content\themes\yoko/content-image.php:17
+#: akvarium\Deploy\wp-content\themes\yoko/content-page.php:17
+#: akvarium\Deploy\wp-content\themes\yoko/content-quote.php:18
+#: akvarium\Deploy\wp-content\themes\yoko/content-single.php:28
+#: akvarium\Deploy\wp-content\themes\yoko/content-video.php:17
+#: akvarium\Deploy\wp-content\themes\yoko/content.php:28
+msgid "Pages:"
+msgstr "Sider:"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/content-aside.php:22
+#: akvarium\Deploy\wp-content\themes\yoko/content-gallery.php:57
+#: akvarium\Deploy\wp-content\themes\yoko/content-image.php:21
+#: akvarium\Deploy\wp-content\themes\yoko/content-link.php:15
+#: akvarium\Deploy\wp-content\themes\yoko/content-quote.php:22
+#: akvarium\Deploy\wp-content\themes\yoko/content-single.php:33
+#: akvarium\Deploy\wp-content\themes\yoko/content-video.php:21
+#: akvarium\Deploy\wp-content\themes\yoko/content.php:33
+#, php-format
+msgid "Categories: %2$s"
+msgstr "Kategorier: %2$s"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/content-aside.php:26
+#: akvarium\Deploy\wp-content\themes\yoko/content-gallery.php:61
+#: akvarium\Deploy\wp-content\themes\yoko/content-image.php:25
+#: akvarium\Deploy\wp-content\themes\yoko/content-link.php:19
+#: akvarium\Deploy\wp-content\themes\yoko/content-quote.php:26
+#: akvarium\Deploy\wp-content\themes\yoko/content-single.php:37
+#: akvarium\Deploy\wp-content\themes\yoko/content-video.php:25
+#: akvarium\Deploy\wp-content\themes\yoko/content.php:37
+#, php-format
+msgid "Tags: %2$s"
+msgstr "Merkelapper: %2$s"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/content-aside.php:28
+#: akvarium\Deploy\wp-content\themes\yoko/content-gallery.php:63
+#: akvarium\Deploy\wp-content\themes\yoko/content-image.php:27
+#: akvarium\Deploy\wp-content\themes\yoko/content-link.php:21
+#: akvarium\Deploy\wp-content\themes\yoko/content-quote.php:28
+#: akvarium\Deploy\wp-content\themes\yoko/content-single.php:39
+#: akvarium\Deploy\wp-content\themes\yoko/content-video.php:27
+#: akvarium\Deploy\wp-content\themes\yoko/content.php:39
+msgid "Permalink "
+msgstr "Permalenke"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/content-aside.php:29
+#: akvarium\Deploy\wp-content\themes\yoko/content-gallery.php:64
+#: akvarium\Deploy\wp-content\themes\yoko/content-image.php:28
+#: akvarium\Deploy\wp-content\themes\yoko/content-link.php:22
+#: akvarium\Deploy\wp-content\themes\yoko/content-page.php:18
+#: akvarium\Deploy\wp-content\themes\yoko/content-quote.php:29
+#: akvarium\Deploy\wp-content\themes\yoko/content-single.php:40
+#: akvarium\Deploy\wp-content\themes\yoko/content-video.php:28
+#: akvarium\Deploy\wp-content\themes\yoko/content.php:40
+msgid "Edit &rarr;"
+msgstr "Endre &rarr;"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/content-gallery.php:19
+#: akvarium\Deploy\wp-content\themes\yoko/content-gallery.php:24
+#: akvarium\Deploy\wp-content\themes\yoko/content-gallery.php:42
+msgid "View the pictures &rarr;"
+msgstr "Se på bilde &rarr;"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/content-gallery.php:45
+#, php-format
+msgid "This gallery contains <a %1$s>%2$s photo</a>."
+msgid_plural "This gallery contains <a %1$s>%2$s photos</a>"
+msgstr[0] "Galleriet inneholder <a %1$s>%2$s bilde</a>."
+msgstr[1] "Galleriet inneholder <a %1$s>%2$s bilder</a>."
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/content-image.php:16
+#: akvarium\Deploy\wp-content\themes\yoko/content-link.php:11
+#: akvarium\Deploy\wp-content\themes\yoko/content-quote.php:17
+#: akvarium\Deploy\wp-content\themes\yoko/content-single.php:25
+#: akvarium\Deploy\wp-content\themes\yoko/content-video.php:16
+#: akvarium\Deploy\wp-content\themes\yoko/content.php:27
+msgid "Continue Reading &rarr;"
+msgstr "Les mer &rarr;"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/content-single.php:47
+#, php-format
+msgid "Author: %s"
+msgstr "Forfatter: %s"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/footer.php:11
+#, php-format
+msgid "Theme: %1$s by %2$s"
+msgstr "Tema: %1$s av %2$s | Norsk oversettelse: <a href=\"http://www.getzit.no\">Julius Getz Mørk</a>."
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/footer.php:12
+msgid "Top"
+msgstr "Topp"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/functions.php:52
+msgid "Primary Navigation"
+msgstr "Primær navigasjon"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/functions.php:91
+msgid "Ginko"
+msgstr "Ginseng"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/functions.php:97
+msgid "Flowers"
+msgstr "Blomster"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/functions.php:103
+msgid "Plant"
+msgstr "Plante"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/functions.php:109
+msgid "Sailing"
+msgstr "Seiling"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/functions.php:115
+msgid "Cape"
+msgstr "Kyst"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/functions.php:121
+msgid "Seagull"
+msgstr "Måke"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/functions.php:223
+#, php-format
+msgid "%s"
+msgstr "%s"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/functions.php:227
+#, php-format
+msgid "%1$s at %2$s"
+msgstr "%1$s på %2$s"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/functions.php:234
+msgid "Your comment is awaiting moderation."
+msgstr "Din kommentar venter moderering."
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/functions.php:252
+msgid "Pingback:"
+msgstr "Pingback:"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/functions.php:252
+msgid "(Edit)"
+msgstr "(Endre)"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/functions.php:264
+msgid "Sidebar 1"
+msgstr "Sidekolonne 1"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/functions.php:273
+msgid "Sidebar 2"
+msgstr "Sidekolonne 2"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/functions.php:275
+msgid "An second sidebar area"
+msgstr "Et sekundært sidekolonne-område"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/functions.php:442
+msgid "Link to your social profiles like twitter, facebook or flickr."
+msgstr "Lenke til dine sosiale profiler som Twitter, Facebook og Flickr."
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/functions.php:543
+msgid "Title:"
+msgstr "Tittel:"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/functions.php:545
+msgid "RSS Text:"
+msgstr "RSS-tekst:"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/functions.php:547
+msgid "RSS  URL:"
+msgstr "URL til RSS:"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/functions.php:549
+msgid "Twitter Text:"
+msgstr "Twitter-tekst:"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/functions.php:550
+msgid "Twitter  URL:"
+msgstr "URL til Twitter:"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/functions.php:551
+msgid "Facebook Text:"
+msgstr "Facebook-tekst:"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/functions.php:552
+msgid "Facebook URL:"
+msgstr "URL til Facebook:"
+
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/functions.php:553
+msgid "Google+ Text:"
+msgstr "Google+ tekst:"
+
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/functions.php:554
+msgid "Google+ URL:"
+msgstr "URL til Google+:"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/functions.php:555
+msgid "Flickr Text:"
+msgstr "Flickr-tekst:"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/functions.php:556
+msgid "Flickr URL:"
+msgstr "URL til Flickr:"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/functions.php:557
+msgid "Vimeo Text:"
+msgstr "Vimeo-tekst:"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/functions.php:558
+msgid "Vimeo URL:"
+msgstr "URL til Vimeo:"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/functions.php:559
+msgid "LinkedIn Text:"
+msgstr "LinkedIn-tekst:"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/functions.php:560
+msgid "LinkedIn URL:"
+msgstr "URL til LinkedIn:"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/functions.php:561
+msgid "Delicious Text:"
+msgstr "Delicious-tekst:"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/functions.php:562
+msgid "Delicious URL:"
+msgstr "URL til Delicious:"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/header.php:22
+#, php-format
+msgid "Page %s"
+msgstr "Side %s"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/image.php:22
+msgid "&larr; Previous Image"
+msgstr "&larr; Forrige bilde"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/image.php:23
+msgid "Next Image &rarr;"
+msgstr "Neste bilde &rarr;"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/image.php:75
+#, php-format
+msgid "<a class=\"comment-link\" href=\"#respond\" title=\"Post a comment\">Post a comment</a> or leave a trackback: <a class=\"trackback-link\" href=\"%s\" title=\"Trackback URL for your post\" rel=\"trackback\">Trackback URL</a>."
+msgstr "<a class=\"comment-link\" href=\"#respond\" title=\"Poster un commentaire\">Skriv en kommentar</a> eller legg igjen en tilbakesporing: <a class=\"trackback-link\" href=\"%s\" title=\"URL for tilbakesporing\" rel=\"trackback\">URL for tilbakesporing</a>."
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/image.php:77
+#, php-format
+msgid "Comments are closed, but you can leave a trackback: <a class=\"trackback-link\" href=\"%s\" title=\"Trackback URL for your post\" rel=\"trackback\">Trackback URL</a>."
+msgstr "Stengt for kommentarer, men du kan legge igjen en tilbakesporing: <a class=\"trackback-link\" href=\"%s\" title=\"URL for tilbakesporing\" rel=\"trackback\">URL for tilbakesporing</a>."
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/image.php:79
+msgid "Trackbacks are closed, but you can <a class=\"comment-link\" href=\"#respond\" title=\"Post a comment\">post a comment</a>."
+msgstr "Stengt for tilbakesporing, men du kan <a class=\"comment-link\" href=\"#respond\" title=\"Skriv en kommentar\">skrive en kommentar</a>."
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/image.php:81
+msgid "Both comments and trackbacks are currently closed."
+msgstr "Stengt for kommentarer og tilbakesporing."
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/search.php:16
+#, php-format
+msgid "Search Results for: %s"
+msgstr "Søkeresultater for: %s"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/search.php:38
+msgid "Nothing Found"
+msgstr "Ingenting ble funnet"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/search.php:42
+msgid "Sorry, but nothing matched your search criteria. Please try again with some different keywords."
+msgstr "Beklager, men vi fant ingen treff på ditt søkekriterie. Prøv igjen med andre søkeord."
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/single.php:23
+msgctxt "Previous post link"
+msgid "&larr;  Previous Post"
+msgstr "&larr;  Forrige artikkel"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/single.php:24
+msgctxt "Next post link"
+msgid "Next Post &rarr;"
+msgstr "Neste artikkel &rarr;"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/tag.php:18
+#, php-format
+msgid "Tag Archives: %s"
+msgstr "Arkiv for merkelapper:  %s"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/includes/theme-options.php:37
+msgid "Theme Options"
+msgstr "Innstillinger for tema"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/includes/theme-options.php:51
+msgid " Theme Options"
+msgstr "Innstillinger for tema"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/includes/theme-options.php:55
+msgid "Options saved"
+msgstr "Innstillinger er lagret"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/includes/theme-options.php:69
+msgid "Custom Link Color"
+msgstr "Egendefinert lenkefarge"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/includes/theme-options.php:76
+msgid "e.g. #0000FF or blue (default link color: #009BC2)"
+msgstr "f.eks: #0000FF eller blue (standard lenkefarge: #009BC2)"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/includes/theme-options.php:80
+msgid "Custom Logo Image URL"
+msgstr "Egendefinert URL til logo"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/includes/theme-options.php:83
+msgid "Upload your own logo image"
+msgstr "Last opp din egen logo"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/includes/theme-options.php:83
+msgid " using the WordPress Media Library and insert the URL here"
+msgstr " ved å bruke WordPress mediabibliotek og sett inn URL her"
+
+# @ yoko
+#: M:\_Backups\MyDocuments\Web
+#: development\Projects\Getzit projects\Drøbak
+#: akvarium\Deploy\wp-content\themes\yoko/includes/theme-options.php:89
+msgid "Save Options"
+msgstr "Lagre innstillinger"
+

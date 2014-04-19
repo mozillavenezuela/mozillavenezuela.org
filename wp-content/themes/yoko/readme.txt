@@ -6,6 +6,18 @@ For a detailed documentation and support please visit: http://www.elmastudio.de/
 Changelog:
 ------------------------------------------------------------------------------------------------------------
 
+Version 1.1 - 22th October 2013
+--------------------------------
+- Enhancement: General code updates and optimizations (see functions.php, includes/theme-options.php)
+- Enhancement: moved Google webfonts import from style.css to functions.php
+- Enhancement: Enqueue stylesheet via functions.php
+- Enhancement: Update of html5.js (see js/html5.js)
+- Enhancement: Update of Social Links icons (see style.css, functions.php + images folder)
+- Enhancement: Improvement of RTL language support (see rtl.css)
+- New: Social Links icons Retina support (see images/x2 folder + style.css)
+- New: Theme translations for Hebrew, Italian, Norwegian and Romanian
+
+
 Version 1.0.5 - 21th August 2011
 --------------------------------
 - Added Google+ and target="_blank" to the Yoko Social Links widget.
@@ -23,18 +35,18 @@ Version 1.0.5 - 21th August 2011
 Version 1.0.4 - 31th May 2011
 --------------------------------
 - Added dropdown menu styles for the main navigation (see style.css line 257-285).
-- Bugfix in fullwidth page template file full-width-page.php and style.css (line 844) so the footer does not 
+- Bugfix in fullwidth page template file full-width-page.php and style.css (line 844) so the footer does not
   collapse into the page content on fullwidth pages.
-- Added an if-statement for "has_post_thumbnail" in content.php and content-sinlge.php so there won't be an 
+- Added an if-statement for "has_post_thumbnail" in content.php and content-sinlge.php so there won't be an
   empty link-tag if there is no thumbnail picture attached to a post.
-- Added the french theme translation files into the languages folder (thanks to http://www.wptrads.fr/theme/yoko/ 
+- Added the french theme translation files into the languages folder (thanks to http://www.wptrads.fr/theme/yoko/
   for the theme translation).
-- Changed the thumbnail image feature in header.php (line 62), so the post thumbnail images will be able to 
+- Changed the thumbnail image feature in header.php (line 62), so the post thumbnail images will be able to
   resize in smaller browser screens, if thumbnail images are shown as header images in single posts.
 - Changed the thumbnail size for the function the_post_thumbnail in content.php and content.single.php to "thumbnail".
-- Created the new folder "includes" for the theme-options files. Also added a Colorpicker to select the custom 
+- Created the new folder "includes" for the theme-options files. Also added a Colorpicker to select the custom
   link color.
-- Added Shortcodes for two, three and four column text, highlighted text and info boxes (see the theme documentation 
+- Added Shortcodes for two, three and four column text, highlighted text and info boxes (see the theme documentation
   for details).
 
 

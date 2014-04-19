@@ -48,7 +48,7 @@ function yoko_theme_options_page() {
 
 	<div class="wrap">
 
-	<?php screen_icon(); echo "<h2>" . get_current_theme() . __( ' Theme Options', 'yoko' ) . "</h2>";
+	<?php screen_icon(); echo "<h2>" . wp_get_theme() . __( ' Theme Options', 'yoko' ) . "</h2>";
 	// This shows the page's name and an icon if one has been provided ?>
 
 	<?php if ( false !== $_REQUEST['updated'] ) : ?>
@@ -65,25 +65,23 @@ function yoko_theme_options_page() {
 	and not somewhere else, very important for security */ ?>
 
 	<table class="form-table">
-
-	<tr valign="top"><th scope="row"><label for="custom_color"><?php _e('Custom Link Color', 'yoko'); ?></label></th>
-	<td>
-	<input id="custom_color" name="yoko_options[custom_color]" type="text" value="<?php  esc_attr_e($settings['custom_color']); ?>" />
-	<a href="#" class="pickcolor hide-if-no-js" id="custom_color-example"></a>
-	<input type="button" class="pickcolor button hide-if-no-js" value="<?php esc_attr_e( 'Select a Color', 'yoko' ); ?>">
-	<div id="colorPickerDiv" style="z-index: 100; background:#eee; border:1px solid #ccc; position:absolute; display:none;"></div>
-	<br />
-	<small class="description"><?php _e('e.g. #0000FF or blue (default link color: #009BC2)', 'yoko'); ?></small>
-	</td>
-	</tr>
+		<tr valign="top"><th scope="row"><label for="custom_color"><?php _e('Custom Link Color', 'yoko'); ?></label></th>
+			<td>
+			<input id="custom_color" name="yoko_options[custom_color]" type="text" value="<?php echo esc_attr($settings['custom_color']); ?>" />
+				<a href="#" class="pickcolor hide-if-no-js" id="custom_color-example"></a>
+			<input type="button" class="pickcolor button hide-if-no-js" value="<?php echo esc_attr( 'Select a Color', 'yoko' ); ?>">
+			<div id="colorPickerDiv" style="z-index: 100; background:#eee; border:1px solid #ccc; position:absolute; display:none;"></div>
+			<br />
+			<small class="description"><?php _e('e.g. #0000FF or blue (default link color: #009BC2)', 'yoko'); ?></small>
+			</td>
+		</tr>
 	
-	<tr valign="top"><th scope="row"><label for="custom_logo"><?php _e('Custom Logo Image URL', 'yoko'); ?></label></th>
-	<td>
-	<input id="custom_logo" name="yoko_options[custom_logo]" type="text" value="<?php  esc_attr_e($settings['custom_logo']); ?>" />
-	<span class="description"> <a href="<?php echo home_url(); ?>/wp-admin/media-new.php" target="_blank"><?php _e('Upload your own logo image', 'yoko'); ?></a> <?php _e(' using the WordPress Media Library and insert the URL here', 'yoko'); ?> </span>
-	<br/><img style="margin-top: 10px;" src="<?php echo (get_option('custom_logo')) ? get_option('custom_logo') : get_template_directory_uri() . '/images/logo.png' ?>" />
-	</td>
-	</tr>
+		<tr valign="top"><th scope="row"><label for="custom_logo"><?php _e('Custom Logo Image URL', 'yoko'); ?></label></th>
+			<td>
+				<input class="regular-text" id="custom_logo" name="yoko_options[custom_logo]" type="text" value="<?php  echo esc_attr($settings['custom_logo']); ?>" />
+				<span class="description"> <a href="<?php echo home_url(); ?>/wp-admin/media-new.php" target="_blank"><?php _e('Upload your own logo image', 'yoko'); ?></a> <?php _e(' using the WordPress Media Library and insert the URL here', 'yoko'); ?> </span>
+			</td>
+		</tr>
 	</table>
 
 	<p class="submit"><input type="submit" class="button-primary" value="<?php _e('Save Options', 'yoko'); ?>" /></p>

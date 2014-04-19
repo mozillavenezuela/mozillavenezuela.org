@@ -20,9 +20,9 @@ get_header(); ?>
 			<?php endwhile; // end of the loop. ?>
 	
 			<nav id="nav-below">
-				<div class="nav-previous"><?php previous_post_link( '%link', '' . _x( '&larr;  Previous Post', 'Previous post link', 'yoko' ) . '' ); ?></div>
-				<div class="nav-next"><?php next_post_link( '%link', __('') . _x( 'Next Post &rarr;', 'Next post link', 'yoko' ) . '' ); ?></div>
-			</nav><!-- end nav-below -->
+				<div class="nav-previous"><?php next_post_link( '%link', __( '&larr; Previous Post', 'yoko' ) ); ?></div>
+				<div class="nav-next"><?php previous_post_link( '%link', __( 'Next Post  &rarr;', 'yoko' ) ); ?></div>
+			</nav><!-- end #nav-below -->
 				
 	</div><!-- end content -->
 	

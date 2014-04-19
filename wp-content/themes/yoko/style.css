@@ -4,21 +4,17 @@ Theme URI: http://www.elmastudio.de/wordpress-themes/yoko/
 Description: Yoko is a modern three-column blog theme. A responsive layout optimizes the theme for mobile devices like tablet pcs and modern smartphones (the layout switches to a two- or one-column layout depending on the screen size the theme is viewed on). To make your blog post more flexible you can use different kinds of post formats such as gallery, image, video, aside, link or quotes. To customize the theme you can choose your own background, link color, logo and header image. Yoko also comes with a custom social links widget and shortcodes for text columns, info boxes and highlighted text.
 
 Author: Elmastudio
-Author URI: http://www.elmastudio.de/wordpress-themes/
-Version: 1.0.5
+Author URI: http://www.elmastudio.de/en/themes/
+Version: 1.1
 Tags: light, three-columns, right-sidebar, flexible-width, custom-colors, custom-header, custom-background, custom-menu, theme-options, threaded-comments, sticky-post, translation-ready
 
 License: GNU/GPL Version 2 or later
 License URI: http://www.gnu.org/licenses/gpl.html
 */
 
-/* Google Fonts Import
---------------------------------------------- */
-@import url(http://fonts.googleapis.com/css?family=Droid+Sans:regular,bold|Droid+Serif:regular,italic,bold,bolditalic&subset=latin);
-
 /* Reset
 --------------------------------------------- */
-/* http://meyerweb.com/eric/tools/css/reset/ 
+/* http://meyerweb.com/eric/tools/css/reset/
    v2.0 | 20110126
    License: none (public domain)
 */
@@ -28,8 +24,8 @@ a, img, strong, var,
 b, u, i, center, dl, dt, dd, ol, ul, li,
 fieldset, form, label, legend,
 table, caption, tbody, tfoot, thead, tr, th, td,
-article, aside, canvas, details, embed, 
-figure, figcaption, footer, header, hgroup, 
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
 menu, nav, output, ruby, section, summary,
 time, mark, audio, video {
 	margin: 0;
@@ -48,8 +44,13 @@ time, mark, audio, video {
 #content pre, code, tt {
 	font-size: 1.1em;
 }
+html {
+	font-size: 100%; overflow-y: scroll;
+	-webkit-text-size-adjust: 100%;
+	-ms-text-size-adjust: 100%;
+}
 /* HTML5 display-role reset for older browsers */
-article, aside, details, figcaption, figure, 
+article, aside, details, figcaption, figure,
 footer, header, hgroup, menu, nav, section {
 	display: block;
 }
@@ -64,6 +65,7 @@ table {
 	border-collapse: collapse;
 	border-spacing: 0;
 }
+
 /* General Structure and Styles
 --------------------------------------------- */
 body {
@@ -153,7 +155,7 @@ body {
 a {
 	color: #009BC2;
 	text-decoration: none;
-} 
+}
 a:hover {
 	color: #777!important;
 	text-decoration: underline;
@@ -519,11 +521,11 @@ nav#subnav ul.menu li.menu-item ul.sub-menu li.menu-item a {
 	clear:right;
 	margin-right:0 !important;
 }
-.divider { 
-	clear:both; 
-	display:block; 
+.divider {
+	clear:both;
+	display:block;
 	margin-bottom:20px;
-	width:100%; 
+	width:100%;
 }
 #content span.highlight {
 	padding: 2px;
@@ -886,7 +888,7 @@ form#commentform p.subscribe-to-doi-comments {
 	display: block;
 }
 
-/* Pages 
+/* Pages
 --------------------------------------------- */
 #content .page {
 	margin: 0 0 40px;
@@ -1063,32 +1065,61 @@ aside.widget ul li:last-child {
 	background-color: #009BC2;
 }
 /* --- Social Links Custom Widget --- */
-.widget_sociallinks a {
-	padding:0 20px;
+.widget_sociallinks ul li {
+	display: block;
 }
-.widget_sociallinks a.rss {
-	background:url(images/rss-icon.png) 0 0 no-repeat;
+.widget_sociallinks a {
+	padding:0 0 0 22px;
+	height: 16px;
+	display: inline-block;
 }
 .widget_sociallinks a.twitter {
-	background:url(images/twitter-icon.png) 0 0 no-repeat;
+	background:url(images/socialicons.png) 0 0 no-repeat;
 }
 .widget_sociallinks a.facebook {
-	background:url(images/fb-icon.png) 0 0 no-repeat;
-}
-.widget_sociallinks a.flickr {
-	background:url(images/flickr-icon.png) 0 0 no-repeat;
-}
-.widget_sociallinks a.vimeo {
-	background:url(images/vimeo-icon.png) 0 0 no-repeat;
-}
-.widget_sociallinks a.linkedin {
-	background:url(images/linkedin-icon.png) 0 0 no-repeat;
-}
-.widget_sociallinks a.delicious {
-	background:url(images/delicious-icon.png) 0 0 no-repeat;
+	background:url(images/socialicons.png) 0 -17px no-repeat;
 }
 .widget_sociallinks a.googleplus {
-	background:url(images/googleplus-icon.png) 0 0 no-repeat;
+	background:url(images/socialicons.png) 0 -34px no-repeat;
+}
+.widget_sociallinks a.pinterest {
+	background:url(images/socialicons.png) 0 -51px no-repeat;
+}
+.widget_sociallinks a.vimeo {
+	background:url(images/socialicons.png) 0 -68px no-repeat;
+}
+.widget_sociallinks a.youtube {
+	background:url(images/socialicons.png) 0 -85px no-repeat;
+}
+.widget_sociallinks a.instagram {
+	background:url(images/socialicons.png) 0 -102px no-repeat;
+}
+.widget_sociallinks a.flickr {
+	background:url(images/socialicons.png) 0 -119px no-repeat;
+}
+.widget_sociallinks a.dribbble {
+	background:url(images/socialicons.png) 0 -136px no-repeat;
+}
+.widget_sociallinks a.github {
+	background:url(images/socialicons.png) 0 -153px no-repeat;
+}
+.widget_sociallinks a.foursquare {
+	background:url(images/socialicons.png) 0 -170px no-repeat;
+}
+.widget_sociallinks a.wordpress {
+	background:url(images/socialicons.png) 0 -187px no-repeat;
+}
+.widget_sociallinks a.xing {
+	background:url(images/socialicons.png) 0 -204px no-repeat;
+}
+.widget_sociallinks a.linkedin {
+	background:url(images/socialicons.png) 0 -221px no-repeat;
+}
+.widget_sociallinks a.delicious {
+	background:url(images/socialicons.png) 0 -238px no-repeat;
+}
+.widget_sociallinks a.rss {
+	background:url(images/socialicons.png) 0 -255px no-repeat;
 }
 /* --- Recent Comments Widget --- */
 .widget_get_recent_comments li.sidebar-comment {
@@ -1524,5 +1555,76 @@ a#cancel-comment-reply-link {
 #colophon {
 	width: 100%;
 	float: none;
+}
+}
+
+/* --- Retina Displays --- */
+@media (-moz-min-device-pixel-ratio: 1.5),
+(-o-min-device-pixel-ratio: 3/2),
+(-webkit-min-device-pixel-ratio: 1.5),
+(min-device-pixel-ratio: 1.5) {
+.widget_sociallinks a.twitter {
+	background:url(images/x2/socialicons.png) 0 0 no-repeat;
+	background-size: 16px 271px;
+}
+.widget_sociallinks a.facebook {
+	background:url(images/x2/socialicons.png) 0 -17px no-repeat;
+	background-size: 16px 271px;
+}
+.widget_sociallinks a.googleplus {
+	background:url(images/x2/socialicons.png) 0 -34px no-repeat;
+	background-size: 16px 271px;
+}
+.widget_sociallinks a.pinterest {
+	background:url(images/x2/socialicons.png) 0 -51px no-repeat;
+	background-size: 16px 271px;
+}
+.widget_sociallinks a.vimeo {
+	background:url(images/x2/socialicons.png) 0 -68px no-repeat;
+	background-size: 16px 271px;
+}
+.widget_sociallinks a.youtube {
+	background:url(images/x2/socialicons.png) 0 -85px no-repeat;
+	background-size: 16px 271px;
+}
+.widget_sociallinks a.instagram {
+	background:url(images/x2/socialicons.png) 0 -102px no-repeat;
+	background-size: 16px 271px;
+}
+.widget_sociallinks a.flickr {
+	background:url(images/x2/socialicons.png) 0 -119px no-repeat;
+	background-size: 16px 271px;
+}
+.widget_sociallinks a.dribbble {
+	background:url(images/x2/socialicons.png) 0 -136px no-repeat;
+	background-size: 16px 271px;
+}
+.widget_sociallinks a.github {
+	background:url(images/x2/socialicons.png) 0 -153px no-repeat;
+	background-size: 16px 271px;
+}
+.widget_sociallinks a.foursquare {
+	background:url(images/x2/socialicons.png) 0 -170px no-repeat;
+	background-size: 16px 271px;
+}
+.widget_sociallinks a.wordpress {
+	background:url(images/x2/socialicons.png) 0 -187px no-repeat;
+	background-size: 16px 271px;
+}
+.widget_sociallinks a.xing {
+	background:url(images/x2/socialicons.png) 0 -204px no-repeat;
+	background-size: 16px 271px;
+}
+.widget_sociallinks a.linkedin {
+	background:url(images/x2/socialicons.png) 0 -221px no-repeat;
+	background-size: 16px 271px;
+}
+.widget_sociallinks a.delicious {
+	background:url(images/x2/socialicons.png) 0 -238px no-repeat;
+	background-size: 16px 271px;
+}
+.widget_sociallinks a.rss {
+	background:url(images/x2/socialicons.png) 0 -255px no-repeat;
+	background-size: 16px 271px;
 }
 }

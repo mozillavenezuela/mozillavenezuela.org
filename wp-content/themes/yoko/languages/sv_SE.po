@@ -1,0 +1,635 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Yoko\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: Jobjörn Folkesson <jobjorn@jobjorn.se>\n"
+"Language-Team: Wolforg <contact@wolforg.eu>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Poedit-Language: Swedish\n"
+"X-Poedit-Country: SWEDEN\n"
+"X-Poedit-SourceCharset: utf-8\n"
+"X-Poedit-KeywordsList: __;_e;__ngettext:1,2;_n:1,2;__ngettext_noop:1,2;_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2\n"
+"X-Poedit-Basepath: .\n"
+"X-Textdomain-Support: yes\n"
+"X-Poedit-SearchPath-0: .\n"
+
+#@ yoko
+#: 404.php:16
+msgid "Not Found"
+msgstr "Ej hittad"
+
+#@ yoko
+#: 404.php:20
+msgid "Apologies, but the page you requested could not be found. Perhaps searching will help."
+msgstr "Ledsen, men sidan du sökte kunde inte hittas. Kanske kan du söka efter den."
+
+#@ yoko
+#: archive.php:24
+msgid "Blog Archives"
+msgstr "Arkiv"
+
+#@ yoko
+#: content-aside.php:18
+#: content-gallery.php:53
+#: content-image.php:17
+#: content-page.php:17
+#: content-quote.php:18
+#: content-single.php:28
+#: content-video.php:17
+#: content.php:28
+#: image.php:68
+msgid "Pages:"
+msgstr "Sidor:"
+
+#@ yoko
+#: category.php:14
+#, php-format
+msgid "Category Archives: %s"
+msgstr "Arkiv för kategorin: %s"
+
+#@ yoko
+#: comments.php:10
+msgid "This post is password protected. Enter the password to view any comments."
+msgstr "Det här inlägget är lösenordsskyddat. Skriv in lösenordet för att se eventuella kommentarer."
+
+#@ yoko
+#: comments.php:32
+#: comments.php:43
+msgid "Comment navigation"
+msgstr "Kommentarsnavigering"
+
+#@ yoko
+#: comments.php:33
+#: comments.php:44
+msgid "&larr; Older Comments"
+msgstr "&larr; Äldre kommentarer"
+
+#@ yoko
+#: comments.php:34
+#: comments.php:45
+msgid "Newer Comments &rarr;"
+msgstr "Nyare kommentarer &rarr;"
+
+#@ yoko
+#: comments.php:68
+msgid "<p class=\"comment-notes\">Required fields are marked <span class=\"required\">*</span>.</p>"
+msgstr "<p class=\"comment-notes\">Obligatoriska fält är märkta <span class=\"required\">*</span>.</p>"
+
+#@ yoko
+#: content-aside.php:12
+#: content-gallery.php:13
+#: content-image.php:13
+#: content-quote.php:12
+#: content-single.php:18
+#: content-video.php:13
+#: content.php:15
+#: image.php:18
+msgid "by"
+msgstr "av"
+
+#@ yoko
+#: content-image.php:16
+#: content-link.php:11
+#: content-quote.php:17
+#: content-single.php:25
+#: content-video.php:16
+#: content.php:27
+msgid "Continue Reading &rarr;"
+msgstr "Läs vidare &rarr;"
+
+#@ yoko
+#: content-aside.php:22
+#: content-gallery.php:57
+#: content-image.php:21
+#: content-link.php:15
+#: content-quote.php:22
+#: content-single.php:33
+#: content-video.php:21
+#: content.php:33
+#, php-format
+msgid "Categories: %2$s"
+msgstr "Kategorier: %2$s"
+
+#@ yoko
+#: content-aside.php:29
+#: content-gallery.php:64
+#: content-image.php:28
+#: content-link.php:22
+#: content-page.php:18
+#: content-quote.php:29
+#: content-single.php:40
+#: content-video.php:28
+#: content.php:40
+#: functions.php:227
+#: image.php:83
+msgid "Edit &rarr;"
+msgstr "Redigera &rarr;"
+
+#@ yoko
+#: content-gallery.php:12
+#: content-gallery.php:46
+#: content-image.php:12
+#: content-video.php:12
+#: content.php:20
+#, php-format
+msgid "Permalink to %s"
+msgstr "Permalänk till %s"
+
+#@ yoko
+#: functions.php:52
+msgid "Primary Navigation"
+msgstr "Primär navigering"
+
+#@ yoko
+#: header.php:22
+#, php-format
+msgid "Page %s"
+msgstr "Sida %s"
+
+#@ yoko
+#: content-aside.php:17
+#: functions.php:171
+msgid "Continue reading <span class=\"meta-nav\">&rarr;</span>"
+msgstr "Läs vidare <span class=\"meta-nav\">&rarr;</span>"
+
+#@ yoko
+#. translators: 1: date, 2: time
+#: functions.php:227
+#, php-format
+msgid "%1$s at %2$s"
+msgstr "%1$s vid %2$s"
+
+#@ yoko
+#: functions.php:223
+#, php-format
+msgid "%s"
+msgstr "%s"
+
+#@ yoko
+#: functions.php:234
+msgid "Your comment is awaiting moderation."
+msgstr "Din kommentar inväntar moderering."
+
+#@ yoko
+#: functions.php:252
+msgid "Pingback:"
+msgstr "Pingback:"
+
+#@ yoko
+#: functions.php:252
+msgid "(Edit)"
+msgstr "(Redigera)"
+
+#@ yoko
+#: functions.php:264
+msgid "Sidebar 1"
+msgstr "Sidolist 1"
+
+#@ yoko
+#: functions.php:273
+msgid "Sidebar 2"
+msgstr "Sidolist 2"
+
+#@ yoko
+#: functions.php:275
+msgid "An second sidebar area"
+msgstr "En andra sidolist"
+
+#@ yoko
+#: functions.php:319
+msgid "Search"
+msgstr "Sök"
+
+#@ yoko
+#: search.php:16
+#, php-format
+msgid "Search Results for: %s"
+msgstr "Sökresultat för: %s"
+
+#@ yoko
+#: search.php:38
+msgid "Nothing Found"
+msgstr "Inget hittat"
+
+#@ yoko
+#: search.php:42
+msgid "Sorry, but nothing matched your search criteria. Please try again with some different keywords."
+msgstr "Ledsen, men ingenting matchade dina sökkriterier. Försök igen med annorlunda sökord."
+
+#@ yoko
+#: sidebar.php:18
+msgid "Archives"
+msgstr "Arkiv"
+
+#@ yoko
+#: single.php:23
+msgctxt "Previous post link"
+msgid "&larr;  Previous Post"
+msgstr "&larr;  Föregående inlägg"
+
+#@ yoko
+#: single.php:24
+msgctxt "Next post link"
+msgid "Next Post &rarr;"
+msgstr "Nästa inlägg &rarr;"
+
+#@ yoko
+#: tag.php:18
+#, php-format
+msgid "Tag Archives: %s"
+msgstr "Arkiv för tagg:  %s"
+
+#@ yoko
+#: archive.php:18
+#, php-format
+msgid "Daily Archives: <span>%s</span>"
+msgstr "Arkiv för dag: <span>%s</span>"
+
+#@ yoko
+#: archive.php:20
+#, php-format
+msgid "Monthly Archives: <span>%s</span>"
+msgstr "Arkiv för månad: <span>%s</span>"
+
+#@ yoko
+#: archive.php:22
+#, php-format
+msgid "Yearly Archives: <span>%s</span>"
+msgstr "Arkiv för år: <span>%s</span>"
+
+#@ yoko
+#: author.php:16
+#, php-format
+msgid "Author Archives: <span class=\"vcard\">%s</span>"
+msgstr "Författararkiv: <span class=\"vcard\">%s</span>"
+
+#@ yoko
+#: comments.php:26
+#, php-format
+msgid "One Comment"
+msgid_plural "%1$s Comments"
+msgstr[0] "En kommentar"
+msgstr[1] "%1$s kommentarer"
+
+#@ yoko
+#: image.php:75
+#, php-format
+msgid "<a class=\"comment-link\" href=\"#respond\" title=\"Post a comment\">Post a comment</a> or leave a trackback: <a class=\"trackback-link\" href=\"%s\" title=\"Trackback URL for your post\" rel=\"trackback\">Trackback URL</a>."
+msgstr "<a class=\"comment-link\" href=\"#respond\" title=\"Skriv en kommentar\">Skriv en kommentar</a> eller lämna en trackback: <a class=\"trackback-link\" href=\"%s\" title=\"URL för trackback\" rel=\"trackback\">URL förtrackback</a>."
+
+#@ yoko
+#: image.php:77
+#, php-format
+msgid "Comments are closed, but you can leave a trackback: <a class=\"trackback-link\" href=\"%s\" title=\"Trackback URL for your post\" rel=\"trackback\">Trackback URL</a>."
+msgstr "Kommentarer är stängda, men du kan lämna en trackback: <a class=\"trackback-link\" href=\"%s\" title=\"URL för trackback\" rel=\"trackback\">URL för trackback</a>."
+
+#@ yoko
+#: image.php:79
+msgid "Trackbacks are closed, but you can <a class=\"comment-link\" href=\"#respond\" title=\"Post a comment\">post a comment</a>."
+msgstr "Trackbacks är avstängda, men du kan <a class=\"comment-link\" href=\"#respond\" title=\"Skriva en kommentar\">skriva en kommentar</a>."
+
+#@ yoko
+#: image.php:81
+msgid "Both comments and trackbacks are currently closed."
+msgstr "Kommentarer och trackbacks är avstängda."
+
+#@ yoko
+#: functions.php:432
+msgid "Title:"
+msgstr "Titel:"
+
+#@ yoko
+#: functions.php:434
+msgid "RSS Text:"
+msgstr "RSS-text:"
+
+#@ yoko
+#: functions.php:436
+msgid "RSS  URL:"
+msgstr "RSS-URL:"
+
+#@ yoko
+#: functions.php:438
+msgid "Twitter Text:"
+msgstr "Twitter-text:"
+
+#@ yoko
+#: functions.php:439
+msgid "Twitter  URL:"
+msgstr "Twitter-URL:"
+
+#@ yoko
+#: functions.php:440
+msgid "Facebook Text:"
+msgstr "Facebook-text:"
+
+#@ yoko
+#: functions.php:441
+msgid "Facebook URL:"
+msgstr "Facebook-URL:"
+
+#@ yoko
+#: functions.php:442
+msgid "Flickr Text:"
+msgstr "Flickr-text:"
+
+#@ yoko
+#: functions.php:443
+msgid "Flickr URL:"
+msgstr "Flickr-URL:"
+
+#@ yoko
+#: functions.php:446
+msgid "LinkedIn Text:"
+msgstr "LinkedIn-text:"
+
+#@ yoko
+#: functions.php:447
+msgid "LinkedIn URL:"
+msgstr "LinkedIn-URL:"
+
+#@ yoko
+#: functions.php:448
+msgid "Delicious Text:"
+msgstr "Delicious-text:"
+
+#@ yoko
+#: functions.php:449
+msgid "Delicious URL:"
+msgstr "Delicious-URL:"
+
+#@ yoko
+#: content-gallery.php:19
+#: content-gallery.php:24
+#: content-gallery.php:42
+msgid "View the pictures &rarr;"
+msgstr "Visa bilderna &rarr;"
+
+#@ yoko
+#: archive.php:41
+#: author.php:31
+#: category.php:28
+#: index.php:22
+#: search.php:29
+#: tag.php:34
+msgid "<span class=\"meta-nav\">&larr;</span> Older posts"
+msgstr "<span class=\"meta-nav\">&larr;</span> Äldre inlägg"
+
+#@ yoko
+#: archive.php:42
+#: author.php:32
+#: category.php:29
+#: index.php:23
+#: search.php:30
+#: tag.php:35
+msgid "Newer posts <span class=\"meta-nav\">&rarr;</span>"
+msgstr "Nyare inlägg <span class=\"meta-nav\">&rarr;</span>"
+
+#@ yoko
+#: content-gallery.php:45
+#, php-format
+msgid "This gallery contains <a %1$s>%2$s photo</a>."
+msgid_plural "This gallery contains <a %1$s>%2$s photos</a>"
+msgstr[0] "Det här galleriet innehåller <a %1$s>ett foto</a>."
+msgstr[1] "Det här galleriet innehåller <a %1$s>%2$s foton</a>"
+
+#@ yoko
+#: content-single.php:47
+#, php-format
+msgid "Author: %s"
+msgstr "Författare: %s"
+
+#@ yoko
+#: footer.php:11
+#, php-format
+msgid "Theme: %1$s by %2$s"
+msgstr "Tema: %1$s av %2$s"
+
+#@ yoko
+#: footer.php:12
+msgid "Top"
+msgstr "Topp"
+
+#@ yoko
+#: functions.php:444
+msgid "Vimeo Text:"
+msgstr "Vimeo-text:"
+
+#@ yoko
+#: functions.php:445
+msgid "Vimeo URL:"
+msgstr "Vimeo-URL:"
+
+#@ yoko
+#: sidebar.php:13
+msgid "Categories"
+msgstr "Kategorier"
+
+#@ yoko
+#: sidebar.php:36
+msgid "Recent Posts"
+msgstr "Senaste inlägg"
+
+#@ yoko
+#: sidebar.php:43
+msgid "Calendar"
+msgstr "Kalender"
+
+#@ yoko
+#: sidebar.php:48
+msgid "Links"
+msgstr "Länkar"
+
+#@ yoko
+#: themeoptions/theme-options.php:51
+msgid " Theme Options"
+msgstr "Temainställningar"
+
+#@ yoko
+#: themeoptions/theme-options.php:55
+msgid "Options saved"
+msgstr "Inställningar sparad"
+
+#@ yoko
+#: themeoptions/theme-options.php:69
+msgid "Custom Link Color"
+msgstr "Anpassad länkfärg"
+
+#@ default
+#: themeoptions/theme-options.php:71
+msgid "custom_color"
+msgstr "custom_color"
+
+#@ yoko
+#: themeoptions/theme-options.php:76
+msgid "e.g. #0000FF or blue (default link color: #009BC2)"
+msgstr "t ex #DC3362 eller \"blue\" (standardlänkfärg: #009BC2)"
+
+#@ yoko
+#: themeoptions/theme-options.php:80
+msgid "Custom Logo Image URL"
+msgstr "URL för egen logo"
+
+#@ default
+#: themeoptions/theme-options.php:82
+msgid "custom_logo"
+msgstr "custom_logo"
+
+#@ yoko
+#: themeoptions/theme-options.php:83
+msgid "Upload your own logo image"
+msgstr "Ladda upp en egen logo"
+
+#@ yoko
+#: themeoptions/theme-options.php:83
+msgid " using the WordPress Media Library and insert the URL here"
+msgstr "i WordPress mediabibliotek och lägg in URL:en här"
+
+#@ yoko
+#: themeoptions/theme-options.php:90
+msgid "Save Options"
+msgstr "Spara inställningar"
+
+#@ yoko
+#: content-aside.php:13
+#: content-gallery.php:14
+#: content-image.php:13
+#: content-quote.php:13
+#: content-single.php:18
+#: content-video.php:13
+#: content.php:16
+#: image.php:18
+msgid "0 comments"
+msgstr "Inga kommentarer"
+
+#@ yoko
+#: content-aside.php:13
+#: content-gallery.php:14
+#: content-image.php:13
+#: content-quote.php:13
+#: content-single.php:18
+#: content-video.php:13
+#: content.php:16
+#: image.php:18
+msgid "1 Comment"
+msgstr "En kommentar"
+
+#@ yoko
+#: content-aside.php:13
+#: content-gallery.php:14
+#: content-image.php:13
+#: content-quote.php:13
+#: content-single.php:18
+#: content-video.php:13
+#: content.php:16
+#: image.php:18
+msgid "% Comments"
+msgstr "% kommentarer"
+
+#@ yoko
+#: comments.php:29
+msgid "Leave a reply &rarr;"
+msgstr "Kommentera &rarr;"
+
+#@ yoko
+#: comments.php:70
+msgctxt "noun"
+msgid "Message <span class=\"required\">*</span>"
+msgstr "Meddelande <span class=\"requis\">*</span>"
+
+#@ yoko
+#. translators: header image description
+#: functions.php:91
+msgid "Ginko"
+msgstr "Ginko"
+
+#@ yoko
+#. translators: header image description
+#: functions.php:97
+msgid "Flowers"
+msgstr "Blommor"
+
+#@ yoko
+#. translators: header image description
+#: functions.php:103
+msgid "Plant"
+msgstr "Planta"
+
+#@ yoko
+#. translators: header image description
+#: functions.php:109
+msgid "Sailing"
+msgstr "Segling"
+
+#@ yoko
+#. translators: header image description
+#: functions.php:115
+msgid "Cape"
+msgstr "Kap"
+
+#@ yoko
+#. translators: header image description
+#: functions.php:121
+msgid "Seagull"
+msgstr "Fiskmås"
+
+#@ yoko
+#: image.php:22
+msgid "&larr; Previous Image"
+msgstr "&larr; Föregående bild"
+
+#@ yoko
+#: image.php:23
+msgid "Next Image &rarr;"
+msgstr "Nästa bild &rarr;"
+
+#@ yoko
+#: themeoptions/theme-options.php:37
+msgid "Theme Options"
+msgstr "Temainställningar"
+
+#@ yoko
+#: functions.php:340
+msgid "Link to your social profiles like twitter, facebook or flickr."
+msgstr "Länka till dina sociala profiler på Twitter, Facebook eller flickr."
+
+#@ yoko
+#: comments.php:61
+msgid "Comments are closed."
+msgstr "Kommentarer är avstängda."
+
+#@ yoko
+#: content-aside.php:26
+#: content-gallery.php:61
+#: content-image.php:25
+#: content-link.php:19
+#: content-quote.php:26
+#: content-single.php:37
+#: content-video.php:25
+#: content.php:37
+#, php-format
+msgid "Tags: %2$s"
+msgstr "Taggar: %2$s"
+
+#@ yoko
+#: content-aside.php:28
+#: content-gallery.php:63
+#: content-image.php:27
+#: content-link.php:21
+#: content-quote.php:28
+#: content-single.php:39
+#: content-video.php:27
+#: content.php:39
+msgid "Permalink "
+msgstr "Permalänk"
+
+#@ yoko
+#: themeoptions/theme-options.php:73
+msgid "Select a Color"
+msgstr "Välj en färg"
+
