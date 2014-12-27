@@ -35,7 +35,6 @@ class BackWPup_Page_Settings {
 
 			delete_site_option( 'backwpup_cfg_showadminbar' );
 			delete_site_option( 'backwpup_cfg_showfoldersize' );
-			delete_site_option( 'backwpup_cfg_jobsteprestart' );
 			delete_site_option( 'backwpup_cfg_jobstepretry' );
 			delete_site_option( 'backwpup_cfg_jobmaxexecutiontime' );
 			delete_site_option( 'backwpup_cfg_jobziparchivemethod' );
@@ -64,13 +63,18 @@ class BackWPup_Page_Settings {
 
 		update_site_option( 'backwpup_cfg_showadminbar', isset( $_POST[ 'showadminbar' ] ) ? 1 : 0 );
 		update_site_option( 'backwpup_cfg_showfoldersize', isset( $_POST[ 'showfoldersize' ] ) ? 1 : 0 );
-		update_site_option( 'backwpup_cfg_jobsteprestart', isset( $_POST[ 'jobsteprestart' ] ) ? 1 : 0 );
 		if ( 100 > $_POST[ 'jobstepretry' ] && 0 < $_POST[ 'jobstepretry' ] )
 			$_POST[ 'jobstepretry' ] = abs( (int)$_POST[ 'jobstepretry' ] );
 		if ( empty( $_POST[ 'jobstepretry' ] ) or ! is_int( $_POST[ 'jobstepretry' ] ) )
 			$_POST[ 'jobstepretry' ] = 3;
 		update_site_option( 'backwpup_cfg_jobstepretry', $_POST[ 'jobstepretry' ] );
-		update_site_option( 'backwpup_cfg_jobmaxexecutiontime', abs( (int)$_POST[ 'jobmaxexecutiontime' ] ) );
+		$max_exe_time = abs( (int)$_POST[ 'jobmaxexecutiontime' ] );
+		if ( ! is_int( $max_exe_time ) || $max_exe_time < 0 ) {
+			$max_exe_time = 0;
+		} elseif ( $max_exe_time > 300 ) {
+			$max_exe_time = 300;
+		}
+		update_site_option( 'backwpup_cfg_jobmaxexecutiontime', $max_exe_time );
 		update_site_option( 'backwpup_cfg_jobziparchivemethod', ( $_POST[ 'jobziparchivemethod' ] == '' || $_POST[ 'jobziparchivemethod' ] == 'PclZip' || $_POST[ 'jobziparchivemethod' ] == 'ZipArchive' ) ? $_POST[ 'jobziparchivemethod' ] : '' );
 		update_site_option( 'backwpup_cfg_jobnotranslate', isset( $_POST[ 'jobnotranslate' ] ) ? 1 : 0 );
 		update_site_option( 'backwpup_cfg_jobwaittimems', $_POST[ 'jobwaittimems' ] );
@@ -85,10 +89,12 @@ class BackWPup_Page_Settings {
 		if ( $_POST[ 'logfolder' ][ 0 ] == '.' || ( $_POST[ 'logfolder' ][ 0 ] != '/' && ! preg_match( '#^[a-zA-Z]:/#', $_POST[ 'logfolder' ] ) ) )
 			$_POST[ 'logfolder' ] = trailingslashit( str_replace( '\\', '/', ABSPATH ) ) . $_POST[ 'logfolder' ];
 		//set def. folders
-		if ( empty( $_POST[ 'logfolder' ] ) || $_POST[ 'logfolder' ] == '/' )
+		if ( empty( $_POST[ 'logfolder' ] ) || $_POST[ 'logfolder' ] == '/' ) {
 			delete_site_option( 'backwpup_cfg_logfolder' );
-		else
+			BackWPup_Option::default_site_options();
+		} else {
 			update_site_option( 'backwpup_cfg_logfolder', $_POST[ 'logfolder' ] );
+		}
 
 		do_action( 'backwpup_page_settings_save' );
 
@@ -222,20 +228,6 @@ class BackWPup_Page_Settings {
                         <input name="jobstepretry" type="text" id="jobstepretry"
                                value="<?php echo get_site_option( 'backwpup_cfg_jobstepretry' );?>"
                                class="small-text code" />
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row"><?php _e( 'Restart on every main step', 'backwpup' ); ?></th>
-                    <td>
-                        <fieldset>
-                            <legend class="screen-reader-text"><span><?php _e( 'Restart on every main step', 'backwpup' ); ?></span>
-                            </legend>
-                            <label for="jobsteprestart">
-                                <input name="jobsteprestart" type="checkbox" id="jobsteprestart" title="<?php esc_attr_e( 'Job will restart on every main step if the last restart has been longer than 3 seconds ago. This is to prevent running in an execution timeout. It will not work with CLI. If <code>ALTERNATE_WP_CRON</code> has been defined, WordPress Cron will be used.', 'backwpup' ); ?>"
-                                       value="1" class="help-tip" <?php checked( get_site_option( 'backwpup_cfg_jobsteprestart' ), TRUE ); ?> />
-								<?php _e( 'Restart the job on every main step on a running job', 'backwpup' ); ?>
-							</label>
-                        </fieldset>
                     </td>
                 </tr>
 				<tr>

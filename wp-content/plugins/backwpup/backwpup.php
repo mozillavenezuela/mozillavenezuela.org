@@ -5,7 +5,7 @@
  * Description: WordPress Backup Plugin
  * Author: Inpsyde GmbH
  * Author URI: http://inpsyde.com
- * Version: 3.1.2
+ * Version: 3.1.4
  * Text Domain: backwpup
  * Domain Path: /languages/
  * Network: true
@@ -15,7 +15,7 @@
  */
 
 /**
- *	Copyright (C) 2012-2013 Inpsyde GmbH (email: info@inpsyde.com)
+ *	Copyright (C) 2012-2014 Inpsyde GmbH (email: info@inpsyde.com)
  *
  *	This program is free software; you can redistribute it and/or
  *	modify it under the terms of the GNU General Public License
@@ -34,17 +34,19 @@
 
 if ( ! class_exists( 'BackWPup' ) ) {
 
-	// Don't activate on anything less than PHP 5.2.4 or WordPress 3.1
-	if ( version_compare( PHP_VERSION, '5.2.6', '<' ) || version_compare( get_bloginfo( 'version' ), '3.4', '<' ) || ! function_exists( 'spl_autoload_register' ) ) {
+	// Don't activate on anything less than PHP 5.2.7 or WordPress 3.1
+	if ( version_compare( PHP_VERSION, '5.2.7', '<' ) || version_compare( get_bloginfo( 'version' ), '3.4', '<' ) || ! function_exists( 'spl_autoload_register' ) ) {
 		require_once ABSPATH . 'wp-admin/includes/plugin.php';
 		deactivate_plugins( basename( __FILE__ ) );
-		if ( isset( $_GET['action'] ) && ( $_GET['action'] == 'activate' || $_GET['action'] == 'error_scrape' ) )
-			die( __( 'BackWPup requires PHP version 5.2.6 with spl extension or greater and WordPress 3.4 or greater.', 'backwpup' ) );
+		if ( isset( $_GET['action'] ) && ( $_GET['action'] == 'activate' || $_GET['action'] == 'error_scrape' ) ) {
+			die( __( 'BackWPup requires PHP version 5.2.7 with spl extension or greater and WordPress 3.4 or greater.', 'backwpup' ) );
+		}
 	}
 
 	//Start Plugin
-	if ( function_exists( 'add_filter' ) )
+	if ( function_exists( 'add_filter' ) ) {
 		add_action( 'plugins_loaded', array( 'BackWPup', 'get_instance' ), 11 );
+	}
 
 	/**
 	 * Main BackWPup Plugin Class
@@ -65,40 +67,48 @@ if ( ! class_exists( 'BackWPup' ) ) {
 		private function __construct() {
 
 			// Nothing else matters if we're not on the main site
-			if ( ! is_main_site() )
+			if ( ! is_main_site() ) {
 				return;
+			}
 			//auto loader
 			spl_autoload_register( array( $this, 'autoloader' ) );
 			//start upgrade if needed
-			if ( get_site_option( 'backwpup_version' ) != self::get_plugin_data( 'Version' ) )
+			if ( get_site_option( 'backwpup_version' ) != self::get_plugin_data( 'Version' ) ) {
 				BackWPup_Install::activate();
+			}
 			//load pro features
-			if ( class_exists( 'BackWPup_Pro' ) )
+			if ( class_exists( 'BackWPup_Pro' ) ) {
 				BackWPup_Pro::get_instance();
+			}
 			//WP-Cron
 			if ( defined( 'DOING_CRON' ) && DOING_CRON ) {
 				//early disable caches
-				if ( ! empty( $_GET[ 'backwpup_run' ] ) && class_exists( 'BackWPup_Job' ) )
+				if ( ! empty( $_GET[ 'backwpup_run' ] ) && class_exists( 'BackWPup_Job' ) ) {
 					BackWPup_Job::disable_caches();
+				}
 				// add normal cron actions
 				add_action( 'backwpup_cron', array( 'BackWPup_Cron', 'run' ) );
 				add_action( 'backwpup_check_cleanup', array( 'BackWPup_Cron', 'check_cleanup' ) );
 				// add action for doing thinks if cron active
-				// must done in int before wp-cron control
-				add_action( 'init', array( 'BackWPup_Cron', 'cron_active' ), 1 );
+				// must done in wp_loaded so that all is really loaded and initiated
+				add_action( 'wp_loaded', array( 'BackWPup_Cron', 'cron_active' ), 999 );
 				// if in cron the rest must not needed
 				return;
 			}
 			//deactivation hook
 			register_deactivation_hook( __FILE__, array( 'BackWPup_Install', 'deactivate' ) );
-			//Things that must do in plugin init
-			add_action( 'init', array( $this, 'plugin_init' ) );
+			//Admin bar
+			if ( is_admin_bar_showing() ) {
+				add_action( 'init', array( 'BackWPup_Adminbar', 'get_instance' ) );
+			}
 			//only in backend
-			if ( is_admin() && class_exists( 'BackWPup_Admin' ) )
+			if ( is_admin() && class_exists( 'BackWPup_Admin' ) ) {
 				BackWPup_Admin::get_instance();
+			}
 			//work with wp-cli
-			if ( defined( 'WP_CLI' ) && WP_CLI && method_exists( 'WP_CLI', 'add_command' ) )
+			if ( defined( 'WP_CLI' ) && WP_CLI && method_exists( 'WP_CLI', 'add_command' ) ) {
 				WP_CLI::add_command( 'backwpup', 'BackWPup_WP_CLI' );
+			}
 		}
 
 		/**
@@ -222,18 +232,18 @@ if ( ! class_exists( 'BackWPup' ) ) {
 				}
 			}
 
-		}
+			//Google SDK Auto loading
+			$classPath = explode( '_', $class );
+			if ( $classPath[0] == 'Google' ) {
+				if ( count( $classPath ) > 3 ) {
+					$classPath = array_slice( $classPath, 0, 3 );
+				}
+				$filePath = self::get_plugin_data( 'plugindir' ) . '/vendor/' . implode( '/', $classPath ) . '.php';
+				if ( file_exists( $filePath ) ) {
+					require $filePath;
+				}
+			}
 
-		/**
-		 * Plugin init function
-		 *
-		 * @return void
-		 */
-		public function plugin_init() {
-
-			//Add Admin Bar
-			if ( ! defined( 'DOING_CRON' ) && current_user_can( 'backwpup' ) && current_user_can( 'backwpup' ) && is_admin_bar_showing() && get_site_option( 'backwpup_cfg_showadminbar' ) )
-				BackWPup_Adminbar::get_instance();
 		}
 
 		/**
@@ -297,11 +307,11 @@ if ( ! class_exists( 'BackWPup' ) ) {
 								),
 								'can_sync' => FALSE,
 								'needed' => array(
-									'php_version'	=> '',
+									'php_version'	=> '5.2.4',
 									'functions'	=> array(),
 									'classes'	=> array()
 								),
-								'autoload'	=> array( 'Swift_Preferences' => dirname( __FILE__ ) . '/vendor/SwiftMailer/swift_required.php' )
+								'autoload'	=> array()
 							);
 			// backup to ftp
 			self::$registered_destinations[ 'FTP' ] 	= array(

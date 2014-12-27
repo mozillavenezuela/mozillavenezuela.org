@@ -353,21 +353,23 @@ class BackWPup_Page_Jobs extends WP_List_Table {
 					//only start job if messages empty
 					$log_messages = BackWPup_Admin::get_messages();
 					if ( empty ( $log_messages ) )  {
-						BackWPup_Admin::message( sprintf( __( 'Job "%s" started.', 'backwpup' ), esc_attr( BackWPup_Option::get( $_GET[ 'jobid' ], 'name' ) ) ) );
+						$old_log_file = BackWPup_Option::get( $_GET[ 'jobid' ], 'logfile' );
 						BackWPup_Job::get_jobrun_url( 'runnow', $_GET[ 'jobid' ] );
 						usleep( 250000 ); //wait a quarter second
+						$new_log_file = BackWPup_Option::get( $_GET[ 'jobid' ], 'logfile', NULL, FALSE );
 						//sleep as long as job not started
 						$i=0;
-						$job_object = BackWPup_Job::get_working_data();
-						while ( ! is_object( $job_object ) && empty( $job_object->logfile ) ) {
+						while ( $old_log_file == $new_log_file ) {
 							usleep( 250000 ); //wait a quarter second for next try
-							clearstatcache();
-							$job_object = BackWPup_Job::get_working_data();
+							$new_log_file = BackWPup_Option::get( $_GET[ 'jobid' ], 'logfile', NULL, FALSE );
 							//wait maximal 10 sec.
-							if ( $i >= 40 )
-								break;
+							if ( $i >= 40 ) {
+								BackWPup_Admin::message( sprintf( __( 'Job “%s” has started, but not responded for 10 seconds.', 'backwpup' ), esc_attr( BackWPup_Option::get( $_GET[ 'jobid' ], 'name' ) ) ), TRUE );
+								break 2;
+							}
 							$i++;
 						}
+						BackWPup_Admin::message( sprintf( __( 'Job "%s" started.', 'backwpup' ), esc_attr( BackWPup_Option::get( $_GET[ 'jobid' ], 'name' ) ) ) );
 					}
 				}
 				break;
@@ -407,9 +409,12 @@ class BackWPup_Page_Jobs extends WP_List_Table {
 			}
 
 			#showworking {
-				white-space: pre;
+				white-space:nowrap;
 				display: block;
 				width: 100%;
+				font-family:monospace;
+				font-size:12px;
+				line-height:15px;
 			}
 			#runningjob {
 				padding:10px;
@@ -430,32 +435,7 @@ class BackWPup_Page_Jobs extends WP_List_Table {
 				right: 10px;
 				bottom: 0;
 			}
-/*
-			a#showworkingbutton {
-				float: left;
-				padding: 10px;
-				font-size: 12px;
-				font-family: sans-serif,"Arial";
-				text-decoration :none;
-				background-color: #93b509;
-				color: #fff;
-				border: none;
-			}
-			a#abortbutton, a#showworkingclose {
-				float: left;
-				margin-left: 10px;
-				padding: 10px;
-				font-size: 12px;
-				font-family: sans-serif,"Arial";
-				text-decoration: none;
-				background-color: #cd1212;
-				color: #fff;
-				border: none;
-			}
-*/
-			#backwpup-page samp {
-				font-family: Consolas, Monaco, monospace;
-			}
+
 			.progressbar {
 				margin-top: 20px;
 				height: auto;
@@ -466,9 +446,9 @@ class BackWPup_Page_Jobs extends WP_List_Table {
 				text-align: center;
 				margin-bottom: 20px;
 			}
-			#backwpup-page #lastmsg samp,
-			#backwpup-page #onstep samp,
-			#backwpup-page #lasterrormsg samp {
+			#backwpup-page #lastmsg,
+			#backwpup-page #onstep,
+			#backwpup-page #lasterrormsg {
 				font-family: "Open Sans", sans-serif;
 			}
 			.bwpu-progress {
@@ -544,7 +524,7 @@ class BackWPup_Page_Jobs extends WP_List_Table {
 				<input type="hidden" name="logpos" id="logpos" value="<?php echo strlen( $logfiledata ); ?>">
 				<div id="lasterrormsg"></div>
 				<div class="progressbar"><div id="progressstep" class="bwpu-progress" style="width:<?php echo $job_object->step_percent; ?>%;"><?php echo  $job_object->step_percent; ?>%</div></div>
-				<div id="onstep"><samp><?php echo $job_object->steps_data[ $job_object->step_working ][ 'NAME' ]; ?></samp></div>
+				<div id="onstep"><?php echo $job_object->steps_data[ $job_object->step_working ][ 'NAME' ]; ?></div>
 				<div class="progressbar"><div id="progresssteps" class="bwpu-progress" style="width:<?php echo $job_object->substep_percent; ?>%;"><?php echo $job_object->substep_percent; ?>%</div></div>
 				<div id="lastmsg"><?php echo $job_object->lastmsg; ?></div>
 				<div id="tb-showworking" style="display:none;">
@@ -616,7 +596,7 @@ class BackWPup_Page_Jobs extends WP_List_Table {
                                 $('#runtime').replaceWith('<span id="runtime">' + rundata.running_time + '</span>');
                             }
                             if ( '' != rundata.onstep ) {
-                                $('#onstep').replaceWith('<div id="onstep"><samp>' + rundata.on_step + '</samp></div>');
+                                $('#onstep').replaceWith('<div id="onstep">' + rundata.on_step + '</div>');
                             }
                             if ( '' != rundata.last_msg ) {
                                 $('#lastmsg').replaceWith('<div id="lastmsg">' + rundata.last_msg + '</div>');
@@ -717,8 +697,7 @@ class BackWPup_Page_Jobs extends WP_List_Table {
 
 		$length = strlen( $logfiledata ) - ( strlen( $logfiledata ) - $endpos ) - $startpos;
 
-		@header( 'Content-Type: application/json; charset=' . get_option( 'blog_charset' ), TRUE );
-		$json = json_encode( array(
+		wp_send_json( array(
 							   'log_pos'         => strlen( $logfiledata ) + $logpos,
 							   'log_text'        => substr( $logfiledata, $startpos, $length ),
 							   'warning_count'   => $warnings,
@@ -731,7 +710,6 @@ class BackWPup_Page_Jobs extends WP_List_Table {
 							   'sub_step_percent'=> $substep_percent,
 							   'job_done'		 => $done
 						  ) );
-		die( $json );
 	}
 
 }

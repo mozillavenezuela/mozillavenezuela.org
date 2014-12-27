@@ -1,9 +1,7 @@
 <?php
-// Windows Azure SDK v0.3.1_2011-08
+// Windows Azure SDK v0.4.0_2014-01
 // http://www.windowsazure.com/en-us/develop/php/
 // https://github.com/WindowsAzure/azure-sdk-for-php
-if ( ! class_exists( 'HTTP_Request2' ) )
-	set_include_path( get_include_path() . PATH_SEPARATOR . BackWPup::get_plugin_data( 'plugindir' ) .'/vendor/PEAR/');
 
 /**
  * Documentation: http://www.windowsazure.com/en-us/develop/php/how-to-guides/blob-service/
@@ -118,6 +116,7 @@ class BackWPup_Destination_MSAzure extends BackWPup_Destinations {
 		//create a new container
 		if ( ! empty( $_POST[ 'newmsazurecontainer' ] ) && ! empty( $_POST[ 'msazureaccname' ] ) && ! empty( $_POST[ 'msazurekey' ] ) ) {
 			try {
+				set_include_path( get_include_path() . PATH_SEPARATOR . BackWPup::get_plugin_data( 'plugindir' ) .'/vendor/PEAR/');
 				$blobRestProxy = WindowsAzure\Common\ServicesBuilder::getInstance()->createBlobService( 'DefaultEndpointsProtocol=https;AccountName=' . $_POST[ 'msazureaccname' ] . ';AccountKey=' . $_POST[ 'msazurekey' ] );
 				$container_options = new WindowsAzure\Blob\Models\CreateContainerOptions();
 				$container_options->setPublicAccess( WindowsAzure\Blob\Models\PublicAccessType::NONE );
@@ -143,6 +142,7 @@ class BackWPup_Destination_MSAzure extends BackWPup_Destinations {
 
 		if ( BackWPup_Option::get( $jobid, 'msazureaccname' ) && BackWPup_Option::get( $jobid, 'msazurekey' ) && BackWPup_Option::get( $jobid, 'msazurecontainer' ) ) {
 			try {
+				set_include_path( get_include_path() . PATH_SEPARATOR . BackWPup::get_plugin_data( 'plugindir' ) .'/vendor/PEAR/');
 				$blobRestProxy = WindowsAzure\Common\ServicesBuilder::getInstance()->createBlobService( 'DefaultEndpointsProtocol=https;AccountName=' . BackWPup_Option::get( $jobid, 'msazureaccname' ) . ';AccountKey=' . BackWPup_Encryption::decrypt( BackWPup_Option::get( $jobid, 'msazurekey' ) ) );
 				$blobRestProxy->deleteBlob( BackWPup_Option::get( $jobid, 'msazurecontainer' ), $backupfile );
 				//update file list
@@ -165,6 +165,7 @@ class BackWPup_Destination_MSAzure extends BackWPup_Destinations {
 	 */
 	public function file_download( $jobid, $get_file ) {
 		try {
+			set_include_path( get_include_path() . PATH_SEPARATOR . BackWPup::get_plugin_data( 'plugindir' ) .'/vendor/PEAR/');
 			$blobRestProxy = WindowsAzure\Common\ServicesBuilder::getInstance()->createBlobService( 'DefaultEndpointsProtocol=https;AccountName=' . BackWPup_Option::get( $jobid, 'msazureaccname' ) . ';AccountKey=' . BackWPup_Encryption::decrypt( BackWPup_Option::get( $jobid, 'msazurekey' ) ) );
 			$blob = $blobRestProxy->getBlob( BackWPup_Option::get( $jobid, 'msazurecontainer' ), $get_file );
 			header( "Pragma: public" );
@@ -174,7 +175,7 @@ class BackWPup_Destination_MSAzure extends BackWPup_Destinations {
 			header( "Content-Disposition: attachment; filename=" . basename( $get_file ) . ";" );
 			header( "Content-Transfer-Encoding: binary" );
 			header( "Content-Length: " . $blob->getProperties()->getContentLength() );
-			@set_time_limit( 0 );
+			@set_time_limit( 300 );
 			fpassthru( $blob->getContentStream() );
 			die();
 		}
@@ -203,7 +204,7 @@ class BackWPup_Destination_MSAzure extends BackWPup_Destinations {
 			$job_object->log( sprintf( __( '%d. Try sending backup to a Microsoft Azure (Blob)&#160;&hellip;', 'backwpup' ), $job_object->steps_data[ $job_object->step_working ][ 'STEP_TRY' ] ), E_USER_NOTICE );
 
 		try {
-
+			set_include_path( get_include_path() . PATH_SEPARATOR . BackWPup::get_plugin_data( 'plugindir' ) .'/vendor/PEAR/');
 			/* @var $blobRestProxy   WindowsAzure\Blob\BlobRestProxy */ //https causes an error SSL: Connection reset by peer that is why http
 			$blobRestProxy = WindowsAzure\Common\ServicesBuilder::getInstance()->createBlobService('DefaultEndpointsProtocol=http;AccountName=' . $job_object->job[ 'msazureaccname' ] . ';AccountKey=' . BackWPup_Encryption::decrypt( $job_object->job[ 'msazurekey' ] ) );
 
@@ -272,7 +273,7 @@ class BackWPup_Destination_MSAzure extends BackWPup_Destinations {
 			$job_object->log( E_USER_ERROR, sprintf( __( 'Microsoft Azure API: %s', 'backwpup' ), htmlentities( $e->getMessage() ) ), $e->getFile(), $e->getLine() );
 			$job_object->substeps_done = 0;
 			unset( $job_object->steps_data[ $job_object->step_working ][ 'BlockList' ] );
-			if ( is_resource( $file_handel ) )
+			if ( isset( $file_handel ) && is_resource( $file_handel ) )
 				fclose( $file_handel );
 
 			return FALSE;
@@ -401,6 +402,7 @@ class BackWPup_Destination_MSAzure extends BackWPup_Destinations {
 
 		if ( ! empty( $args[ 'msazureaccname' ] ) && ! empty( $args[ 'msazurekey' ] ) ) {
 			try {
+				set_include_path( get_include_path() . PATH_SEPARATOR . BackWPup::get_plugin_data( 'plugindir' ) .'/vendor/PEAR/');
 				$blobRestProxy = WindowsAzure\Common\ServicesBuilder::getInstance()->createBlobService( 'DefaultEndpointsProtocol=https;AccountName=' . $args[ 'msazureaccname' ] . ';AccountKey=' . BackWPup_Encryption::decrypt( $args[ 'msazurekey' ] ) );
 				$containers    = $blobRestProxy->listContainers()->getContainers();
 			}

@@ -1,5 +1,5 @@
 <?php
-// Amazon S3 SDK v2.5.1
+// Amazon S3 SDK v2.6.1
 // http://aws.amazon.com/de/sdkforphp2/
 // https://github.com/aws/aws-sdk-php
 
@@ -28,6 +28,8 @@ class BackWPup_Destination_S3 extends BackWPup_Destinations {
 				return 'https://s3-us-west-2.amazonaws.com';
 			case 'eu-west-1':
 				return 'https://s3-eu-west-1.amazonaws.com';
+			case 'eu-central-1':
+				return 'https://s3-eu-central-1.amazonaws.com';
 			case 'ap-northeast-1':
 				return 'https://s3-ap-northeast-1.amazonaws.com';
 			case 'ap-southeast-1':
@@ -40,10 +42,10 @@ class BackWPup_Destination_S3 extends BackWPup_Destinations {
 				return 'https:/cn-north-1.amazonaws.com';
 			case 'google-storage':
 				return 'https://storage.googleapis.com';
-			case 'hosteurope':
-				return 'https://cs.hosteurope.de';
 			case 'dreamhost':
 				return 'https://objects.dreamhost.com';
+			case 'greenqloud':
+				return 'http://s.greenqloud.com';
 			default:
 				return '';
 		}
@@ -76,14 +78,15 @@ class BackWPup_Destination_S3 extends BackWPup_Destinations {
 						<option value="us-west-1" <?php selected( 'us-west-1', BackWPup_Option::get( $jobid, 's3region' ), TRUE ) ?>><?php _e( 'Amazon S3: US West (Northern California)', 'backwpup' ); ?></option>
 						<option value="us-west-2" <?php selected( 'us-west-2', BackWPup_Option::get( $jobid, 's3region' ), TRUE ) ?>><?php _e( 'Amazon S3: US West (Oregon)', 'backwpup' ); ?></option>
 						<option value="eu-west-1" <?php selected( 'eu-west-1', BackWPup_Option::get( $jobid, 's3region' ), TRUE ) ?>><?php _e( 'Amazon S3: EU (Ireland)', 'backwpup' ); ?></option>
+						<option value="eu-central-1" <?php selected( 'eu-central-1', BackWPup_Option::get( $jobid, 's3region' ), TRUE ) ?>><?php _e( 'Amazon S3: EU (Germany)', 'backwpup' ); ?></option>
 						<option value="ap-northeast-1" <?php selected( 'ap-northeast-1', BackWPup_Option::get( $jobid, 's3region' ), TRUE ) ?>><?php _e( 'Amazon S3: Asia Pacific (Tokyo)', 'backwpup' ); ?></option>
 						<option value="ap-southeast-1" <?php selected( 'ap-southeast-1', BackWPup_Option::get( $jobid, 's3region' ), TRUE ) ?>><?php _e( 'Amazon S3: Asia Pacific (Singapore)', 'backwpup' ); ?></option>
 						<option value="ap-southeast-2" <?php selected( 'ap-southeast-2', BackWPup_Option::get( $jobid, 's3region' ), TRUE ) ?>><?php _e( 'Amazon S3: Asia Pacific (Sydney)', 'backwpup' ); ?></option>
 						<option value="sa-east-1" <?php selected( 'sa-east-1', BackWPup_Option::get( $jobid, 's3region' ), TRUE ) ?>><?php _e( 'Amazon S3: South America (Sao Paulo)', 'backwpup' ); ?></option>
 						<option value="cn-north-1" <?php selected( 'cn-north-1', BackWPup_Option::get( $jobid, 's3region' ), TRUE ) ?>><?php _e( 'Amazon S3: China (Beijing)', 'backwpup' ); ?></option>
 						<option value="google-storage" <?php selected( 'google-storage', BackWPup_Option::get( $jobid, 's3region' ), TRUE ) ?>><?php _e( 'Google Storage (Interoperable Access)', 'backwpup' ); ?></option>
-						<option value="hosteurope" <?php selected( 'hosteurope', BackWPup_Option::get( $jobid, 's3region' ), TRUE ) ?>><?php _e( 'Hosteurope Cloud Storage', 'backwpup' ); ?></option>
                         <option value="dreamhost" <?php selected( 'dreamhost', BackWPup_Option::get( $jobid, 's3region' ), TRUE ) ?>><?php _e( 'Dream Host Cloud Storage', 'backwpup' ); ?></option>
+						<option value="greenqloud" <?php selected( 'greenqloud', BackWPup_Option::get( $jobid, 's3region' ), TRUE ) ?>><?php _e( 'GreenQloud Storage Qloud', 'backwpup' ); ?></option>
 					</select>
 				</td>
 			</tr>
@@ -328,7 +331,7 @@ class BackWPup_Destination_S3 extends BackWPup_Destinations {
 			header( "Content-Disposition: attachment; filename=" . basename( $get_file ) . ";" );
 			header( "Content-Transfer-Encoding: binary" );
 			header( "Content-Length: " . $s3file[ 'ContentLength' ] );
-			@set_time_limit( 0 );
+			@set_time_limit( 300 );
 			$body = $s3file->get( 'Body' );
 			$body->rewind();
 			while ( $filedata = $body->read( 1024 ) ) {
@@ -376,17 +379,15 @@ class BackWPup_Destination_S3 extends BackWPup_Destinations {
 					return TRUE;
 				}
 
-				if ( $job_object->job[ 's3multipart' ] ) {
+				if ( $job_object->job[ 's3multipart' ] && empty( $job_object->steps_data[ $job_object->step_working ][ 'UploadId' ] ) ) {
 					//Check for aboded Multipart Uploads
 					$job_object->log( __( 'Checking for not aborted multipart Uploads&#160;&hellip;', 'backwpup' ) );
-					$multipart_uploads = $s3->listMultipartUploads( array( 	'Bucket' => $job_object->job[ 's3bucket' ] ) );
+					$multipart_uploads = $s3->listMultipartUploads( array( 	'Bucket' => $job_object->job[ 's3bucket' ], 'Prefix' => (string) $job_object->job[ 's3dir' ] ) );
 					$uploads = $multipart_uploads->get( 'Uploads' );
 					if ( ! empty( $uploads ) ) {
 						foreach( $uploads as $upload ) {
-							if ( empty( $job_object->steps_data[ $job_object->step_working ][ 'UploadId' ] ) || $job_object->steps_data[ $job_object->step_working ][ 'UploadId' ] != $upload[ 'UploadId' ] ) {
-								$s3->abortMultipartUpload( array( 'Bucket' => $job_object->job[ 's3bucket' ], 'Key' => $upload[ 'Key' ], 'UploadId' => $upload[ 'UploadId' ] ) );
-								$job_object->log( sprintf( __( 'Upload for %s aborted.', 'backwpup' ), $upload[ 'Key' ] ) );
-							}
+							$s3->abortMultipartUpload( array( 'Bucket' => $job_object->job[ 's3bucket' ], 'Key' => $upload[ 'Key' ], 'UploadId' => $upload[ 'UploadId' ] ) );
+							$job_object->log( sprintf( __( 'Upload for %s aborted.', 'backwpup' ), $upload[ 'Key' ] ) );
 						}
 					}
 				}

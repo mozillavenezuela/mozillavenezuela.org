@@ -1,575 +1,465 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: WP Maintenance Mode v1.8.7\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-11-14 12:06+0100\n"
-"PO-Revision-Date: 2013-04-15 23:03+0100\n"
-"Last-Translator: \n"
-"Language-Team: \n"
+"Project-Id-Version: WP Maintenance Mode 2.0.0\n"
+"POT-Creation-Date: 2014-09-26 19:03+0200\n"
+"PO-Revision-Date: 2014-09-26 19:03+0200\n"
+"Last-Translator: Florian TIAR <tflorian91@hotmail.fr>\n"
+"Language-Team: Designmodo <info@designmodo.com>\n"
+"Language: en\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Poedit 1.5.5\n"
+"X-Generator: Poedit 1.6.7\n"
+"X-Poedit-Basepath: ../\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Poedit-SourceCharset: UTF-8\n"
-"X-Poedit-KeywordsList: __;_e;__ngettext:1,2;_n:1,2;__ngettext_noop:1,2;"
-"_n_noop:1,2;_c,_nc:4c,1,2;_x:1,2c;_ex:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2\n"
-"X-Poedit-Basepath: c:/xampp/htdocs/wp-plugins/wp-maintenance-mode/\n"
-"X-Textdomain-Support: yes\n"
+"X-Poedit-KeywordsList: __;_e\n"
 "X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPath-1: includes/classes\n"
+"X-Poedit-SearchPath-2: views\n"
 
-# @ wp-maintenance-mode
-#: site.php:27 site.php:65
-msgid "Maintenance Mode"
-msgstr "Mode de maintenance"
-
-# @ wp-maintenance-mode
-#: site.php:72
-msgid "Access to the admin area blocked"
-msgstr "Accès à la zone d'administration bloqué"
-
-# @ wp-maintenance-mode
-#: site.php:75
-msgid "Admin-Logout"
-msgstr "Admin-Logout"
-
-# @ wp-maintenance-mode
-#: site.php:80
-msgid "Admin-Login"
-msgstr "Admin-Login"
-
-# @ default
-#: inc/wp-maintenance-mode-settings.php:55
-#: inc/wp-maintenance-mode-settings.php:65
-msgid "Settings"
-msgstr "Réglages"
-
-# @ wp-maintenance-mode
-#: wp-maintenance-mode.php:304
-msgid "Maintenance mode"
-msgstr "Mode de maintenance"
-
-# @ wp-maintenance-mode
-#: wp-maintenance-mode.php:305
-#, php-format
-msgid ""
-"<p>Sorry for the inconvenience.<br />Our website is currently undergoing "
-"scheduled maintenance.<br /><strong>Please try back in %1$s %2$s</"
-"strong><br />Thank you for your understanding.</p>"
-msgstr ""
-
-# @ wp-maintenance-mode
-#: wp-maintenance-mode.php:348 wp-maintenance-mode.php:428
-msgid "Updated"
-msgstr "Mis à jour"
-
-# @ wp-maintenance-mode
-#: wp-maintenance-mode.php:607
-msgid "seconds"
-msgstr "secondes"
-
-# @ wp-maintenance-mode
-#: wp-maintenance-mode.php:611
-msgid "minutes"
-msgstr "minutes"
-
-# @ wp-maintenance-mode
-#: wp-maintenance-mode.php:615
-msgid "hours"
-msgstr "heures"
-
-# @ wp-maintenance-mode
-#: wp-maintenance-mode.php:619
-msgid "days"
-msgstr "jours"
-
-# @ wp-maintenance-mode
-#: wp-maintenance-mode.php:623
-msgid "weeks"
-msgstr "semaines"
-
-# @ wp-maintenance-mode
-#: wp-maintenance-mode.php:627
-msgid "months"
-msgstr "mois"
-
-# @ wp-maintenance-mode
-#: wp-maintenance-mode.php:631
-msgid "years"
-msgstr "années"
-
-# @ wp-maintenance-mode
-#: wp-maintenance-mode.php:693
-msgid " &amp; WP Super Cache flushed."
-msgstr " &amp; Cache de WP Super vidé."
-
-# @ wp-maintenance-mode
-#: wp-maintenance-mode.php:700
-msgid " &amp; W3 Total Cache for pages flushed."
-msgstr " &amp; Cache de W3 Total Cache vidé."
-
-# @ wp-maintenance-mode
-#: wp-maintenance-mode.php:705 wp-maintenance-mode.php:1013
-msgid "Caution: Maintenance mode is <strong>active</strong>!"
-msgstr "Attention : Le mode de maintenance est <strong>actif</strong> !"
-
-# @ wp-maintenance-mode
-#: wp-maintenance-mode.php:707
-msgid "Deactivate or change Settings"
-msgstr "Désactiver ou modifier les réglages"
-
-# @ wp-maintenance-mode
-#: wp-maintenance-mode.php:815
-msgid "Plugin by:"
-msgstr "Extension par :"
-
-# @ wp-maintenance-mode
-#: wp-maintenance-mode.php:817 wp-maintenance-mode.php:819
-#: wp-maintenance-mode.php:821 wp-maintenance-mode.php:823
-#: wp-maintenance-mode.php:825 wp-maintenance-mode.php:827
-#: wp-maintenance-mode.php:829 wp-maintenance-mode.php:831
-#: wp-maintenance-mode.php:833 wp-maintenance-mode.php:835
-#: wp-maintenance-mode.php:837
-msgid "Design by:"
-msgstr "Design par :"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:100
-#: inc/wp-maintenance-mode-settings.php:429
-#, php-format
-msgid "Plugin %s settings <strong>updated</strong>."
-msgstr "Les réglages de l'extension %s <strong>a été mis à jour</strong>."
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:103
-#: inc/wp-maintenance-mode-settings.php:116
-#, php-format
-msgid "Plugin %s active status <strong>updated</strong>."
-msgstr "L'extension %s a changé <strong>d'état</strong>."
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:106
-msgid "Plugin Activate"
-msgstr "Activation de l'extension"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:110
-#: inc/wp-maintenance-mode-settings.php:129
-#: inc/wp-maintenance-mode-settings.php:173
-#: inc/wp-maintenance-mode-settings.php:186
-#: inc/wp-maintenance-mode-settings.php:261
-#: inc/wp-maintenance-mode-settings.php:333
-#: inc/wp-maintenance-mode-settings.php:419
-msgid "False"
-msgstr "Non"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:111
-#: inc/wp-maintenance-mode-settings.php:130
-#: inc/wp-maintenance-mode-settings.php:174
-#: inc/wp-maintenance-mode-settings.php:187
-#: inc/wp-maintenance-mode-settings.php:262
-#: inc/wp-maintenance-mode-settings.php:334
-#: inc/wp-maintenance-mode-settings.php:420
-msgid "True"
-msgstr "Oui"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:113
-msgid "Update"
-msgstr "Mettre à jour"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:119
-msgid "Plugin Settings"
-msgstr "Réglages de l'extension"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:125
-msgid "Countdown:"
-msgstr "Compte à rebours"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:136
-#: inc/wp-maintenance-mode-settings.php:139
-msgid "Click for datepicker"
-msgstr "Cliquez pour afficher le calendrier"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:136
-msgid "Date:"
-msgstr "Date :"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:140
-msgid ""
-"Activate countdown for using this. Use value and unit or use the countdown "
-"and set the date."
-msgstr ""
-"Activez le compte à rebours pour utiliser ce champ. Renseignez la date et "
-"l'heure d'échéance. Sinon saisissez une durée et une unité de temps."
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:145
-msgid "Value:"
-msgstr "Durée :"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:153
-msgid "Unit:"
-msgstr "Unité :"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:157
-msgid "second"
-msgstr "seconde"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:158
-msgid "minute"
-msgstr "minute"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:159
-msgid "hour"
-msgstr "heure"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:160
-msgid "day"
-msgstr "jour"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:161
-msgid "week"
-msgstr "semaine"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:162
-msgid "month"
-msgstr "mois"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:163
-msgid "year"
-msgstr "année"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:169
-msgid "Link:"
-msgstr "Lien :"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:177
-msgid ""
-"Please leave a link to the plugin- and design-author on your maintenance "
-"mode site."
-msgstr ""
-"Merci de laisser un lien vers le site de l'auteur pendant la maintenance de "
-"votre site."
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:182
-msgid "Admin Link:"
-msgstr "Lien vers l'admin :"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:190
-msgid "Do you will a link to the admin area of your install?"
-msgstr "Souhaitez-vous un lien vers la zone d'administration de votre site ?"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:200
-msgid "Simple Text"
-msgstr "Texte simple"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:201
-msgid "The Truck"
-msgstr "Le camion"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:202
-msgid "The Sun"
-msgstr "Le soleil"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:203
-msgid "The FF Error"
-msgstr "Erreur FF"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:204
-msgid "Monster"
-msgstr "Monstre"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:205
-msgid "Chastely"
-msgstr "Chastement"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:206
-msgid "Only Typo"
-msgstr "Typo uniquement"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:207
-msgid "Paint"
-msgstr "Peinture"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:208
-msgid "Animate (Flash)"
-msgstr "Animation (Flash)"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:209
-msgid "Damask"
-msgstr "Damas"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:210
-msgid "Lego"
-msgstr "Lego"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:211
-msgid "Chemistry"
-msgstr "Chimie"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:220
-msgid "URL to the css-file (incl. http://)"
-msgstr "URL du fichier CSS (avec http://)"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:222
-msgid ""
-"<strong>Caution:</strong> Please don&acute;t copy the stylesheet in your "
-"plugin folder, it will be deleted on the next automatical update of the "
-"plugin!"
-msgstr ""
-"<strong>Attention :</strong> Veillez à ne pas copier votre fichier css dans "
-"le dossier de l'extension, il sera supprimé lors de la prochaine mise à jour "
-"de l'extension !"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:227
-#: inc/wp-maintenance-mode-settings.php:250
-msgid "Preview"
-msgstr "Prévisualisation"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:257
-msgid "noindex, nofollow:"
-msgstr "noindex, nofollow :"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:265
-msgid ""
-"The robots meta tag lets you utilize a granular, page-specific approach to "
-"controlling how an individual page should be indexed and served to users in "
-"search results. Set TRUE for noindex, nofollow; set FALSE for index, follow."
-msgstr ""
-"La meta tag robot vous permet d'avoir une approche granulaire, spécifique à "
-"chaque page pour contrôler si celle-ci doit être indexée et affichée dans "
-"les résultats des moteurs de recherche. Utilisez OUI pour noindex, nofollow "
-"et NON pour index, follow."
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:270
-msgid "Title:"
-msgstr "Balise title :"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:273
-#: inc/wp-maintenance-mode-settings.php:281
-#: inc/wp-maintenance-mode-settings.php:289
-msgid "Leave empty for default."
-msgstr "Laissez vide par défaut."
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:278
-msgid "Header:"
-msgstr "Entête :"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:286
-msgid "Heading:"
-msgstr "Titre :"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:294
-msgid "Text:"
-msgstr "Texte :"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:307
-msgid "Exclude:"
-msgstr "Exclure :"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:323
-msgid ""
-"Exclude feed, pages, posts, archives or IPs from the maintenance mode. Add "
-"the Slug of page or post as a comma-separated list.<br />Example:"
-msgstr ""
-"Exclure les flux RSS, les pages, les articles, les catégories ou des IPs du "
-"mode de maintenance. Ajoutez le slug de la page ou de l'article séparé d'une "
-"virgule.<br /> Exemple :"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:342
-msgid "Backend Role:"
-msgstr "Rôle de la zone d'administration:"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:367
-msgid "Allowed userrole to access the backend of this blog."
-msgstr "Rôle autorisé à accéder à l'administration du blog."
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:368
-#: inc/wp-maintenance-mode-settings.php:399
-msgid "Super Admin has always access."
-msgstr "Le Super Admin a toujours accès."
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:373
-msgid "Frontend Role:"
-msgstr "Rôle de la partie publique :"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:398
-msgid "Allowed userrole to see the frontend of this blog."
-msgstr "Rôle autorisé à accéder à la partie publique du blog."
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:404
-msgid "Redirection:"
-msgstr "Redirection :"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:409
-msgid ""
-"If you want that after the login the destination address is not standard to "
-"the dashboard, then defining a URL. (incl. http://)"
-msgstr ""
-"Si vous souhaitez être redirigé vers une adresse spécifique lors de la "
-"connexion à la zone d'administration, définissez l'url ici (avec http://)"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:432
-msgid "Save"
-msgstr "Enregistrer"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:300
-#, php-format
-msgid ""
-"Use the first <em>%1$s</em> for the time value or countdown and second <em>"
-"%2$s</em> for the unit of the time or countdown-value; HTML and Shortcodes "
-"are possible."
-msgstr ""
-"Utilisez le premier <em>%1$s</em> pour la durée ou le temps en seconde du "
-"compte à rebours et le second <em>%2$s</em> pour les unités de temps; Code "
-"HTML et Shortcodes sont utilisables."
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:301
-msgid ""
-"Use <code>[loginform]</code> for add the default login form in the "
-"maintenance page."
-msgstr ""
-"Utilisez le shortcode <code>[loginform]</code> pour ajouter le formulaire de "
-"login par défaut sur la page de maintenance."
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:415
-msgid "Notice:"
-msgstr "Remarque :"
-
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:422
-msgid ""
-"Do you will see all notices, inside backend, the Admin Bar and the login "
-"screen?"
-msgstr ""
-"Voulez-vous voir toutes les alertes dans la zone d'administration ainsi que "
-"la barre d'admin et l'ecran de connexion ?"
-
-# @ default
-#: index.php:25
-msgid "Cheatin&#8217; uh?"
-msgstr ""
-
-# @ wp-maintenance-mode
-#. translators: plugin header field 'Name'
-#: wp-maintenance-mode.php:0
+#: includes/classes/wp-maintenance-mode-admin.php:154
 msgid "WP Maintenance Mode"
 msgstr "WP Maintenance Mode"
 
-# @ wp-maintenance-mode
-#. translators: plugin header field 'PluginURI'
-#: wp-maintenance-mode.php:0
-msgid "http://wordpress.org/extend/plugins/wp-maintenance-mode/"
-msgstr "http://wordpress.org/extend/plugins/wp-maintenance-mode/"
+#: includes/classes/wp-maintenance-mode-admin.php:358
+msgid "Settings"
+msgstr "Options"
 
-# @ wp-maintenance-mode
-#. translators: plugin header field 'Description'
-#: wp-maintenance-mode.php:0
+#: includes/classes/wp-maintenance-mode-admin.php:377
+#, php-format
 msgid ""
-"The plugin adds a splash page to your blog that lets visitors know your blog "
-"is down for maintenance. Logged in users get full access to the blog "
-"including the front-end, depends of the settings."
+"The Maintenance Mode is <strong>active</strong>. Please don't forget to <a "
+"href=\"%s\">deactivate</a> as soon as you are done."
 msgstr ""
-"Le plugin ajoute une page de garde à votre blog qui permet aux visiteurs de "
-"voir si votre blog est en maintenance. Les utilisateurs connectés ont un "
-"accès complet au blog, la partie publique du site y compris, en fonction des "
-"réglages."
+"Le mode Maintenance est <strong>actif</strong>. N'oubliez pas de le <a href="
+"\"%s\">désactiver</a> dès que vous avez terminé."
 
-# @ wp-maintenance-mode
-#. translators: plugin header field 'Author'
-#: wp-maintenance-mode.php:0
-msgid "Frank B&uuml;ltge"
-msgstr "Frank B&uuml;ltge"
+#: includes/classes/wp-maintenance-mode.php:100
+#: includes/classes/wp-maintenance-mode.php:101
+msgid "Maintenance mode"
+msgstr "Mode Maintenance"
 
-# @ wp-maintenance-mode
-#. translators: plugin header field 'AuthorURI'
-#: wp-maintenance-mode.php:0
-msgid "http://bueltge.de/"
-msgstr "http://bueltge.de/"
+#: includes/classes/wp-maintenance-mode.php:103
+msgid ""
+"<p>Sorry for the inconvenience.<br />Our website is currently undergoing "
+"scheduled maintenance.<br />Thank you for your understanding.</p>"
+msgstr ""
+"<p>Excusez-nous pour la gêne occasionnée.<br />Notre site web est "
+"actuellement en maintenance.<br />Merci de votre compréhension.</p>"
 
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:195
-msgid "CSS Style:"
-msgstr "Style CSS :"
+#: includes/classes/wp-maintenance-mode.php:121
+msgid "Notify me when it's ready"
+msgstr "Me notifier quand c'est prêt"
 
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:199
-msgid "Own CSS Stylesheet"
-msgstr "Fichier CSS personnalisé"
+#: includes/classes/wp-maintenance-mode.php:249
+#, php-format
+msgid ""
+"WP Maintenance Mode plugin was relaunched and you MUST revise <a href=\"%s"
+"\">settings</a>."
+msgstr ""
+"Le plugin WP Maintenance Mode a été relancé et vous devez redéfinir les <a "
+"href=\"%s\">options</a>."
 
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:217
-msgid "Own CSS Style URL:"
-msgstr "URL de votre fichier CSS personnalisé :"
+#: includes/classes/wp-maintenance-mode.php:425
+#: includes/classes/wp-maintenance-mode.php:439
+msgid "Maintenance Mode"
+msgstr "Maintenance Mode"
 
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:329
-msgid "Bypass for Search Bots:"
-msgstr "By-pass des robots des moteurs de recherche :"
+#: includes/classes/wp-maintenance-mode.php:630
+#: includes/classes/wp-maintenance-mode.php:658
+msgid "Please enter a valid email address."
+msgstr "Veuillez entrer une adresse email valide s'il vous plait."
 
-# @ wp-maintenance-mode
-#: inc/wp-maintenance-mode-settings.php:336
+#: includes/classes/wp-maintenance-mode.php:641
+msgid "You successfuly subscribed. Thanks!"
+msgstr "Merci ! Vous vous êtes abonné avec succès."
+
+#: includes/classes/wp-maintenance-mode.php:654
+msgid "All fields required."
+msgstr "Tous les champs requis."
+
+#: includes/classes/wp-maintenance-mode.php:675
+msgid "Message via contact"
+msgstr "Message via contact"
+
+#: includes/classes/wp-maintenance-mode.php:679
+msgid "Your email was sent to the website administrator. Thanks!"
+msgstr "Merci ! Votre email a été envoyé au webmaster du site."
+
+#: views/loginform.php:8
+msgid "Login"
+msgstr ""
+
+#: views/maintenance.php:41
+msgid "your e-mail..."
+msgstr "votre e-mail"
+
+#: views/maintenance.php:42 views/settings.php:260
+msgid "Subscribe"
+msgstr "Abonnement Newsletter"
+
+#: views/maintenance.php:83 views/sidebar.php:7
+msgid "Name"
+msgstr "Nom"
+
+#: views/maintenance.php:84
+msgid "E-mail"
+msgstr "E-mail"
+
+#: views/maintenance.php:86
+msgid "Your message"
+msgstr "Votre message"
+
+#: views/maintenance.php:87
+msgid "Send"
+msgstr "Envoyer"
+
+#: views/maintenance.php:92
+msgid "Contact us"
+msgstr "Contactez-nous"
+
+#: views/maintenance.php:97
+msgid "Dashboard"
+msgstr ""
+
+#: views/settings.php:6
+msgid "Settings saved."
+msgstr "Options sauvegardés"
+
+#: views/settings.php:13
+msgid "General"
+msgstr "Général"
+
+#: views/settings.php:14
+msgid "Design"
+msgstr "Design"
+
+#: views/settings.php:15
+msgid "Modules"
+msgstr "Modules"
+
+#: views/settings.php:24
+msgid "Status"
+msgstr "Etat"
+
+#: views/settings.php:26
+msgid "Activated"
+msgstr "Activé"
+
+#: views/settings.php:27
+msgid "Deactivated"
+msgstr "Désactivé"
+
+#: views/settings.php:31
+msgid "Bypass for Search Bots"
+msgstr "Contournement pour les Robots"
+
+#: views/settings.php:34 views/settings.php:94 views/settings.php:104
+#: views/settings.php:232 views/settings.php:268 views/settings.php:305
+#: views/settings.php:373 views/settings.php:405
+msgid "Yes"
+msgstr "Oui"
+
+#: views/settings.php:35 views/settings.php:95 views/settings.php:105
+#: views/settings.php:233 views/settings.php:269 views/settings.php:306
+#: views/settings.php:374 views/settings.php:406
+msgid "No"
+msgstr "Non"
+
+#: views/settings.php:37
 msgid "Allow Search Bots to bypass maintenance mode?"
-msgstr ""
-"Permettre aux robots de passer outre le mode de maintenance (indexer les "
-"pages) ?"
+msgstr "Autoriser les robots à contourner le mode maintenance ?"
 
-# @ wp-maintenance-mode
-#. translators: plugin header field 'Version'
-#: wp-maintenance-mode.php:0
-msgid "1.8.7"
-msgstr "1.8.7"
+#: views/settings.php:41
+msgid "Backend Role"
+msgstr "Rôle utilisateur du Panel d'Administration"
+
+#: views/settings.php:48
+msgid "Which user role is allowed to access the backend of this blog?"
+msgstr ""
+"Quel rôle d'utilisateur est autorisé à avoir accès au panel "
+"d'administration ?"
+
+#: views/settings.php:52
+msgid "Frontend Role"
+msgstr "Rôle utilisateur du Site Web"
+
+#: views/settings.php:59
+msgid "Which user role is allowed to access the frontend of this blog?"
+msgstr "Quel rôle d'utilisateur est autorisé à avoir accès au Site Web ?"
+
+#: views/settings.php:63
+msgid "Robots Meta Tag"
+msgstr "Balise Meta de Robots"
+
+#: views/settings.php:69
+msgid ""
+"The robots meta tag lets you use a granular, page-specific approach to "
+"control how an individual page should be indexed and served to users in "
+"search results."
+msgstr ""
+"La balise meta de robots vous permet d'utiliser un granulaire, chemin de "
+"page spécifique pour contrôler  comment une page individuelle peut être "
+"indexé et servi aux utilisateurs dans les résultats de recherche."
+
+#: views/settings.php:73
+msgid "Redirection"
+msgstr "Redirection"
+
+#: views/settings.php:76
+msgid ""
+"If you want to redirect a user to a URL (which is not the WordPress "
+"dashboard) after login, then define a URL (incl. http://)"
+msgstr ""
+"Si vous souhaitez rediriger un utilisateur vers une URL spécifique (qui "
+"n'est pas celle de votre site) après connexion (inclure : http://)"
+
+#: views/settings.php:80
+msgid "Exclude"
+msgstr "Exclure"
+
+#: views/settings.php:87
+msgid ""
+"Exclude feed, pages, archives or IPs from maintenance mode. Add one slug / "
+"IP per line!"
+msgstr ""
+"Exclure les flux, pages, archives ou adresses IP du mode maintenance. "
+"Ajouter une exclusion par ligne."
+
+#: views/settings.php:91
+msgid "Notice"
+msgstr "Notification"
+
+#: views/settings.php:97
+msgid "Do you want to see notices when maintenance mode is activated?"
+msgstr ""
+"Souhaitez-vous voir une notification quand le mode maintenance est activé ?"
+
+#: views/settings.php:101
+msgid "Dashboard link"
+msgstr ""
+
+#: views/settings.php:107
+msgid ""
+"Do you want to add a link to the dashboard on your maintenance mode page?"
+msgstr ""
+
+#: views/settings.php:115 views/settings.php:218 views/settings.php:421
+msgid "Save settings"
+msgstr ""
+
+#: views/settings.php:116 views/settings.php:219 views/settings.php:422
+msgid "Reset settings"
+msgstr ""
+
+#: views/settings.php:121
+msgid "Content"
+msgstr "Contenu"
+
+#: views/settings.php:126
+msgid "Title (HTML tag)"
+msgstr "Title (balise meta HTML)"
+
+#: views/settings.php:132
+msgid "Heading"
+msgstr "En-tête (titre)"
+
+#: views/settings.php:139 views/settings.php:274
+msgid "Text"
+msgstr "Texte"
+
+#: views/settings.php:159
+msgid "Background"
+msgstr "Fond d'écran"
+
+#: views/settings.php:164
+msgid "Choose type"
+msgstr "Choix du type"
+
+#: views/settings.php:167
+msgid "Custom color"
+msgstr "Couleur personnalisée"
+
+#: views/settings.php:168
+msgid "Uploaded background"
+msgstr "Fond d'écran uploadé"
+
+#: views/settings.php:169
+msgid "Predefined background"
+msgstr "Fond d'écran prédéfini"
+
+#: views/settings.php:174
+msgid "Choose color"
+msgstr "Choix de la couleur"
+
+#: views/settings.php:180
+msgid "Upload background"
+msgstr "Uploader le fond d'écran"
+
+#: views/settings.php:184
+msgid "Backgrounds should have 1920x1280 px size."
+msgstr "Le fond d'écran doit avoir une taille de 1920x1280px."
+
+#: views/settings.php:189
+msgid "Choose background"
+msgstr "Choix du fond d'écran"
+
+#: views/settings.php:191
+msgid "source <a href=\"%\" target=\"_blank\">Free Photos</a>"
+msgstr ""
+
+#: views/settings.php:224
+msgid "Countdown"
+msgstr "Compte à rebours"
+
+#: views/settings.php:229
+msgid "Show countdown?"
+msgstr "Afficher le compte à rebours ?"
+
+#: views/settings.php:238
+msgid "Start date"
+msgstr "Date de départ"
+
+#: views/settings.php:244
+msgid "Countdown (remaining time)"
+msgstr "Compte à rebours (temps restant)"
+
+#: views/settings.php:246
+msgid "Days"
+msgstr "Jours"
+
+#: views/settings.php:247
+msgid "Hours"
+msgstr "Heures"
+
+#: views/settings.php:248
+msgid "Minutes"
+msgstr "Minutes"
+
+#: views/settings.php:252
+msgid "Color"
+msgstr "Couleur"
+
+#: views/settings.php:265
+msgid "Show subscribe?"
+msgstr "Afficher l'abonnement (newsletter) ?"
+
+#: views/settings.php:281
+msgid "Stats"
+msgstr "Statistiques"
+
+#: views/settings.php:285
+#, php-format
+msgid "You have %d subscriber(s)"
+msgstr "Vous avez %d abonné(s)"
+
+#: views/settings.php:290
+msgid "Export as CSV"
+msgstr "Exporter en CSV"
+
+#: views/settings.php:297
+msgid "Social Networks"
+msgstr "Réseaux Sociaux"
+
+#: views/settings.php:302
+msgid "Show social networks?"
+msgstr "Afficher les réseaux sociaux ?"
+
+#: views/settings.php:311
+msgid "Links target?"
+msgstr ""
+
+#: views/settings.php:314
+msgid "New page"
+msgstr ""
+
+#: views/settings.php:315
+msgid "Same page"
+msgstr ""
+
+#: views/settings.php:317
+msgid "Choose how the links will open."
+msgstr ""
+
+#: views/settings.php:365
+msgid "Contact"
+msgstr "Contact"
+
+#: views/settings.php:370
+msgid "Show contact?"
+msgstr "Afficher le formulaire de contact ?"
+
+#: views/settings.php:379
+msgid "Email address"
+msgstr "Adresse email"
+
+#: views/settings.php:385
+msgid "Effects"
+msgstr "Animation"
+
+#: views/settings.php:388
+msgid "Move top - Move bottom"
+msgstr ""
+
+#: views/settings.php:389
+msgid "Zoom - Zoomed"
+msgstr ""
+
+#: views/settings.php:390
+msgid "Fold - Unfold"
+msgstr ""
+
+#: views/settings.php:397
+msgid "Google Analytics"
+msgstr ""
+
+#: views/settings.php:402
+msgid "Use Google Analytics?"
+msgstr ""
+
+#: views/settings.php:411
+msgid "Tracking code"
+msgstr ""
+
+#: views/sidebar.php:3
+msgid "Plugin Info"
+msgstr "Informations sur le Plugin"
+
+#: views/sidebar.php:13
+msgid "Author"
+msgstr "Auteur"
+
+#: views/sidebar.php:14
+msgid "Website"
+msgstr "Site Web"
+
+#: views/sidebar.php:15
+msgid "Twitter"
+msgstr "Twitter"
+
+#: views/sidebar.php:16
+msgid "GitHub"
+msgstr "GitHub"
+
+#: views/sidebar.php:22
+msgid "WordPress Themes"
+msgstr ""
+
+#: views/sidebar.php:31
+msgid "Resources"
+msgstr "Resources"
+
+#~ msgid "Developed by <a href=\"%s\">Designmodo</a>"
+#~ msgstr "Développé par <a href=\"%s\">Designmodo</a>"
+
+#~ msgid "Subscribe now for early access to new WordPress themes."
+#~ msgstr ""
+#~ "Abonnez-vous maintenant pour avoir facilement accès aux nouveaux thèmes "
+#~ "WordPress."
+
+#~ msgid "Enter your email address"
+#~ msgstr "Entrez votre adresse email"
+
+#~ msgid "News"
+#~ msgstr "Actualités"

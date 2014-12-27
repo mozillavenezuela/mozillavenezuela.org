@@ -1,9 +1,9 @@
-=== BackWPup Free - WordPress Backup Plugin ===
+﻿=== BackWPup Free - WordPress Backup Plugin ===
 Contributors: inpsyde, danielhuesken, Bueltge, nullbyte
 Tags: Amazon, Amazon S3, back up, backup, chinese, cloud, cloud files, database, db backup, dropbox, dump, file, french, ftp, ftps, german, migrate, multisite, russian, schedule, sftp, storage, S3, time, upload, xml
 Requires at least: 3.4
-Tested up to: 3.8.1
-Stable tag: 3.1.2
+Tested up to: 4.1
+Stable tag: 3.1.4
 License: GPLv3
 License URI: http://www.gnu.org/licenses/gpl-3.0.html
 
@@ -43,7 +43,7 @@ BackWPup Free is the number 1 backup-plugin for WordPress with nearly 1.000.000 
 * simplified chinese (zh_CN)
 
 = Requirements =
-* WordPress 3.4 and PHP 5.2.6 required!
+* WordPress 3.4 and PHP 5.2.7 required!
 * To use the Plugin with full functionality PHP 5.3.3 with mysqli, FTP,gz, bz2,  ZipArchive and curl is needed.
 * Plugin functions that don't work because of your server settings, will not be displayed in admin area.
 
@@ -171,6 +171,41 @@ Please check all settings after the update:
 
 
 == Changelog ==
+= Version 3.1.4 =
+* Fixed: removing of % from filename
+* Fixed: Notice in combination with bbPress
+* Fixed: Zip Archive "Entry has been deleted" messages
+* Improved: WP-CLI output a bit
+
+= Version 3.1.3 =
+* Fixed: var_export not working if output buffering active
+* Fixed: bug in sending test emails on Backup with email
+* Fixed: backup archives not deleted if archive name has spaces
+* Fixed: bug in tar file name length detecting
+* Fixed: bug in not displaying abort message
+* Fixed: abort of S3 uploads from other running backups
+* Changed: Maximum backup archive size is now 2GB (some filesystems do not support larger files, split the job if you need more)
+* Changed: WordPress Export will now done by a own class
+* Changed: Dropbox now uses oAuth 2 Protocol
+* Changed: Dropbox change to TLS Protocol
+* Changed: Logs have now a br tag on line end for better reading in emails
+* Improved: Dropbox chipper list not on NSS cUrl backend
+* Improved: Increased performance on Zip File generation massively
+* Improved: Backup archives now deleted to if the archive format changed
+* Improved: Archive tarring and its compression
+* Improved: Loading of Swift Mailer
+* Added: GreenQloud to S3 services
+* Added: Amazon Germany region to S3 and Glacier services
+* Removed: Hosteurope from S3 services (terminated to end of 2014)
+* Updated: SwiftMailer to Version 5.2.0
+* Updated: AWS SDK to Version 2.7.3 (PHP 5.3.3+)
+* Updated: RSC SDK to Version 1.9.2
+* Updated: MSAZURE SDK to Version 0.4.0
+* Updated: PEAR packeges for MSAZURE
+* PRO: Added: Option to use database backup with mysqli/mysqldump (not longer automatic)
+* PRO: Added: Option in GDrive destination to delete files permanently
+* PRO: Updated: Google SDK to 1.1.1
+
 = Version 3.1.2 =
 * Added: .donotbackup file. Folders and sub folders containing this file in will not be included in backups.
 * Fixed: New multisite installs did not save jobs.

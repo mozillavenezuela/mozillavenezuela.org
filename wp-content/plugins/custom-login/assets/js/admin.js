@@ -33,14 +33,14 @@ jQuery(document).ready(function($) {
 		$('div.img').each(function() {
 			var $size = $(this).parent().width();
 			$(this).css({
-				'max-width'	: $size,
+				'max-width': $size,
 				'width'		: $size
 			}).slideDown('fast');
 		});
 	}
 	
 	// Remote API helper
-	$('#custom_login a[data-toggle]').on('click',function(e) {
+	$('#custom_login_extensions a[data-toggle]').on('click',function(e) {
 		e.preventDefault();
 		$('#' + $(this).data('toggle')).toggle();
 	});
@@ -49,9 +49,11 @@ jQuery(document).ready(function($) {
     $('a[data-edd-install]').each(function() {
 		var $this = $(this);
 		setTimeout( function() {
-			if ( $this.prev('.eddri-status').text() === 'Not Installed' )
-				$this.closest( $this.parent() ).children('a.button.show-if-not-purchased').show()
-		}, 5000 );
+			if ( $this.prev('.eddri-status').text() === 'Not Installed' ) {
+				$this.closest( $this.parent() ).children('a.button').hide();
+				$this.closest( $this.parent() ).children('a.button.show-if-not-purchased').show();
+			}
+		}, 500 );
 	});
     
 });

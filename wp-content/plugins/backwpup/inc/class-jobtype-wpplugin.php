@@ -77,7 +77,7 @@ class BackWPup_JobType_WPPlugin extends BackWPup_JobTypes {
 	 */
 	public function edit_form_post_save( $id ) {
 
-		BackWPup_Option::update( $id, 'pluginlistfile', $_POST[ 'pluginlistfile' ] );
+		BackWPup_Option::update( $id, 'pluginlistfile', BackWPup_Job::sanitize_file_name( $_POST[ 'pluginlistfile' ] ) );
 		if ( $_POST[ 'pluginlistfilecompression' ] == '' || $_POST[ 'pluginlistfilecompression' ] == '.gz' || $_POST[ 'pluginlistfilecompression' ] == '.bz2' )
 			BackWPup_Option::update( $id, 'pluginlistfilecompression', $_POST[ 'pluginlistfilecompression' ] );
 	}
@@ -138,7 +138,7 @@ class BackWPup_JobType_WPPlugin extends BackWPup_JobTypes {
 		if ( is_readable( BackWPup::get_plugin_data( 'TEMP' ) . $job_object->temp[ 'pluginlistfile' ] ) ) {
 			$job_object->additional_files_to_backup[ ] = BackWPup::get_plugin_data( 'TEMP' ) . $job_object->temp[ 'pluginlistfile' ];
 			$job_object->count_files ++;
-			$job_object->count_filesize = $job_object->count_filesize + @filesize( BackWPup::get_plugin_data( 'TEMP' ) . $job_object->temp[ 'pluginlistfile' ] );
+			$job_object->count_filesize = $job_object->count_filesize + filesize( BackWPup::get_plugin_data( 'TEMP' ) . $job_object->temp[ 'pluginlistfile' ] );
 			$job_object->log( sprintf( __( 'Added plugin list file "%1$s" with %2$s to backup file list.', 'backwpup' ), $job_object->temp[ 'pluginlistfile' ], size_format( filesize( BackWPup::get_plugin_data( 'TEMP' ) . $job_object->temp[ 'pluginlistfile' ] ), 2 ) ) );
 		}
 		$job_object->substeps_done = 1;
