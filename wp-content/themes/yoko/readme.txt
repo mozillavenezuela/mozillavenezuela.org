@@ -6,8 +6,22 @@ For a detailed documentation and support please visit: http://www.elmastudio.de/
 Changelog:
 ------------------------------------------------------------------------------------------------------------
 
+Version 1.2.1 - 8th February 2015
+-----------------------------------
+- Enhancement: Added fallback for the theme_mod custom color in functions.php
+
+
+Version 1.2 - 3rd February 2015
+-----------------------------------
+- Enhancement: Updated theme tags
+- Enhancement: Updated custom search form in functions.php
+- New: Moved custom link color from theme options page to the customizer
+- New: Added theme support for title-tag in functions.php
+- New: Added the_archive_title and the_archive_description to archive.php
+
+
 Version 1.1 - 22th October 2013
---------------------------------
+-----------------------------------
 - Enhancement: General code updates and optimizations (see functions.php, includes/theme-options.php)
 - Enhancement: moved Google webfonts import from style.css to functions.php
 - Enhancement: Enqueue stylesheet via functions.php
@@ -19,7 +33,7 @@ Version 1.1 - 22th October 2013
 
 
 Version 1.0.5 - 21th August 2011
---------------------------------
+-----------------------------------
 - Added Google+ and target="_blank" to the Yoko Social Links widget.
 - Added theme translations for Spanish (Spain), Catalan, Portuguese (Brazil), Dutch, Russian and Ukrainian.
 - new script for smooth scroll to top in smoothscroll.js.

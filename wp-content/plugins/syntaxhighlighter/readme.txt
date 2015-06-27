@@ -3,7 +3,7 @@ Contributors: Viper007Bond, automattic
 Donate link: http://www.viper007bond.com/wordpress-plugins/syntaxhighlighter/donate/
 Tags: code, sourcecode, php, xhtml, html, css, WordPress.com
 Requires at least: 2.7
-Tested up to: 3.9
+Tested up to: 4.2
 Stable tag: trunk
 
 Easily post syntax-highlighted code to your site without having to modify the code at all. As seen on WordPress.com.
@@ -54,6 +54,12 @@ Make sure your theme's `footer.php` file has `<?php wp_footer(); ?>` somewhere i
 2. A part of the Settings page which controls the defaults.
 
 == ChangeLog ==
+
+= Version 3.1.11 =
+
+* SyntaxHighlighter 3.x: Fix table layout issue. Props jeherve.
+* Fix sanitization bug for "classname" parameter.
+* Fix a bug that prevented highlighting a range of lines, such as "5-10".
 
 = Version 3.1.10 =
 

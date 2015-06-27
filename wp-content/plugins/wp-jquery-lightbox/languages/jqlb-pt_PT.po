@@ -1,0 +1,149 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: WP JQuery Lightbox\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2011-06-26 20:31+0100\n"
+"PO-Revision-Date: 2014-05-12 14:56-0000\n"
+"Last-Translator: Pedro Mendonça <ped.gaspar@gmail.com>\n"
+"Language-Team: Pedro Mendonça <ped.gaspar@gmail.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-KeywordsList: __;_e;_c;__ngettext:1,2\n"
+"X-Poedit-Basepath: .\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: pt_PT\n"
+"X-Generator: Poedit 1.6.4\n"
+
+#: G:\@WINNEEDS\Desktop\wp-jquery-lightbox.1.3.3\wp-jquery-lightbox/wp-jquery-lightbox.php:42
+msgid "Settings"
+msgstr "Definições"
+
+#: G:\@WINNEEDS\Desktop\wp-jquery-lightbox.1.3.3\wp-jquery-lightbox/wp-jquery-lightbox.php:113
+msgid "previous image"
+msgstr "Imagem anterior"
+
+#: G:\@WINNEEDS\Desktop\wp-jquery-lightbox.1.3.3\wp-jquery-lightbox/wp-jquery-lightbox.php:114
+msgid "next image"
+msgstr "Imagem seguinte"
+
+#: G:\@WINNEEDS\Desktop\wp-jquery-lightbox.1.3.3\wp-jquery-lightbox/wp-jquery-lightbox.php:115
+msgid "&laquo; Previous"
+msgstr "&laquo; Anterior"
+
+#: G:\@WINNEEDS\Desktop\wp-jquery-lightbox.1.3.3\wp-jquery-lightbox/wp-jquery-lightbox.php:116
+msgid "Next &raquo;"
+msgstr "Seguinte &raquo;"
+
+#: G:\@WINNEEDS\Desktop\wp-jquery-lightbox.1.3.3\wp-jquery-lightbox/wp-jquery-lightbox.php:117
+msgid "close image gallery"
+msgstr "Fechar a galeria"
+
+#: G:\@WINNEEDS\Desktop\wp-jquery-lightbox.1.3.3\wp-jquery-lightbox/wp-jquery-lightbox.php:118
+msgid "Image "
+msgstr "Imagem "
+
+#: G:\@WINNEEDS\Desktop\wp-jquery-lightbox.1.3.3\wp-jquery-lightbox/wp-jquery-lightbox.php:119
+msgid " of "
+msgstr " de "
+
+#: G:\@WINNEEDS\Desktop\wp-jquery-lightbox.1.3.3\wp-jquery-lightbox/wp-jquery-lightbox.php:120
+msgid "Download"
+msgstr "Descarregar"
+
+#: G:\@WINNEEDS\Desktop\wp-jquery-lightbox.1.3.3\wp-jquery-lightbox/wp-jquery-lightbox.php:166
+msgid "Cheatin&#8217; uh?"
+msgstr "A fazer batota?"
+
+#: G:\@WINNEEDS\Desktop\wp-jquery-lightbox.1.3.3\wp-jquery-lightbox/wp-jquery-lightbox.php:179
+msgid "Let the plugin add necessary html to image links"
+msgstr "Deixe o plugin adicionar o html necessário às ligações das imagens"
+
+#: G:\@WINNEEDS\Desktop\wp-jquery-lightbox.1.3.3\wp-jquery-lightbox/wp-jquery-lightbox.php:179
+msgid "Auto-lightbox image links"
+msgstr "Alterar as ligações das imagens automaticamente"
+
+#: G:\@WINNEEDS\Desktop\wp-jquery-lightbox.1.3.3\wp-jquery-lightbox/wp-jquery-lightbox.php:186
+msgid ""
+"Note: this will disable the nofollow-attribute of comment links, that "
+"otherwise interfere with the lightbox."
+msgstr ""
+"Nota: isto desactivará o atributo 'nofollow' das ligações dos comentários, "
+"que de outro modo interfeririam com o lightbox."
+
+#: G:\@WINNEEDS\Desktop\wp-jquery-lightbox.1.3.3\wp-jquery-lightbox/wp-jquery-lightbox.php:186
+msgid ""
+"Enable lightbox in comments (disables <a href=\"http://codex.wordpress.org/"
+"Nofollow\">the nofollow attribute!</a>)"
+msgstr ""
+"Activar lightbox nos comentários (desactiva <a href=\"http://codex.wordpress."
+"org/Nofollow\">o atributo 'nofollow'!</a>)"
+
+#: G:\@WINNEEDS\Desktop\wp-jquery-lightbox.1.3.3\wp-jquery-lightbox/wp-jquery-lightbox.php:193
+msgid "Show download link"
+msgstr "Mostrar ligação para descarregar"
+
+#: G:\@WINNEEDS\Desktop\wp-jquery-lightbox.1.3.3\wp-jquery-lightbox/wp-jquery-lightbox.php:197
+msgid ""
+"_blank: open the image in a new window or tab\n"
+"_self: open the image in the same frame as it was clicked (default)\n"
+"_parent: open the image in the parent frameset\n"
+"_top: open the image in the full body of the window"
+msgstr ""
+"_blank: abrir a imagem numa nova janela ou separador\n"
+"_self: abrir a imagem na mesma janela em que for seleccionada (por omissão)\n"
+"_parent: abrir a imagem na janela superior\n"
+"_top: abrir a imagem ocupando toda a janela"
+
+#: G:\@WINNEEDS\Desktop\wp-jquery-lightbox.1.3.3\wp-jquery-lightbox/wp-jquery-lightbox.php:200
+msgid "Target for download link:"
+msgstr "Destino para a ligação de descarga:"
+
+#: G:\@WINNEEDS\Desktop\wp-jquery-lightbox.1.3.3\wp-jquery-lightbox/wp-jquery-lightbox.php:214
+msgid "Show image info on top"
+msgstr "Mostrar a informação da imagem no topo"
+
+#: G:\@WINNEEDS\Desktop\wp-jquery-lightbox.1.3.3\wp-jquery-lightbox/wp-jquery-lightbox.php:222
+msgid "Shrink large images to fit smaller screens"
+msgstr "Reduzir imagens grandes a ecrãs pequenos"
+
+#: G:\@WINNEEDS\Desktop\wp-jquery-lightbox.1.3.3\wp-jquery-lightbox/wp-jquery-lightbox.php:227
+msgid "Keep a distance between the image and the screen edges."
+msgstr "Manter uma distância entre a imagem e os bordos do ecrã."
+
+#: G:\@WINNEEDS\Desktop\wp-jquery-lightbox.1.3.3\wp-jquery-lightbox/wp-jquery-lightbox.php:227
+msgid "Minimum margin to screen edge (default: 0)"
+msgstr "Margem mínima ao bordo do ecrã (por omissão: 0)"
+
+#: G:\@WINNEEDS\Desktop\wp-jquery-lightbox.1.3.3\wp-jquery-lightbox/wp-jquery-lightbox.php:234
+msgid "Animation duration (in milliseconds) "
+msgstr "Duração da animação (em milisegundos) "
+
+#: G:\@WINNEEDS\Desktop\wp-jquery-lightbox.1.3.3\wp-jquery-lightbox/wp-jquery-lightbox.php:240
+msgid "Help text (default: none) "
+msgstr "Texto de ajuda (por omissão: nenhum)"
+
+#: G:\@WINNEEDS\Desktop\wp-jquery-lightbox.1.3.3\wp-jquery-lightbox/wp-jquery-lightbox.php:244
+msgid ""
+"Browse images with your keyboard: Arrows or P(revious)/N(ext) and X/C/ESC "
+"for close."
+msgstr ""
+"Navegar pelas imagens com o teclado: Setas ou 'P' (Anterior) e "
+"'N' (Seguinte), 'X' ou 'C' ou 'Esc' para fechar."
+
+#: G:\@WINNEEDS\Desktop\wp-jquery-lightbox.1.3.3\wp-jquery-lightbox/wp-jquery-lightbox.php:246
+msgid "Save Changes"
+msgstr "Guardar alterações"
+
+msgid "Show title & caption"
+msgstr "Mostrar título e descrição"
+
+msgid "Slideshow speed (in milliseconds). 0 to disable."
+msgstr "Velocidade da apresentação (em milisegundos). 0 para desactivar."
+
+msgid "(pause slideshow)"
+msgstr "(pausar apresentação)"
+
+msgid "(play slideshow)"
+msgstr "(iniciar apresentação)"

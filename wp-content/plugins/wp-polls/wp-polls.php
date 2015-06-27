@@ -3,7 +3,7 @@
 Plugin Name: WP-Polls
 Plugin URI: http://lesterchan.net/portfolio/programming/php/
 Description: Adds an AJAX poll system to your WordPress blog. You can easily include a poll into your WordPress's blog post/page. WP-Polls is extremely customizable via templates and css styles and there are tons of options for you to choose to ensure that WP-Polls runs the way you wanted. It now supports multiple selection of answers.
-Version: 2.68
+Version: 2.69
 Author: Lester 'GaMerZ' Chan
 Author URI: http://lesterchan.net
 Text Domain: wp-polls
@@ -11,7 +11,7 @@ Text Domain: wp-polls
 
 
 /*
-	Copyright 2014  Lester Chan  (email : lesterchan@gmail.com)
+	Copyright 2015  Lester Chan  (email : lesterchan@gmail.com)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ Text Domain: wp-polls
 
 
 ### Version
-define( 'WP_POLLS_VERSION', 2.68 );
+define( 'WP_POLLS_VERSION', 2.69 );
 
 
 ### Create Text Domain For Translations
@@ -168,28 +168,6 @@ function get_poll($temp_poll_id = 0, $display = true) {
 ### Function: Print Polls Stylesheets That Are Dynamic And jQuery At The Top
 add_action('wp_head', 'poll_head_scripts');
 function poll_head_scripts() {
-	$pollbar = get_option('poll_bar');
-	echo '<style type="text/css">'."\n";
-	if($pollbar['style'] == 'use_css') {
-		echo '.wp-polls .pollbar {'."\n";
-		echo "\t".'margin: 1px;'."\n";
-		echo "\t".'font-size: '.($pollbar['height']-2).'px;'."\n";
-		echo "\t".'line-height: '.$pollbar['height'].'px;'."\n";
-		echo "\t".'height: '.$pollbar['height'].'px;'."\n";
-		echo "\t".'background: #'.$pollbar['background'].';'."\n";
-		echo "\t".'border: 1px solid #'.$pollbar['border'].';'."\n";
-		echo '}'."\n";
-	} else {
-		echo '.wp-polls .pollbar {'."\n";
-		echo "\t".'margin: 1px;'."\n";
-		echo "\t".'font-size: '.($pollbar['height']-2).'px;'."\n";
-		echo "\t".'line-height: '.$pollbar['height'].'px;'."\n";
-		echo "\t".'height: '.$pollbar['height'].'px;'."\n";
-		echo "\t".'background-image: url(\''.plugins_url('wp-polls/images/'.$pollbar['style'].'/pollbg.gif').'\');'."\n";
-		echo "\t".'border: 1px solid #'.$pollbar['border'].';'."\n";
-		echo '}'."\n";
-	}
-	echo '</style>'."\n";
 	wp_print_scripts('jquery');
 }
 
@@ -209,6 +187,27 @@ function poll_scripts() {
 			wp_enqueue_style('wp-polls-rtl', plugins_url('wp-polls/polls-css-rtl.css'), false, WP_POLLS_VERSION, 'all');
 		}
 	}
+	$pollbar = get_option('poll_bar');
+	if($pollbar['style'] == 'use_css') {
+		$pollbar_css = '.wp-polls .pollbar {'."\n";
+		$pollbar_css .= "\t".'margin: 1px;'."\n";
+		$pollbar_css .= "\t".'font-size: '.($pollbar['height']-2).'px;'."\n";
+		$pollbar_css .= "\t".'line-height: '.$pollbar['height'].'px;'."\n";
+		$pollbar_css .= "\t".'height: '.$pollbar['height'].'px;'."\n";
+		$pollbar_css .= "\t".'background: #'.$pollbar['background'].';'."\n";
+		$pollbar_css .= "\t".'border: 1px solid #'.$pollbar['border'].';'."\n";
+		$pollbar_css .= '}'."\n";
+	} else {
+		$pollbar_css = '.wp-polls .pollbar {'."\n";
+		$pollbar_css .= "\t".'margin: 1px;'."\n";
+		$pollbar_css .= "\t".'font-size: '.($pollbar['height']-2).'px;'."\n";
+		$pollbar_css .= "\t".'line-height: '.$pollbar['height'].'px;'."\n";
+		$pollbar_css .= "\t".'height: '.$pollbar['height'].'px;'."\n";
+		$pollbar_css .= "\t".'background-image: url(\''.plugins_url('wp-polls/images/'.$pollbar['style'].'/pollbg.gif').'\');'."\n";
+		$pollbar_css .= "\t".'border: 1px solid #'.$pollbar['border'].';'."\n";
+		$pollbar_css .= '}'."\n";
+	}
+	wp_add_inline_style( 'wp-polls', $pollbar_css );
 	$poll_ajax_style = get_option('poll_ajax_style');
 	$pollbar = get_option('poll_bar');
 	wp_enqueue_script('wp-polls', plugins_url('wp-polls/polls-js.js'), array('jquery'), WP_POLLS_VERSION, true);
@@ -723,16 +722,16 @@ function display_pollresult($poll_id, $user_voted = '', $display_loading = true)
 ### Function: Get IP Address
 if(!function_exists('get_ipaddress')) {
 	function get_ipaddress() {
-		if (empty($_SERVER["HTTP_X_FORWARDED_FOR"])) {
-			$ip_address = $_SERVER["REMOTE_ADDR"];
-		} else {
-			$ip_address = $_SERVER["HTTP_X_FORWARDED_FOR"];
+		foreach ( array( 'HTTP_CLIENT_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_FORWARDED', 'HTTP_X_CLUSTER_CLIENT_IP', 'HTTP_FORWARDED_FOR', 'HTTP_FORWARDED', 'REMOTE_ADDR' ) as $key ) {
+			if ( array_key_exists( $key, $_SERVER ) === true ) {
+				foreach ( explode( ',', $_SERVER[$key] ) as $ip ) {
+					$ip = trim( $ip );
+					if ( filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) !== false ) {
+						return esc_attr( $ip );
+					}
+				}
+			}
 		}
-		if(strpos($ip_address, ',') !== false) {
-			$ip_address = explode(',', $ip_address);
-			$ip_address = $ip_address[0];
-		}
-		return esc_attr($ip_address);
 	}
 }
 
@@ -1495,14 +1494,10 @@ function manage_poll() {
 
 
 ### Function: Plug Into WP-Stats
-add_action('wp','polls_wp_stats');
+add_action( 'plugins_loaded','polls_wp_stats' );
 function polls_wp_stats() {
-	if(function_exists('stats_page')) {
-		if(strpos(get_option('stats_url'), $_SERVER['REQUEST_URI']) || strpos($_SERVER['REQUEST_URI'], 'stats-options.php') || strpos($_SERVER['REQUEST_URI'], 'wp-stats/wp-stats.php')) {
-			add_filter('wp_stats_page_admin_plugins', 'polls_page_admin_general_stats');
-			add_filter('wp_stats_page_plugins', 'polls_page_general_stats');
-		}
-	}
+	add_filter( 'wp_stats_page_admin_plugins', 'polls_page_admin_general_stats' );
+	add_filter( 'wp_stats_page_plugins', 'polls_page_general_stats' );
 }
 
 
@@ -1795,20 +1790,24 @@ function polls_activate() {
 			$key_name[]= $i->Key_name;
 		}
 	}
-	if ( !in_array( 'pollip_ip', $key_name ) ) {
+	if ( ! in_array( 'pollip_ip', $key_name ) ) {
 		$wpdb->query( "ALTER TABLE $wpdb->pollsip ADD INDEX pollip_ip (pollip_ip);" );
 	}
-	if ( !in_array( 'pollip_qid', $key_name ) ) {
+	if ( ! in_array( 'pollip_qid', $key_name ) ) {
 		$wpdb->query( "ALTER TABLE $wpdb->pollsip ADD INDEX pollip_qid (pollip_qid);" );
 	}
-	if ( !in_array( 'pollip_ip_qid', $key_name ) ) {
-		$wpdb->query( "ALTER TABLE $wpdb->pollsip ADD INDEX pollip_ip_qid (pollip_ip, pollip_qid);" );
+	if ( ! in_array( 'pollip_ip_qid_aid', $key_name ) ) {
+		$wpdb->query( "ALTER TABLE $wpdb->pollsip ADD INDEX pollip_ip_qid_aid (pollip_ip, pollip_qid, pollip_aid);" );
+	}
+	// No longer needed index
+	if ( in_array( 'pollip_ip_qid', $key_name ) ) {
+		$wpdb->query( "ALTER TABLE $wpdb->pollsip DROP INDEX pollip_ip_qid;" );
 	}
 
 	// Set 'manage_polls' Capabilities To Administrator
-	$role = get_role('administrator');
-	if(!$role->has_cap('manage_polls')) {
-		$role->add_cap('manage_polls');
+	$role = get_role( 'administrator' );
+	if( ! $role->has_cap( 'manage_polls' ) ) {
+		$role->add_cap( 'manage_polls' );
 	}
 	cron_polls_place();
 }

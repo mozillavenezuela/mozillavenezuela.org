@@ -24,12 +24,6 @@ add_action( 'after_setup_theme', 'yoko' );
 if ( ! function_exists( 'yoko' ) ):
 
 /**
- * Create Yoko Theme Options Page
- */
-require_once ( get_template_directory() . '/includes/theme-options.php' );
-
-
-/**
  * Returns the Google font stylesheet URL if available.
  */
 
@@ -88,33 +82,6 @@ add_action( 'wp_enqueue_scripts', 'yoko_scripts' );
 
 
 /**
- * Creates a nicely formatted and more specific title element text for output
- * in head of document, based on current view.
- */
-function yoko_wp_title( $title, $sep ) {
-	global $paged, $page;
-
-	if ( is_feed() )
-		return $title;
-
-	// Add the site name.
-	$title .= get_bloginfo( 'name' );
-
-	// Add the site description for the home/front page.
-	$site_description = get_bloginfo( 'description', 'display' );
-	if ( $site_description && ( is_home() || is_front_page() ) )
-		$title = "$title $sep $site_description";
-
-	// Add a page number if necessary.
-	if ( $paged >= 2 || $page >= 2 )
-		$title = "$title $sep " . sprintf( __( 'Page %s', 'yoko' ), max( $paged, $page ) );
-
-	return $title;
-}
-add_filter( 'wp_title', 'yoko_wp_title', 10, 2 );
-
-
-/**
  * Sets up theme defaults and registers support for WordPress features.
  */
 function yoko() {
@@ -128,6 +95,9 @@ function yoko() {
 	// Add default posts and comments RSS feed links to head
 	add_theme_support( 'automatic-feed-links' );
 
+	//  Let WordPress manage the document title.
+	add_theme_support( 'title-tag' );
+
 	// This theme uses wp_nav_menu() in one location.
 	register_nav_menus( array(
 		'primary' => __( 'Primary Navigation', 'yoko' ),
@@ -136,8 +106,11 @@ function yoko() {
 	// Add support for Post Formats
 	add_theme_support( 'post-formats', array( 'aside', 'gallery', 'link', 'video', 'image', 'quote' ) );
 
-	// This theme allows users to set a custom background
-	add_theme_support('custom-background');
+	// This theme allows users to set a custom background.
+	add_theme_support( 'custom-background', apply_filters( 'yoko_custom_background_args', array(
+		'default-color'	=> 'ececec',
+		'default-image'	=> '',
+	) ) );
 
 	// Your changeable header business starts here
 	define( 'HEADER_TEXTCOLOR', '' );
@@ -377,7 +350,7 @@ add_action( 'widgets_init', 'yoko_remove_recent_comments_style' );
  */
 function yoko_search_form( $form ) {
 
-    $form = '<form role="search" method="get" class="searchform" action="'.get_bloginfo('url').'" >
+    $form = '<form role="search" method="get" class="searchform" action="'.home_url('/').'" >
     <div>
     <input type="text" class="search-input" value="' . get_search_query() . '" name="s" id="s" />
     <input type="submit" class="searchsubmit" value="'. esc_attr__('Search', 'yoko') .'" />
@@ -396,105 +369,31 @@ add_filter('gallery_style', create_function('$a', 'return "
 
 
 /**
- * Yoko Shortcodes
+ * Add Theme Customizer CSS
  */
-
-// Enable shortcodes in widget areas
-add_filter( 'widget_text', 'do_shortcode' );
-
-
-// Columns Shortcodes
-// Don't forget to add _last behind the shortcode if it is the last column.
-
-// Two Columns
-function yoko_shortcode_two_columns_one( $atts, $content = null ) {
-   return '<div class="two-columns-one">' . $content . '</div>';
+function yoko_customize_css() {
+    ?>
+	<style type="text/css" id="yoko-themeoptions-css">
+		a {color: <?php echo get_theme_mod( 'link_color', '#009BC2' ); ?>;}
+		#content .single-entry-header h1.entry-title {color: <?php echo get_theme_mod( 'link_color', '#009BC2' ); ?>!important;}
+		input#submit:hover {background-color: <?php echo get_theme_mod( 'link_color', '#009BC2' ); ?>!important;}
+		#content .page-entry-header h1.entry-title {color: <?php echo get_theme_mod( 'link_color', '#009BC2' ); ?>!important;}
+		.searchsubmit:hover {background-color: <?php echo get_theme_mod( 'link_color', '#009BC2' ); ?>!important;}
+	</style>
+    <?php
 }
-add_shortcode( 'two_columns_one', 'yoko_shortcode_two_columns_one' );
+add_action( 'wp_head', 'yoko_customize_css');
 
-function yoko_shortcode_two_columns_one_last( $atts, $content = null ) {
-   return '<div class="two-columns-one last">' . $content . '</div>';
-}
-add_shortcode( 'two_columns_one_last', 'yoko_shortcode_two_columns_one_last' );
+/**
+ * Customizer additions
+ */
+require get_template_directory() . '/inc/customizer.php';
 
-// Three Columns
-function yoko_shortcode_three_columns_one($atts, $content = null) {
-   return '<div class="three-columns-one">' . $content . '</div>';
-}
-add_shortcode( 'three_columns_one', 'yoko_shortcode_three_columns_one' );
+/**
+ * Theme Options page
+ */
+require get_template_directory() . '/inc/theme-options.php';
 
-function yoko_shortcode_three_columns_one_last($atts, $content = null) {
-   return '<div class="three-columns-one last">' . $content . '</div>';
-}
-add_shortcode( 'three_columns_one_last', 'yoko_shortcode_three_columns_one_last' );
-
-function yoko_shortcode_three_columns_two($atts, $content = null) {
-   return '<div class="three-columns-two">' . $content . '</div>';
-}
-add_shortcode( 'three_columns_two', 'yoko_shortcode_three_columns' );
-
-function yoko_shortcode_three_columns_two_last($atts, $content = null) {
-   return '<div class="three-columns-two last">' . $content . '</div>';
-}
-add_shortcode( 'three_columns_two_last', 'yoko_shortcode_three_columns_two_last' );
-
-// Four Columns
-function yoko_shortcode_four_columns_one($atts, $content = null) {
-   return '<div class="four-columns-one">' . $content . '</div>';
-}
-add_shortcode( 'four_columns_one', 'yoko_shortcode_four_columns_one' );
-
-function yoko_shortcode_four_columns_one_last($atts, $content = null) {
-   return '<div class="four-columns-one last">' . $content . '</div>';
-}
-add_shortcode( 'four_columns_one_last', 'yoko_shortcode_four_columns_one_last' );
-
-function yoko_shortcode_four_columns_two($atts, $content = null) {
-   return '<div class="four-columns-two">' . $content . '</div>';
-}
-add_shortcode( 'four_columns_two', 'yoko_shortcode_four_columns_two' );
-
-function yoko_shortcode_four_columns_two_last($atts, $content = null) {
-   return '<div class="four-columns-two last">' . $content . '</div>';
-}
-add_shortcode( 'four_columns_two_last', 'yoko_shortcode_four_columns_two_last' );
-
-function yoko_shortcode_four_columns_three($atts, $content = null) {
-   return '<div class="four-columns-three">' . $content . '</div>';
-}
-add_shortcode( 'four_columns_three', 'yoko_shortcode_four_columns_three' );
-
-function yoko_shortcode_four_columns_three_last($atts, $content = null) {
-   return '<div class="four-columns-three last">' . $content . '</div>';
-}
-add_shortcode( 'four_columns_three_last', 'yoko_shortcode_four_columns_three_last' );
-
-// Divide Text Shortcode
-function yoko_shortcode_divider($atts, $content = null) {
-   return '<div class="divider"></div>';
-}
-add_shortcode( 'divider', 'yoko_shortcode_divider' );
-
-//Text Highlight and Info Boxes Shortcodes
-function yoko_shortcode_highlight($atts, $content = null) {
-   return '<span class="highlight">' . $content . '</span>';
-}
-add_shortcode( 'highlight', 'yoko_shortcode_highlight' );
-
-function yoko_shortcode_yellow_box($atts, $content = null) {
-   return '<div class="yellow-box">' . $content . '</div>';
-}
-add_shortcode( 'yellow_box', 'yoko_shortcode_yellow_box' );
-
-function yoko_shortcode_red_box($atts, $content = null) {
-   return '<div class="red-box">' . $content . '</div>';
-}
-add_shortcode( 'red_box', 'yoko_shortcode_red_box' );
-
-function yoko_shortcode_green_box($atts, $content = null) {
-   return '<div class="green-box">' . $content . '</div>';
-}
-add_shortcode( 'green_box', 'yoko_shortcode_green_box' );
 
 /**
  * Custom Social Links Widget
@@ -720,5 +619,3 @@ $googleplus_title = empty($instance['googleplus_title']) ? ' ' : apply_filters('
 }
 // register Yoko SocialLinks Widget
 add_action('widgets_init', create_function('', 'return register_widget("Yoko_SocialLinks_Widget");'));
-
-

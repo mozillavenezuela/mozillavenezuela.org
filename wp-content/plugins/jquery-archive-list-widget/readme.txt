@@ -3,30 +3,33 @@ Contributors: skatox
 Donate link: http://skatox.com/blog/jquery-archive-list-widget/
 Tags: jquery, ajax, javacript, collapse, collapsible, archive, collapsible archive, widget
 Requires at least: 3.0
-Tested up to: 3.8
-Stable tag: 2.2
+Tested up to: 4.1
+Stable tag: 3.0.2
 
-A simple jQuery widget (can be used in posts) for displaying an archive list with some effects.
+A jQuery widget (can be used in posts) for displaying an archive list with some effects.
 
 == Description ==
 
 This plugin provides a widget and a filter to display a collapsible archive list in your sidebar or posts using the jQuery JS library.
 
 = Features =
- 1. Display a collapsed list of your archives to reduce space.
- 2. Uses jQuery to add effects and to be compatible with most browsers.
- 3. Select your expand/collapse symbol and date format.
- 4. Support for archive filters.
- 5. Auto expands current/select year from posts.
- 6. Select the categories to exclude
- 7. Multiple instances support.
- 8. Shortcode support  *[jQuery Archive List]*
- 9. And more to come...
+1. Display a collapsed list of your archives to reduce space.
+1. Uses jQuery to add effects and to be compatible with most browsers.
+1. Select your expand/collapse symbol and date format.
+1. Support for archive filters.
+1. Auto expands current/select year from posts.
+1. Select the categories to exclude
+1. Multiple instances support.
+1. Shortcode support  *[jQuery Archive List]*
+1. Generates valid HTML5 code.
+1. Supports multiple languages.
+1. Compatible with most JS caché and minify plugins.
+1. And more to come...
 
 == Installation ==
 
 1. Make a directory jquery-archive-list-widget under */wp-content/plugins/*
-1. Upload all downloaded files to */wp-content/plugins/jquery-archive-list-widget/* 
+1. Upload all downloaded files to */wp-content/plugins/jquery-archive-list-widget/*
 1. Activate plugin at the plugins section.
 1. Go to *Presentation -> Widgets* and drag the jQuery Archive List to your sidebar and configure it, if you want to display it inside a post then write *[jQuery Archive List]* at the location where it will be shown and save it.
 
@@ -41,6 +44,7 @@ This plugin provides a widget and a filter to display a collapsible archive list
 * Show posts under months:  show post's title under months.
 * Only expand/reduce by clicking the symbol: select if animations start when click the link or just the bullet.
 * Exclude categories: Select the categories to exclude.
+* Post type: Lets you choose the custom types besides posts.
 
 == Frequently Asked Questions ==
 
@@ -51,6 +55,10 @@ By support experience, like 99% of problems are due to:
 * There's a Javascript error caused by other plugin and it stops any further code execution, check your browser's logs to find the problem and deactivate the conflict plugin.
 * Your template doesn't have a wp_footer() function, this plugin requires this function to load JS code at the end of the website to improve speed.
 * You're using a plugin that removes Wordpress' jQuery version and inserts an old one.
+
+= I'm using custom permalinks, How can I change the links? =
+
+Currently there's no function in WP API for getting link for date archives when using custom permalinks. So, you'll need to modify/hack the source code to support your custom link structure, you can do this by changing the lines where I call **get_month_link** and **get_year_link**.
 
 = How I can send you a translation? =
 
@@ -66,19 +74,20 @@ just play with the widget's classes: .jaw_symbol, .jaw_years, .jaw_months.
 Yes, only write *[jQuery Archive List]* anywhere inside a post or page's contest and it will be replaced for
 the archive list when rendering the content. You can add the following parameters to change its behavior:
 
-1. **showcount** ( boolean ): Select if you want to show the count post inside that month/year.
-1. **showpost** ( boolean ): Show post's titles under months.
-1. **expand** ("none", "never", "expand"): Never expand by default, current year only and always expand.
-1. **month_format** ("short", "full", "number"): The format of the date.
+1. **showcount** ( boolean ): select if you want to show the count post inside that month/year.
+1. **showpost** ( boolean ): show post's titles under months.
+1. **expand** ("none", "never", "expand"): never expand by default, current year only and always expand.
+1. **month_format** ("short", "full", "number"): the format of the date.
 1. **ex_sym**: the expansion symbol.
 1. **con_sym**: the collapse symbol.
 1. **only_sym_link**: only expand/collapse when clicking the bullet.
 1. **fx_in** ("", "slideDown", "fadeIn"): the jQuery effect to implement.
 1. **exclude**: IDs (comma separated) of the categories to exclude.
+1. **type**: ID of the type of the posts to show, this is if you're using custom type posts. By default will show posts.
 
 So for example:
 
-*[jQuery Archive List month_format=number showpost=1 showcount=1 ex_sym=+ con_sym=- fx_in=fadeIn]*
+*[jQuery Archive List month_format=number showpost=1 showcount=1 ex_sym=+ con_sym=- fx_in=fadeIn type=page]*
 
 Will show a widget with months as numbers, show posts under months and their count, the simbols are + and - and the effect is fadeIn. You can check source code for more information.
 
@@ -98,9 +107,28 @@ Since 2.0 it's possible. Each instance has its own configuration. Shortcode widg
 == Screenshots ==
 
 1. Here you can see a list of the archives, archives for each month are hidden under years.
-2.  Here you can see a list of archives and its month archives expanded.
+2. Here you can see a list of archives and its month archives expanded.
 
 == Change Log ==
+
+= 3.0.2 =
+* Solved missing months bug.
+
+= 3.0.1 =
+* Solved month linking bug.
+* Checkbox are easier to click at widget's configuration, now each text is a label.
+
+= 3.0 =
+* Complete rewrite of the javascript code, it has less size, easier to understand and should work faster.
+* Added support for custom posts, now you can create archive widgets for your custom posts.
+* Added **active** CSS class to indicate when a link points to current URL.
+* Added **title** attribute to links to generate valid HTML5 code.
+* Added Dutch translation (thanks to Patrick Schreibing).
+* Migrated category selection to Wordpress checkbox tool.
+* Solved bugs when excluding categories.
+* Solved bug of missing **expanded** class on months (thanks to pjarts).
+* Solved not expanding months bug when selecting some options.
+
 
 = 2.2 =
 * Added support for HTTPS, now the plugin generates the correct link if HTTPS is being used, thanks to **bridgetwes** for the patch.
@@ -116,8 +144,8 @@ Since 2.0 it's possible. Each instance has its own configuration. Shortcode widg
 * Huge update thanks to donations! If you upgrade to this version you'll NEED to configurate the widget AGAIN, due to architecture rewriting configuration may get lost.
 * Added support for multiples instances, finally you can have as many widgets as you want without any hack :)
 * Added support for dynamic widgets.s
-* Added an option to not have any effect when expanding or collapsing. 
-* Added an option to activate the expand/collapse only when clicking the bullet. 
+* Added an option to not have any effect when expanding or collapsing.
+* Added an option to activate the expand/collapse only when clicking the bullet.
 * Removed dynamic generation of the JS file, now you don't need write permissions on the folder.
 * Rewroted JS code, now it is a single JS file for all instances, improved perfomance and compatible with all cache plugins.
 * Updated translation files for Spanish, Czech, Slovak and Italian.
@@ -175,5 +203,5 @@ Since 2.0 it's possible. Each instance has its own configuration. Shortcode widg
 * Almost all code were rewritten for better maintainer and easy way to add new features.
 * Improved code to be more Wordpress compatible.
 
-= 0.1.3 ==
+= 0.1.3 =
 * Initial public version.

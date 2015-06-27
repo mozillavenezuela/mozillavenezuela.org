@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the Twenty Thirteen package.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2014-12-10 13:18:16+0000\n"
+"PO-Revision-Date: 2015-04-25 17:18:29+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -10,13 +10,21 @@ msgstr ""
 "X-Generator: GlotPress/1.0-alpha-1000\n"
 "Project-Id-Version: Twenty Thirteen\n"
 
+#. Author URI of the plugin/theme
+msgid "https://wordpress.org/"
+msgstr "https://wordpress.org/"
+
+#. Theme URI of the plugin/theme
+msgid "https://wordpress.org/themes/twentythirteen/"
+msgstr "https://wordpress.org/themes/twentythirteen/"
+
 #. translators: %s: Name of current post
 #: content-aside.php:16 content-audio.php:27 content-chat.php:26
 #: content-gallery.php:27 content-image.php:26 content-link.php:27
 #: content-quote.php:16 content-status.php:16 content-video.php:26
 #: content.php:44 functions.php:478
 msgid "Continue reading %s <span class=\"meta-nav\">&rarr;</span>"
-msgstr "Seguir leyendo %s <span class=\"meta-nav\">&rarr;</span>"
+msgstr "Sigue leyendo %s <span class=\"meta-nav\">&rarr;</span>"
 
 #: 404.php:16
 msgid "Not Found"
@@ -29,10 +37,6 @@ msgstr "El tema 2013 para WordPress se remonta al clásico esquema de blog, dest
 #: functions.php:233
 msgid "Appears in the footer section of the site."
 msgstr "Aparece en la sección de pie de página del sitio."
-
-#. Theme URI of the plugin/theme
-msgid "http://wordpress.org/themes/twentythirteen"
-msgstr "http://wordpress.org/themes/twentythirteen"
 
 #: image.php:39
 msgid "Full resolution"
@@ -243,17 +247,16 @@ msgstr "%1$s en %2$s"
 msgid "<span class=\"attachment-meta\">Published on <time class=\"entry-date\" datetime=\"%1$s\">%2$s</time> in <a href=\"%3$s\" title=\"Return to %4$s\" rel=\"gallery\">%5$s</a></span>"
 msgstr "<span class=\"attachment-meta\">Publicado el <time class=\"entry-date\" datetime=\"%1$s\">%2$s</time> en <a href=\"%3$s\" title=\"Volver a %4$s\" rel=\"gallery\">%5$s</a></span>"
 
-#. Translators: If there are characters in your language that are not
-#. * supported by Source Sans Pro, translate this to 'off'. Do not translate
-#. * into your own language.
+#. Translators: If there are characters in your language that are not supported
+#. by Source Sans Pro, translate this to 'off'. Do not translate into your own
+#. language.
 #: functions.php:128
 msgctxt "Source Sans Pro font: on or off"
 msgid "on"
 msgstr "activa"
 
-#. Translators: If there are characters in your language that are not
-#. * supported by Bitter, translate this to 'off'. Do not translate into your
-#. * own language.
+#. Translators: If there are characters in your language that are not supported
+#. by Bitter, translate this to 'off'. Do not translate into your own language.
 #: functions.php:134
 msgctxt "Bitter font: on or off"
 msgid "on"
@@ -307,8 +310,6 @@ msgstr "Los comentarios están cerrados."
 msgid "Ready to publish your first post? <a href=\"%1$s\">Get started here</a>."
 msgstr "¿Preparado para publicar tu primera entrada? <a href=\"%1$s\">Empieza aquí</a>."
 
-#. #-#-#-#-#  twentythirteen.pot (Twenty Thirteen 1.4)  #-#-#-#-#
-#. Author URI of the plugin/theme
 #: footer.php:19
 msgid "http://wordpress.org/"
 msgstr "http://es.wordpress.org/"

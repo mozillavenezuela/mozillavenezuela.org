@@ -1,10 +1,10 @@
 === WP jQuery Lightbox ===
 Contributors: ulfben
-Donate link: http://amzn.com/w/2QB6SQ5XX2U0N
+Donate link: http://flattr.com/thing/367557/Support-my-WordPress-plugins
 Tags: lightbox, jquery, nodal, image, display, ulfben
-Requires at least: 3.5.1
-Tested up to: 3.5.1
-Stable tag: 1.4.5
+Requires at least: 3.9
+Tested up to: 4.1.1
+Stable tag: 1.4.6
 License: GPLv2 or later
 
 A drop-in replacement for Lightbox 2 and similar plugins, shedding the bulk of Prototype and Scriptaculous. Improved for mobile devices.
@@ -20,15 +20,31 @@ This version is also [adjusted for mobile devices](http://wordpress.org/extend/p
 * Swipe gestures for flicking between images on touch devices
 * Improved scaling *maximizes* use of screen space
 * Live adjustment to the browser window and orientation of your phone
-* Optional download link to display images in native app.
 
 See the plugin in action here: [http://game.hgo.se/blog/motion-capture/](http://game.hgo.se/blog/motion-capture/)
 
 You can browse images with your keyboard: Arrows, P(revious)/N(ext) and X/C/ESC for close.
 
-If you value [my plugins](http://profiles.wordpress.org/users/ulfben/), please help me out by [Flattr-ing them](http://flattr.com/thing/367557/Support-my-WordPress-plugins)! Or perhaps [send me a book](http://www.amazon.com/gp/registry/wishlist/2QB6SQ5XX2U0N/105-3209188-5640446?reveal=unpurchased&filter=all&sort=priority&layout=standard&x=11&y=10)? Used ones are fine! :)
+If you value [my plugins](http://profiles.wordpress.org/users/ulfben/), there's several ways you can help me out; 
 
-*[//Ulf Benjaminsson](http://profiles.wordpress.org/users/ulfben/)*
+* Help me out by [Flattr-ing them](http://flattr.com/thing/367557/Support-my-WordPress-plugins)
+* or [sign up to Microsoft OneDrive using my referral link](https://onedrive.live.com?invref=b1f728851abada15&invsrc=90) - we both get 0.5GB extra for free!
+* or [sign up to RealPlayer Cloud using my referral link](https://cloud.real.com/r/UzKHSP) - we both get 1GB extra for free! 
+* get me anything from [my Amazon whislisth](http://www.amazon.com/gp/registry/wishlist/2QB6SQ5XX2U0N/105-3209188-5640446?reveal=unpurchased&filter=all&sort=priority&layout=standard&x=11&y=10) (used items are OK!)
+
+Any help is greatly appreciated. Thanks!
+
+*[//Ulf Benjaminsson](http://www.ulfben.com)*
+
+= 1.4.6 (2015-03-20) =
+* "Download link" now correctly open a download dialogue instead of displaying the file
+* Title, caption and all control elements can now be turned on / off individually
+* Added support for custom style sheets (just copy original to your theme's style folder, and hack away)
+* Restructured the HTML slightly, making styling easier
+* Added specific CSS selectors for all elements
+* Fixed animation speed setting being ignored
+* Dropped quirks support for Internet Explorer 8
+* Removed help-text setting 
 
 = 1.4.5 (2013-06-09) =
 * Fit to screen edge on low rez displays (<500px)
@@ -53,15 +69,6 @@ If you value [my plugins](http://profiles.wordpress.org/users/ulfben/), please h
 * Fix better support of Infinite Scroll and similar
 * Fix toggling visible state on unrelated object, embed and select nodes. [mwolfe02](http://wordpress.org/support/topic/lightbox-shows-hidden-selectembedobject-blocks?replies=1)
 * Fix leaky CSS on admin page
-
-= 1.3 (2011-05-01) =
-* Improved scaling to *maximize* display area.
-* Supports orientation / resize changes - Lightbox reflows with site. 
-* Added translation support (Thanks; [Martin S](http://sukimashita.com/) & Denis N. Voituk).
-* Added option to display download link.
-* Added support for disabling all animations (set duration to 0).
-* Fixed "duration" not having an effect.
-* [For Developers: public method to apply Lightbox to any string.](http://wordpress.org/extend/plugins/wp-jquery-lightbox/installation/)
 
 [Older changelogs moved here.](http://wordpress.org/extend/plugins/wp-jquery-lightbox/changelog/)
 
@@ -139,6 +146,16 @@ Lastly:
 Still have problems? Post a link and describe what issue you're having, and tell us what of these steps you've already tried.
 
 == Changelog ==
+= 1.4.6 (2015-03-20) =
+* "Download link" now correctly open a download dialogue instead of displaying the file
+* Title, caption and all control elements can now be turned on / off individually
+* Added support for custom style sheets (just copy original to your theme's style folder, and hack away)
+* Restructured the HTML slightly, making styling easier
+* Added specific CSS selectors for all elements
+* Fixed animation speed setting being ignored
+* Dropped quirks support for Internet Explorer 8
+* Removed help-text setting 
+
 = 1.4.5 (2013-06-09) =
 * Fit to screen edge on low rez displays (<500px)
 * Added global setting to hide title & caption
@@ -228,6 +245,9 @@ Still have problems? Post a link and describe what issue you're having, and tell
 * Release.
 
 == Upgrade Notice ==
+= 1.4.6 =
+Lots of bug fixes and performance improvements. New CSS styles!
+
 = 1.4.5 (2013-06-09) =
 Support latest jQuery. Better use of small screen estate, fixed buggy features (slideshow, swipes) and reduced system load. 
 

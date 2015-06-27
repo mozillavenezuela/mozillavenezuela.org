@@ -1,0 +1,141 @@
+# PLEASE TRY TO TRANSLATE THIS PLUGIN TO OTHER LANGUAGES, ANY HELP IS WELCOMED.
+# Copyright (C) 2013 jQuery Archive List Widget
+# This file is distributed under the same license as the jQuery Archive List Widget package.
+msgid ""
+msgstr ""
+"Project-Id-Version: jQuery Archive List Widget 2.0\n"
+"Report-Msgid-Bugs-To: http://wordpress.org/tag/jquery-archive-list-widget\n"
+"POT-Creation-Date: 2013-03-25 16:54:38+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2013-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Patrick Schreibing <techniek@younitymedia.nl>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+
+#: jquery-archive-list-widget.php:61
+msgid ""
+"A simple jQuery widget for displaying an \n"
+"                    archive list with some effects (inspired by \n"
+"                    Collapsible Archive Widget)"
+msgstr ""
+
+#: jquery-archive-list-widget.php:95
+msgid "Archives"
+msgstr "Archief"
+
+#: jquery-archive-list-widget.php:149
+msgid "Title"
+msgstr "Titel"
+
+#: jquery-archive-list-widget.php:153
+msgid "Trigger Symbol"
+msgstr "Trigger Symbool"
+
+#: jquery-archive-list-widget.php:157
+msgid "Empty Space"
+msgstr "Spatie"
+
+#: jquery-archive-list-widget.php:170
+msgid "Effect"
+msgstr "Effect"
+
+#: jquery-archive-list-widget.php:174 jquery-archive-list-widget.php:202
+msgid "None"
+msgstr "Geen"
+
+#: jquery-archive-list-widget.php:177
+msgid "Slide (Accordion)"
+msgstr "Slide (Accordion)"
+
+#: jquery-archive-list-widget.php:180
+msgid "Fade"
+msgstr "Fade"
+
+#: jquery-archive-list-widget.php:184
+msgid "Month Format"
+msgstr "Maand formaat"
+
+#: jquery-archive-list-widget.php:188
+msgid "Full Name (January)"
+msgstr "Volledige naam (Januari)"
+
+#: jquery-archive-list-widget.php:191
+msgid "Short Name (Jan)"
+msgstr "Korte naam (Jan)"
+
+#: jquery-archive-list-widget.php:194
+msgid "Number (01)"
+msgstr "Nummer (01)"
+
+#: jquery-archive-list-widget.php:198
+msgid "Expand"
+msgstr "Uitklappen"
+
+#: jquery-archive-list-widget.php:234
+msgid "Post type"
+msgstr "Post type"
+
+#: jquery-archive-list-widget.php:205
+msgid "All"
+msgstr "Alles"
+
+#: jquery-archive-list-widget.php:208
+msgid "Current or post date"
+msgstr "Huidige of post datum"
+
+#: jquery-archive-list-widget.php:208
+msgid "Only post date"
+msgstr "Alleen post datum"
+
+#: jquery-archive-list-widget.php:208
+msgid "Only current date"
+msgstr "Alleen huidige datum"
+
+#: jquery-archive-list-widget.php:212
+msgid "Extra options"
+msgstr "Extra optie"
+
+#: jquery-archive-list-widget.php:215
+msgid "Show number of posts"
+msgstr "Toon aantal posts"
+
+#: jquery-archive-list-widget.php:233
+msgid "Show only post from selected category in a category page"
+msgstr "Toon alleen posts van geselecteerde categorieën"
+
+#: jquery-archive-list-widget.php:219
+msgid "Show posts under months"
+msgstr "Toon posts onder de maand"
+
+#: jquery-archive-list-widget.php:223
+msgid "Only expand/reduce by clicking the symbol"
+msgstr "Alleen uitklappen bij een klik op het symbool"
+
+#: jquery-archive-list-widget.php:225
+msgid "Exclude categories"
+msgstr "Categorieën uitsluiten"
+
+#: jquery-archive-list-widget.php:351
+msgid "There are no post to show."
+msgstr "Er zijn geen posts om te tonen"
+
+#. Plugin Name of the plugin/theme
+msgid "jQuery Archive List Widget"
+msgstr ""
+
+#. Plugin URI of the plugin/theme
+msgid "http://skatox.com/blog/jquery-archive-list-widget/"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid "A simple jQuery widget for displaying an archive list with some effects"
+msgstr "Een eenvoudige jQuery Widget om een archief te tonen met enkele effecten"
+
+#. Author of the plugin/theme
+msgid "Miguel Useche"
+msgstr "Patrick Schreibing"
+
+#. Author URI of the plugin/theme
+msgid "http://migueluseche.com/"
+msgstr "http://www.younitymedia.nl"

@@ -3,7 +3,7 @@
 Plugin Name: wp-jquery-lightbox
 Plugin URI: http://wordpress.org/extend/plugins/wp-jquery-lightbox/
 Description: A drop in replacement for LightBox-2 and similar plugins. Uses jQuery to save you from the JS-library mess in your header. :)
-Version: 1.4.5
+Version: 1.4.6
 Author: Ulf Benjaminsson
 Author URI: http://www.ulfben.com
 License: GPLv2 or later
@@ -19,10 +19,9 @@ function jqlb_init() {
 	//JQLB_URL = plugin_dir_url(__FILE__);
 	//JQLB_STYLES_URL = plugin_dir_url(__FILE__).'styles/'
 	//JQLB_LANGUAGES_DIR = plugin_dir_path(__FILE__) . 'languages/'
-	define('JQLB_SCRIPT', 'jquery.lightbox.min.js');
+	define('JQLB_SCRIPT', 'jquery.lightbox.min.js'); 
 	define('JQLB_TOUCH_SCRIPT', 'jquery.touchwipe.min.js');
 	load_plugin_textdomain('jqlb', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/');	
-	//load_plugin_textdomain('jqlb', false, plugin_dir_path(__FILE__).'languages/');
 	add_action('admin_init', 'jqlb_register_settings');
 	add_action('admin_menu', 'jqlb_register_menu_item');
 	add_action('wp_print_styles', 'jqlb_css');	
@@ -49,27 +48,30 @@ function jqlb_add_admin_footer(){ //shows some plugin info in the footer of the 
 	printf('%1$s by %2$s (who <a href="'.ULFBEN_DONATE_URL.'">appreciates books</a>) :)<br />', $plugin_data['Title'].' '.$plugin_data['Version'], $plugin_data['Author']);		
 }	
 function jqlb_register_settings(){
-	register_setting( 'jqlb-settings-group', 'jqlb_automate', 'jqlb_bool_intval'); 
-	register_setting( 'jqlb-settings-group', 'jqlb_showinfo', 'jqlb_bool_intval');
+	register_setting( 'jqlb-settings-group', 'jqlb_automate', 'jqlb_bool_intval');
+	register_setting( 'jqlb-settings-group', 'jqlb_showTitle', 'jqlb_bool_intval');	
+	register_setting( 'jqlb-settings-group', 'jqlb_showCaption', 'jqlb_bool_intval');
+	register_setting( 'jqlb-settings-group', 'jqlb_showNumbers', 'jqlb_bool_intval');
 	register_setting( 'jqlb-settings-group', 'jqlb_comments', 'jqlb_bool_intval'); 
 	register_setting( 'jqlb-settings-group', 'jqlb_resize_on_demand', 'jqlb_bool_intval');
-	register_setting( 'jqlb-settings-group', 'jqlb_show_download', 'jqlb_bool_intval');
+	register_setting( 'jqlb-settings-group', 'jqlb_showDownload', 'jqlb_bool_intval');
 	register_setting( 'jqlb-settings-group', 'jqlb_navbarOnTop', 'jqlb_bool_intval');
 	register_setting( 'jqlb-settings-group', 'jqlb_margin_size', 'floatval');
 	register_setting( 'jqlb-settings-group', 'jqlb_resize_speed', 'jqlb_pos_intval');
-	register_setting( 'jqlb-settings-group', 'jqlb_slideshow_speed', 'jqlb_pos_intval');	
-	register_setting( 'jqlb-settings-group', 'jqlb_help_text');
-	register_setting( 'jqlb-settings-group', 'jqlb_link_target');	
-	add_option('jqlb_help_text', '');
-	add_option('jqlb_showinfo', 1);
+	register_setting( 'jqlb-settings-group', 'jqlb_slideshow_speed', 'jqlb_pos_intval');		
+	register_setting( 'jqlb-settings-group', 'jqlb_use_theme_styles', 'jqlb_bool_intval');			
+	add_option('jqlb_showTitle', 1);
+	add_option('jqlb_showCaption', 1);
+	add_option('jqlb_showNumbers', 1);
 	add_option('jqlb_link_target', '_self');
 	add_option('jqlb_automate', 1); //default is to auto-lightbox.
 	add_option('jqlb_comments', 1);
 	add_option('jqlb_resize_on_demand', 0); 
-	add_option('jqlb_show_download', 0); 
+	add_option('jqlb_showDownload', 0); 
 	add_option('jqlb_navbarOnTop', 0);
 	add_option('jqlb_resize_speed', 400); 
 	add_option('jqlb_slideshow_speed', 4000); 	
+	add_option('jqlb_use_theme_styles', 0); 
 }
 function jqlb_register_menu_item() {		
 	add_options_page('jQuery Lightbox Options', 'jQuery Lightbox', 'manage_options', 'jquery-lightbox-options', 'jqlb_options_panel');
@@ -88,31 +90,42 @@ function jqlb_css(){
 	if(is_admin() || is_feed()){return;}
 	$locale = jqlb_get_locale();
 	$fileName = "lightbox.min.{$locale}.css";	
-	//$fileName = "lightbox.css";	
-	$path = plugin_dir_path(__FILE__)."styles/{$fileName}";
-	if(!is_readable($path)){
-		$fileName = 'lightbox.min.css';
-	}
-	wp_enqueue_style('jquery.lightbox.min.css', plugin_dir_url(__FILE__).'styles/'.$fileName, false, '1.4');	
+	$fileName = "lightbox.min.css";
+	$haveThemeCss = false;
+	if(get_option('jqlb_use_theme_styles') == 1){ // courtesy of Vincent Weber
+		$pathTheme = get_stylesheet_directory() ."/{$fileName}"; //look for CSS in theme's style folder first	
+		if(false === ($haveThemeCss = is_readable($pathTheme))) {
+			$fileName = 'lightbox.min.css';
+			$pathTheme = get_stylesheet_directory() ."/{$fileName}";	
+			$haveThemeCss = is_readable($pathTheme);			
+		} 		
+	} 
+	if($haveThemeCss == false){	
+		$path = plugin_dir_path(__FILE__)."styles/{$fileName}";		
+		if(!is_readable($path)) {
+			$fileName = 'lightbox.min.css';
+		}
+	}	
+	$uri = ( $haveThemeCss ) ? get_template_directory_uri().'/'.$fileName : plugin_dir_url(__FILE__).'styles/'.$fileName;	
+	wp_enqueue_style('jquery.lightbox.min.css', $uri, false, '1.4.6');	
 }
 
 function jqlb_js() {			   	
 	if(is_admin() || is_feed()){return;}
 	wp_enqueue_script('jquery', '', array(), false, true);
-	wp_enqueue_script('wp-jquery-lightbox-swipe', plugins_url(JQLB_TOUCH_SCRIPT, __FILE__),  Array('jquery'), '1.4', true);	
-	wp_enqueue_script('wp-jquery-lightbox', plugins_url(JQLB_SCRIPT, __FILE__),  Array('jquery'), '1.4', true);
+	wp_enqueue_script('wp-jquery-lightbox-swipe', plugins_url(JQLB_TOUCH_SCRIPT, __FILE__),  Array('jquery'), '1.4.6', true);	
+	wp_enqueue_script('wp-jquery-lightbox', plugins_url(JQLB_SCRIPT, __FILE__),  Array('jquery'), '1.4.6', true);
 	wp_localize_script('wp-jquery-lightbox', 'JQLBSettings', array(
-		'showInfo'	=> get_option('jqlb_showinfo'),
+		'showTitle'	=> get_option('jqlb_showTitle'),
+		'showCaption'	=> get_option('jqlb_showCaption'),
+		'showNumbers' => get_option('jqlb_showNumbers'),
 		'fitToScreen' => get_option('jqlb_resize_on_demand'),
 		'resizeSpeed' => get_option('jqlb_resize_speed'),
-		'displayDownloadLink' => get_option('jqlb_show_download'),
-		'navbarOnTop' => get_option('jqlb_navbarOnTop'),		
-		'resizeCenter' => get_option('jqlb_resizeCenter'),
-		'marginSize' => get_option('jqlb_margin_size'),
-		'linkTarget' => get_option('jqlb_link_target'),
+		'showDownload' => get_option('jqlb_showDownload'),
+		'navbarOnTop' => get_option('jqlb_navbarOnTop'),				
+		'marginSize' => get_option('jqlb_margin_size'),		
 		'slideshowSpeed' => get_option('jqlb_slideshow_speed'),
-		/* translation */
-		'help' => __(get_option('jqlb_help_text'), 'jqlb'),
+		/* translation */		
 		'prevLinkTitle' => __('previous image', 'jqlb'),
 		'nextLinkTitle' => __('next image', 'jqlb'),		
 		'closeTitle' => __('close image gallery', 'jqlb'),
@@ -209,31 +222,32 @@ function jqlb_options_panel(){
 				</td>
 			</tr>
 			<tr>
-			<td>
-					<?php $check = get_option('jqlb_showinfo') ? ' checked="yes" ' : ''; ?>
-					<input type="checkbox" id="jqlb_showinfo" name="jqlb_showinfo" value="1" <?php echo $check; ?> />
-					<label for="jqlb_showinfo"> <?php _e('Show title & caption', 'jqlb') ?> </label>
+				<td>
+					<?php $check = get_option('jqlb_showTitle') ? ' checked="yes" ' : ''; ?>
+					<input type="checkbox" id="jqlb_showTitle" name="jqlb_showTitle" value="1" <?php echo $check; ?> />
+					<label for="jqlb_showTitle"> <?php _e('Show title', 'jqlb') ?> </label>
 				</td>
 			</tr>
-			<tr valign="baseline" colspan="2">				
+			<tr>
 				<td>
-					<?php $check = get_option('jqlb_show_download') ? ' checked="yes" ' : ''; ?>
-					<input type="checkbox" id="jqlb_show_download" name="jqlb_show_download" value="1" <?php echo $check; ?> />
-					<label for="jqlb_show_download"> <?php _e('Show download link', 'jqlb') ?> </label>
+					<?php $check = get_option('jqlb_showCaption') ? ' checked="yes" ' : ''; ?>
+					<input type="checkbox" id="jqlb_showCaption" name="jqlb_showCaption" value="1" <?php echo $check; ?> />
+					<label for="jqlb_showCaption"> <?php _e('Show caption', 'jqlb') ?> </label>
 				</td>
+			</tr>
+			<tr valign="baseline">				
 				<td>
-				<?php $target = get_option('jqlb_link_target'); ?>
-				<label for="jqlb_link_target" title="<?php _e('_blank: open the image in a new window or tab
-_self: open the image in the same frame as it was clicked (default)
-_parent: open the image in the parent frameset
-_top: open the image in the full body of the window', 'jqlb') ?>"><?php _e('Target for download link:', 'jqlb'); ?></label> 
-				<select id="jqlb_link_target" name="jqlb_link_target">
-					<option <?php if ('_blank' == $target)echo 'selected="selected"'; ?>>_blank</option>
-					<option <?php if ('_self' == $target)echo 'selected="selected"'; ?>>_self</option>
-					<option <?php if ('_top' == $target)echo 'selected="selected"'; ?>>_top</option>
-					<option <?php if ('_parent' == $target)echo 'selected="selected"'; ?>>_parent</option>
-				</select>							
-				</td>
+					<?php $check = get_option('jqlb_showNumbers') ? ' checked="yes" ' : ''; ?>
+					<input type="checkbox" id="jqlb_showNumbers" name="jqlb_showNumbers" value="1" <?php echo $check; ?> />
+					<label for="jqlb_showNumbers"> <?php _e('Show image numbers:', 'jqlb');  printf(' <code>"%s # %s #"</code>', __('Image ', 'jqlb'), __(' of ', 'jqlb')); ?> </label>
+				</td>				
+			</tr>			
+			<tr valign="baseline">				
+				<td>
+					<?php $check = get_option('jqlb_showDownload') ? ' checked="yes" ' : ''; ?>
+					<input type="checkbox" id="jqlb_showDownload" name="jqlb_showDownload" value="1" <?php echo $check; ?> />
+					<label for="jqlb_showDownload"> <?php _e('Show download link', 'jqlb') ?> </label>
+				</td>				
 			</tr>
       <tr valign="baseline" colspan="2">
         <td colspan="2"> 
@@ -256,7 +270,14 @@ _top: open the image in the full body of the window', 'jqlb') ?>"><?php _e('Targ
 				<label for="jqlb_margin_size" title="<?php _e('Keep a distance between the image and the screen edges.', 'jqlb') ?>"><?php _e('Minimum margin to screen edge (default: 0)', 'jqlb') ?></label>			
 			</td>
 			<?php ENDIF; ?>
-		</tr>					
+		</tr>
+		<tr valign="baseline" colspan="2">			
+			<td>
+				<?php $check = get_option('jqlb_use_theme_styles') ? ' checked="yes" ' : ''; ?>
+				<input type="checkbox" id="jqlb_use_theme_styles" name="jqlb_use_theme_styles" value="1" <?php echo $check; ?> />	
+				<label for="jqlb_use_theme_styles" title="You must put lightbox.min.css or lightbox.min.[locale].css in your theme's style-folder. This is good to keep your CSS edits when updating the plugin."><?php _e('Use custom stylesheet', 'jqlb'); ?></label>						
+			</td>			
+		</tr>						
 		<tr valign="baseline" colspan="2">
 			<td colspan="2">					
 				<input type="text" id="jqlb_resize_speed" name="jqlb_resize_speed" value="<?php echo intval(get_option('jqlb_resize_speed')) ?>" size="3" />
@@ -268,15 +289,8 @@ _top: open the image in the full body of the window', 'jqlb') ?>"><?php _e('Targ
 				<input type="text" id="jqlb_slideshow_speed" name="jqlb_slideshow_speed" value="<?php echo intval(get_option('jqlb_slideshow_speed')) ?>" size="3" />
 				<label for="jqlb_slideshow_speed"><?php _e('Slideshow speed (in milliseconds). 0 to disable.', 'jqlb') ?></label>			
 			</td>
-		</tr>
-		<tr valign="baseline" colspan="2">			
-			<td>
-				<input type="text" id="jqlb_help_text" name="jqlb_help_text" value="<?php echo get_option('jqlb_help_text'); ?>" size="30" />		
-				<label for="jqlb_help_text"><?php _e('Help text (default: none) ', 'jqlb'); ?></label>						
-			</td>			
-		</tr>			
-		 </table>
-		<p style="font-size:xx-small;font-style:italic;"><?php _e('Browse images with your keyboard: Arrows or P(revious)/N(ext) and X/C/ESC for close.', 'jqlb'); ?></p>
+		</tr>		
+		 </table>		
 		<p class="submit">
 		  <input type="submit" name="Submit" value="<?php _e('Save Changes', 'jqlb') ?>" />
 		</p>

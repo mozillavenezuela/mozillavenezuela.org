@@ -71,6 +71,10 @@ msgstr "Number (01)"
 msgid "Expand"
 msgstr "Rozšířit"
 
+#: jquery-archive-list-widget.php:234
+msgid "Post type"
+msgstr "Typ Post"
+
 #: jquery-archive-list-widget.php:205
 msgid "All"
 msgstr "Vše"

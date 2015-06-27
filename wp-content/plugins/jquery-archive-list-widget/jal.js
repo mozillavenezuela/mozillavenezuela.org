@@ -1,42 +1,47 @@
-function jquery_archive_list_animate(clickedObj, options) 
+/*global jQuery:false */
+"use strict";
+
+function jqueryArchiveListAnimate(clickedObj, listElements, options) 
 {
-    var changeSymbol = function (){
-        jQuery(clickedObj).children('.jaw_symbol').html(options['ex_sym'])
+    var changeSymbol = function () {
+        var symbol = jQuery(this).is(":hidden") ? options.expSym : options.conSym;        
+        jQuery(clickedObj).children(".jaw_symbol").html(symbol);
+    };
+
+    switch ( options.fxIn )
+    {
+        case "fadeIn":
+            listElements.fadeToggle("", changeSymbol);
+            break;
+        case "slideDown":
+            listElements.slideToggle("", changeSymbol);
+            break;
+        default:
+            listElements.toggle(0, changeSymbol);
+            break;
     }
 
-    if (jQuery(clickedObj).siblings('ul').children('li').is(':hidden')) {
-        jQuery(clickedObj).children('.jaw_symbol').html(options['con_sym'])
-
-        if(options['fx_in'] === 'fadeIn')
-            jQuery(clickedObj).siblings('ul').children('li').fadeIn()
-        else if (options['fx_in'] === 'slideDown')
-            jQuery(clickedObj).siblings('ul').children('li').slideDown()
-        else
-            jQuery(clickedObj).siblings('ul').children('li').show()
-    } else {
-        if(options['fx_in'] === 'fadeIn')
-            jQuery(clickedObj).siblings('ul').children('li').fadeOut('', changeSymbol)
-        else if (options['fx_in'] === 'slideDown')
-            jQuery(clickedObj).siblings('ul').children('li').slideUp('', changeSymbol)
-        else
-            jQuery(clickedObj).siblings('ul').children('li').hide(0, changeSymbol)
-            
-    }
-    jQuery(clickedObj).parent().toggleClass('expanded')
+    jQuery(clickedObj).parent().toggleClass("expanded");
 }
 
 jQuery(function() 
 {
-    jQuery('.jaw_widget').each(function(index){
+    jQuery(".jaw_widget").each(function(){
         var options = {
-            fx_in: jQuery(this).siblings('.fx_in').val(),
-            ex_sym: jQuery(this).siblings('.ex_sym').val(),
-            con_sym: jQuery(this).siblings('.con_sym').val()
-        }
+            fxIn: jQuery(this).siblings(".fx_in").val(),
+            expSym: jQuery(this).siblings(".ex_sym").val(),
+            conSym: jQuery(this).siblings(".con_sym").val(),
+        };
 
-        jQuery(this).on('click', 'li.jaw_years a.jaw_years, li.jaw_months a.jaw_months', function(e){
-             if (jQuery(this).siblings('ul').children('li').length) e.preventDefault()
-             jquery_archive_list_animate(this, options)
-        })
-    })
+        jQuery(this).on("click", "li.jaw_years a.jaw_years, li.jaw_months a.jaw_months", function(e)
+        {
+            var elements = jQuery(this).siblings("ul").children("li");
+
+            if (elements.length)
+            {
+                e.preventDefault(); 
+                jqueryArchiveListAnimate(this, elements, options);
+            } 
+        });
+    });
 });
