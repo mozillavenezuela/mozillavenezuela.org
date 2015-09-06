@@ -1,0 +1,474 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: One Mozilla 1.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-08-17 03:01-0800\n"
+"PO-Revision-Date: 2013-04-01 11:31+0100\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-KeywordsList: __;gettext;gettext_noop;_e\n"
+"X-Poedit-Basepath: .\n"
+"X-Generator: Poedit 1.5.5\n"
+"X-Poedit-SearchPath-0: ..\n"
+
+#: ../404.php:7
+msgid "Well, this is embarrassing…"
+msgstr "No, to je hecno ..."
+
+#: ../404.php:10
+msgid ""
+"We hate to say it, but we couldn’t find the page or file you’re looking for."
+msgstr ""
+"Težko to rečemo, vendar nismo mogli najti strani ali datoteko, ki jo iščete."
+
+#: ../404.php:11
+msgid "If you typed in the address, try double-checking the spelling."
+msgstr ""
+
+#: ../404.php:12
+msgid ""
+"If you followed a link from somewhere, please let us know at <em>webmaster "
+"at mozilla dot com</em>. Be sure to tell us where you came from and what you "
+"were looking for, and we’ll do our best to fix it."
+msgstr ""
+
+#: ../archive.php:14
+#, php-format
+msgid "Archive for %s"
+msgstr "Arhiv za %s"
+
+#: ../archive.php:15
+#, php-format
+msgid "Posts tagged with “%s”"
+msgstr ""
+
+#: ../archive.php:16 ../archive.php:17 ../archive.php:18 ../header.php:46
+#: ../header.php:47 ../header.php:48
+#, php-format
+msgid "Posts from %s"
+msgstr ""
+
+#: ../archive.php:19
+#, php-format
+msgid "Posts by %s"
+msgstr "Objave od %s"
+
+#: ../archive.php:21
+msgid "Archives"
+msgstr "Arhivi"
+
+#: ../archive.php:28 ../archive.php:44 ../index.php:43 ../search.php:18
+#: ../search.php:34
+msgid "Older posts"
+msgstr "Starejše objave"
+
+#: ../archive.php:29 ../archive.php:45 ../index.php:44 ../search.php:19
+#: ../search.php:35
+msgid "Newer posts"
+msgstr "Novejše objave"
+
+#: ../archive.php:54 ../index.php:53 ../search.php:42
+msgid "Nothing Found"
+msgstr "Nič ni najdeno"
+
+#: ../archive.php:58
+msgid ""
+"Apologies, but no results were found for the requested archive. Perhaps "
+"searching will help find a related post."
+msgstr ""
+
+#: ../comments.php:14
+msgid ""
+"This post is password protected. Enter the password to view any comments."
+msgstr ""
+"Ta objava je zaščitena z geslom. Vnesite geslo za ogled vseh komentarjev."
+
+#: ../comments.php:26 ../content-summary.php:21 ../content.php:22
+msgid "No responses yet"
+msgstr "Ni nobenega odgovora"
+
+#: ../comments.php:27
+msgid "Post a comment"
+msgstr "Objavite komentar"
+
+#: ../comments.php:36
+msgid "More comments:"
+msgstr "Več komentarjev"
+
+#: ../comments.php:46
+#, php-format
+msgid "You must be <a href=\"%s\">logged in</a> to post a comment."
+msgstr "Za objavo komentarja morate biti <a href=\"%s\">prijavljeni</a>."
+
+#: ../comments.php:51
+msgid "Post Your Comment"
+msgstr "Objavite svoj komentar"
+
+#: ../comments.php:51
+#, php-format
+msgid "Reply to %s"
+msgstr "Odgovori %s"
+
+#: ../comments.php:55
+#, php-format
+msgid ""
+"You are logged in as <a href=\"%1$s\">%2$s</a>. <a class=\"logout\" href="
+"\"%3$s\">Log out?</a>"
+msgstr ""
+"Ste prijavljeni kot <a href=\"%1$s\">%2$s</a>. <a class=\"logout\" href="
+"\"%3$s\">Odjava?</a>"
+
+#: ../comments.php:58
+msgid "Name"
+msgstr "Ime"
+
+#: ../comments.php:58
+msgid "(required)"
+msgstr "(obvezno)"
+
+#: ../comments.php:62
+msgid "E-mail"
+msgstr "E-Mail"
+
+#: ../comments.php:62
+msgid "(required, will not be published)"
+msgstr "(obvezno, ne bo objavljeno)"
+
+#: ../comments.php:66
+msgid "Website"
+msgstr "Spletna stran"
+
+#: ../comments.php:70
+msgid "Your comment"
+msgstr "Vaš komentar"
+
+#: ../comments.php:71
+msgid "Submit Comment"
+msgstr "Pošlji komentar"
+
+#: ../comments.php:83
+msgid ""
+"You must provide a name and e-mail (your e-mail address won’t be published)."
+msgstr ""
+
+#: ../comments.php:84
+msgid "You must provide a name."
+msgstr ""
+
+#: ../comments.php:85
+msgid "You must provide an e-mail address (it won’t be published)."
+msgstr ""
+
+#: ../comments.php:86
+msgid ""
+"The e-mail address you entered doesn’t look like a complete e-mail address. "
+"It should look like “yourname@example.com”."
+msgstr ""
+
+#: ../comments.php:87
+msgid "You must enter a comment."
+msgstr "Vnesti morate komentar."
+
+#: ../content-page.php:7
+msgid "Edit Page"
+msgstr "Uredi stran"
+
+#: ../content-page.php:9 ../content-single.php:20 ../content.php:30
+#: ../image.php:41
+msgid "Pages:"
+msgstr "Strani:"
+
+#: ../content-single.php:8 ../content-single.php:10 ../content-summary.php:8
+#: ../content-summary.php:10 ../content.php:9 ../content.php:11
+#, php-format
+msgid "See all posts from %s"
+msgstr ""
+
+#: ../content-single.php:17 ../content.php:33
+msgid "Edit Post"
+msgstr "Uredi objavo"
+
+#: ../content-single.php:26 ../content-summary.php:33 ../content.php:38
+msgid "Tags"
+msgstr "Oznake"
+
+#: ../content-single.php:28 ../content-summary.php:35 ../content.php:40
+msgid "Categories"
+msgstr "Kategorije"
+
+#: ../content.php:29
+msgid "Continue reading &hellip;"
+msgstr ""
+
+#: ../footer.php:8
+msgid "Return to top"
+msgstr "Nazaj na vrh"
+
+#: ../footer.php:13
+#, php-format
+msgid ""
+"Except where otherwise <a href=\"%1s\" rel=\"external\">noted</a>, content "
+"on this site is licensed under the <a href=\"%2s\" rel=\"external license"
+"\">Creative Commons Attribution Share-Alike License v3.0</a> or any later "
+"version."
+msgstr ""
+"Razen če ni drugače <a href=\"%1s\" rel=\"external\">določeno</a>, je "
+"vsebina na tej strani je pod licenco <a href=\"%2s\" rel=\"external license"
+"\">Creative Commons Attribution Share-Alike License V3.0</a> ali katera "
+"novejša verzija."
+
+#: ../footer.php:18
+msgid "Contact Us"
+msgstr "Kontaktirajte nas"
+
+#: ../footer.php:19
+msgid "Privacy Policy"
+msgstr "Pravilnik o zasebnosti"
+
+#: ../footer.php:20
+msgid "Legal Notices"
+msgstr "Pravna obvestila"
+
+#: ../footer.php:21
+msgid "Report Trademark Abuse"
+msgstr "Poročilo o zlorabi trgovske znamke"
+
+#: ../functions.php:35
+msgid "Primary Menu"
+msgstr "Glavni menu"
+
+#: ../functions.php:68
+msgid "Firefox Logo"
+msgstr "Firefox logotip"
+
+#: ../functions.php:194
+#, php-format
+msgid "Page %s"
+msgstr "Stran %s"
+
+#: ../functions.php:231
+msgid "This post is password protected. To view it, please enter the password."
+msgstr ""
+
+#: ../functions.php:232
+msgid "Password"
+msgstr "Geslo"
+
+#: ../functions.php:358
+msgid "Feature this post?"
+msgstr ""
+
+#: ../functions.php:363
+msgid "Featured Post"
+msgstr ""
+
+#: ../functions.php:391
+msgid "Continue reading"
+msgstr ""
+
+#: ../functions.php:438
+msgid "Sidebar"
+msgstr ""
+
+#: ../functions.php:539
+msgid "Trackback from "
+msgstr ""
+
+#: ../functions.php:541 ../functions.php:550
+msgid "on"
+msgstr ""
+
+#: ../functions.php:542 ../functions.php:551 ../functions.php:566
+#: ../functions.php:576
+msgid "Permanent link to this comment by "
+msgstr ""
+
+# Comment headings read "<Name> wrote on <Date> at <Time>"
+#: ../functions.php:545 ../functions.php:554 ../functions.php:569
+#: ../functions.php:579
+#, php-format
+msgid "%1$s at %2$s"
+msgstr ""
+
+#: ../functions.php:548
+msgid "Pingback from "
+msgstr ""
+
+#: ../functions.php:565 ../functions.php:575
+msgid "wrote on"
+msgstr ""
+
+#: ../functions.php:585
+msgid "Your comment is awaiting moderation."
+msgstr "Vaš komentar čaka na moderiranje."
+
+#: ../functions.php:593
+msgid "Edit Comment"
+msgstr "Uredi komentar"
+
+#: ../functions.php:607
+msgid "This widget shows the three most recent featured posts."
+msgstr ""
+
+#: ../functions.php:619
+msgid "Title:"
+msgstr "Naslov:"
+
+#: ../header.php:45
+#, php-format
+msgid "Search results for “%s”"
+msgstr "Rezultati iskanja za “%s”"
+
+#: ../header.php:49
+msgid "Not Found"
+msgstr "Ni bilo mogoče najti"
+
+#: ../header.php:64
+msgid "Skip to main content"
+msgstr ""
+
+#: ../header.php:65
+msgid "Skip to sidebar"
+msgstr ""
+
+#: ../header.php:67
+msgid "Skip to blog search"
+msgstr ""
+
+#: ../image.php:13
+#, php-format
+msgid ""
+"Published <time class=\"published\" title=\"%1$s\" datetime=\"%1$s\">%2$s</"
+"time> at <a href=\"%3$s\" title=\"Link to full-size image\">%4$s &times; "
+"%5$s</a>"
+msgstr ""
+
+#: ../image.php:22
+msgid "Edit Attachment"
+msgstr ""
+
+#: ../index.php:10
+msgid "Featured"
+msgstr ""
+
+#: ../index.php:57
+msgid ""
+"Sorry, we couldn&#8217;t find any results for the requested archive. Perhaps "
+"try searching?"
+msgstr ""
+
+#: ../masthead.php:6
+msgid "Go to the front page"
+msgstr "Pojdi na prvo stran"
+
+#: ../search.php:45
+#, php-format
+msgid "Sorry, we didn't find anything for “%s.” Try another search."
+msgstr "Oprostite, nismo našli ničesar za “%s.” Poskusite novo iskanje."
+
+#: ../searchform.php:3
+msgid "Search"
+msgstr "Iskanje"
+
+#: ../sidebar.php:9 ../sidebar.php:55
+msgid "About"
+msgstr "O nas"
+
+#: ../sidebar.php:35 ../sidebar.php:81
+#, php-format
+msgid "More from %s"
+msgstr ""
+
+#: ../inc/theme-options.php:46
+msgid "Color Scheme"
+msgstr ""
+
+#: ../inc/theme-options.php:54
+msgid "Hide post authors"
+msgstr ""
+
+#: ../inc/theme-options.php:88 ../inc/theme-options.php:89
+msgid "Theme Options"
+msgstr "Nastavitve teme"
+
+#: ../inc/theme-options.php:104
+msgid ""
+"Some themes provide customization options that are grouped together on a "
+"Theme Options screen. If you change themes, options may change or disappear, "
+"as they are theme-specific. Your current theme, One Mozilla, provides the "
+"following Theme Options:"
+msgstr ""
+
+#: ../inc/theme-options.php:106
+msgid ""
+"<strong>Color Scheme</strong>: You can choose from a few different color "
+"schemes: “Sand” (orange-tan background) is suitable for most Mozilla blogs. "
+"“Sky” (light blue/gray background) suitable for Firefox-related blogs. "
+"“Obsidian” is a light-on-dark scheme. “Stone” is the default scheme, a "
+"light, neutral gray."
+msgstr ""
+
+#: ../inc/theme-options.php:107
+msgid ""
+"<strong>Hide post authors</strong>: Post authors are shown by default, with "
+"an author bio in the sidebar on single post pages. You can choose to hide "
+"post authors and the blog will be anonymous to the public, though authors "
+"will still be visible in the administration panel."
+msgstr ""
+
+#: ../inc/theme-options.php:109
+msgid ""
+"Remember to click “Save Changes” to save any changes you have made to the "
+"theme options."
+msgstr ""
+
+#: ../inc/theme-options.php:111
+msgid "For more information:"
+msgstr "Za več informacij:"
+
+#: ../inc/theme-options.php:112
+msgid ""
+"<a href=\"http://codex.wordpress.org/Appearance_Theme_Options_Screen\" "
+"target=\"_blank\">Documentation on Theme Options</a>"
+msgstr ""
+
+#: ../inc/theme-options.php:113
+msgid ""
+"<a href=\"http://wordpress.org/support/\" target=\"_blank\">Support Forums</"
+"a>"
+msgstr ""
+
+#: ../inc/theme-options.php:120
+msgid "Overview"
+msgstr ""
+
+#: ../inc/theme-options.php:152
+msgid "Stone"
+msgstr ""
+
+#: ../inc/theme-options.php:157
+msgid "Sand"
+msgstr ""
+
+#: ../inc/theme-options.php:162
+msgid "Sky"
+msgstr ""
+
+#: ../inc/theme-options.php:167
+msgid "Obsidian"
+msgstr ""
+
+#: ../inc/theme-options.php:213
+msgid "Hide post authors (makes posts anonymous to the public)"
+msgstr ""
+
+#: ../inc/theme-options.php:227
+#, php-format
+msgid "%s Theme Options"
+msgstr "%s Nastavitve teme"
+
+#~ msgid "<span class=\"note\">(required)</span>"
+#~ msgstr "<span class=\"note\">(erforderlich)</span>"
