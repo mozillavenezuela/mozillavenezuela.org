@@ -23,10 +23,15 @@ function onemozilla_setup() {
    */
   load_theme_textdomain( 'onemozilla', get_template_directory() . '/languages' );
 
-  $locale = get_locale();
+ $locale = get_locale();
+  
   $locale_file = get_template_directory() . "/languages/$locale.php";
+
   if ( is_readable( $locale_file ) )
-    require_once( $locale_file );
+    {
+      require_once( $locale_file );
+echo $locale_file; die();
+    }
 
   // Load up our theme options page and related code.
   require( get_template_directory() . '/inc/theme-options.php' );

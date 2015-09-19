@@ -23,7 +23,7 @@
 ?>
 
   <header class="comments-head">
-    <h2><?php if($comment_count > 0) { printf(_n( '1 komentar', 'Št. komentarjev: %d', $comment_count, 'onemozilla'), $comment_count); } else { _e('Ni komentarjev'); } ?></h2>
+    <h2><?php if($comment_count > 0) { printf(_n( '1 Comentario', 'Št. Comentarios: %d', $comment_count, 'onemozilla'), $comment_count); } else { _e('Sin comentarios'); } ?></h2>
     <?php if (comments_open()) : ?><p class="cmt-post"><a href="#respond"><?php _e('Post a comment','onemozilla'); ?></a></p><?php endif; ?>
   </header>
 
@@ -42,7 +42,7 @@
   <p class="comments-closed pings-open">
     <?php
     /* L10N: 'trackbacks' are when another website refers to this blog post with a link notification */
-    printf( __( 'Comments are closed, but <a href="%1$s" title="Trackback URL for this post">trackbacks</a> are open.', 'onemozilla' ), get_trackback_url() ); ?>
+    printf( __( 'Los comentarios han sido cerrados para este artículo', 'onemozilla' ), get_trackback_url() ); ?>
   </p>
 <?php endif; ?>
 
@@ -51,27 +51,27 @@
   <div id="respond">
   <?php if ( get_option('comment_registration') ) : // If registration is required and you're not logged in, show a message ?>
 
-    <p><?php printf( __('You must be <a href="%s">logged in</a> to post a comment.', 'onemozilla'), esc_attr(wp_login_url(get_permalink())) ); ?></p>
+    <p><?php printf( __('Usted debe estar  <a href="%s">conectado</a> para comentar.', 'onemozilla'), esc_attr(wp_login_url(get_permalink())) ); ?></p>
 
   <?php else : // else show the form ?>
     <form id="comment-form" action="<?php echo esc_attr(get_option('siteurl')); ?>/wp-comments-post.php" method="post">
       <fieldset>
-        <legend><span><?php comment_form_title( __('Objavite komentar'), __('Reply to %s' ) ); ?></span></legend>
-        <p id="cancel-comment-reply"><?php cancel_comment_reply_link('Cancel Reply'); ?></p>
+        <legend><span><?php comment_form_title( __('Deja un comentario'), __('Responder a %s' ) ); ?></span></legend>
+        <p id="cancel-comment-reply"><?php cancel_comment_reply_link('Cancelar respuesta'); ?></p>
         <ol>
         <?php if ( $user_ID ) : ?>
-          <li class="self"><?php printf( __( 'You are logged in as <a href="%1$s">%2$s</a>. <a class="logout" href="%3$s">Log out?</a>', 'onemozilla' ), admin_url( 'profile.php' ), esc_html($user_identity), wp_logout_url( apply_filters( 'the_permalink', get_permalink( $post_id ) ) ) ); ?></li>
+          <li class="self"><?php printf( __( 'Estás conectado como <a href="%1$s">%2$s</a>. <a class="logout" href="%3$s">Desea salir?</a>', 'onemozilla' ), admin_url( 'profile.php' ), esc_html($user_identity), wp_logout_url( apply_filters( 'the_permalink', get_permalink( $post_id ) ) ) ); ?></li>
         <?php else : ?>
           <li id="cmt-name">
-            <label for="author"><?php _e('Name', 'onemozilla'); ?> <?php if ($req) : ?><span class="note"><?php _e('(zahtevano)', 'onemozilla'); ?></span><?php endif; ?></label>
+            <label for="author"><?php _e('Name', 'onemozilla'); ?> <?php if ($req) : ?><span class="note"><?php _e('(required)', 'onemozilla'); ?></span><?php endif; ?></label>
             <input type="text" name="author" id="author" value="<?php echo esc_attr($comment_author); ?>" size="25" <?php if ($req) echo "required aria-required='true'"; ?>>
           </li>
           <li id="cmt-email">
-            <label for="email"><?php _e('E-pošta', 'onemozilla'); ?> <?php if ($req) : ?><span class="note"><?php _e('(zahtevano, a ne bo objavljeno)', 'onemozilla'); ?></span><?php endif; ?></label>
+            <label for="email"><?php _e('E-mail', 'onemozilla'); ?> <?php if ($req) : ?><span class="note"><?php _e('(required, will not be published)', 'onemozilla'); ?></span><?php endif; ?></label>
             <input type="email" name="email" id="email" value="<?php echo esc_attr($comment_author_email); ?>" size="25" <?php if ($req) echo "required aria-required='true'"; ?>>
           </li>
           <li id="cmt-web">
-            <label for="url"><?php _e('Spletna stran', 'onemozilla'); ?></label>
+            <label for="url"><?php _e('Website', 'onemozilla'); ?></label>
             <input type="url" name="url" id="url" value="<?php echo esc_attr($comment_author_url); ?>" size="25">
           </li>
         <?php endif; ?>
@@ -88,11 +88,11 @@
   <?php if (get_option('require_name_email')) :
     wp_enqueue_script('fc-checkcomment', get_template_directory_uri() . '/js/fc-checkcomment.js');
     wp_localize_script('fc-checkcomment', 'objectL10n', array(
-      'nonameemail' => __('You must provide a name and e-mail (your e-mail address won’t be published).'),
-      'noname' => __('You must provide a name.'),
-      'noemail' => __('You must provide an e-mail address (it won’t be published).'),
-      'bademail' => __('The e-mail address you entered doesn’t look like a complete e-mail address. It should look like “yourname@example.com”.'),
-      'nocomment' => __('You must enter a comment.')
+      'nonameemail' => __('Debe proporcionar un nombre y correo electrónico (su dirección de correo electrónico no será publicada).'),
+      'noname' => __('Debe proporcionar un nombre.'),
+      'noemail' => __('Debe proporcionar una dirección de correo electrónico (no se publicará).'),
+      'bademail' => __('La dirección de correo electrónico que ha introducido no se ve como una dirección de correo electrónico completa. Ejemplo: "yourname@example.com".'),
+      'nocomment' => __('Debe escribir un comentario.')
     ) );
   ?>
   <script type="text/javascript">jQuery("#comment-form").submit(function() { return fc_checkform(<?php if ($req) : echo "'req'"; endif; ?>); });</script>

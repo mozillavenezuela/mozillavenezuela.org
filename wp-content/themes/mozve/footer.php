@@ -21,8 +21,8 @@
     </p>
 
     <p id="colophon">
-    Spletna stran Mozilla Slovenija je na voljo pod okriljem dovoljenja <a href="http://creativecommons.org/licenses/by/2.5/si/" rel="external license">Creative Commons Priznanje avtorstva 2.5 Slovenija.</a><br /><br />
-    <a target="_blank" href="mailto:info@mozilla.si?Subject=Mozilla Slovenija" rel="external">Stopite v stik z nami</a>
+       A no ser que se indique lo contrario, el contenido de este sitio está licenciado bajo  <a href="http://creativecommons.org/licenses/by-sa/3.0/" rel="external license">Creative Commons Attribution Share-Alike License v3.0 .</a> o una versión posterior.<br/><br/>
+    
     </p>
    
     <div id="footermenu">
@@ -34,9 +34,9 @@
     
     <nav id="nav-social">
       <ul role="navigation">
-        <li><a target="_blank" href="https://www.facebook.com/mozillaslovenija" rel="home">Facebook</a></li>
-        <li><a target="_blank" href="https://twitter.com/MozillaSi" rel="external">Twitter</a></li>
-        <li><a target="_blank" href="http://www.youtube.com/user/mozillaslovenija" rel="external">Youtube</a></li>
+        <li><a target="_blank" href="https://www.facebook.com/MozillaVenezuela" rel="home">Facebook</a></li>
+        <li><a target="_blank" href="https://twitter.com/mozillaVe" rel="external">Twitter</a></li>
+        <li><a target="_blank" href="https://www.youtube.com/user/mozillaVe" rel="external">Youtube</a></li>
       </ul>
     </nav>
     

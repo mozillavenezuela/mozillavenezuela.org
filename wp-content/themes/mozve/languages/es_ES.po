@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: One Mozilla 1.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-08-17 03:01-0800\n"
-"PO-Revision-Date: 2012-08-17 03:04-0800\n"
+"PO-Revision-Date: 2015-09-18 21:39-0430\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -11,23 +11,25 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Poedit-KeywordsList: __;_e\n"
 "X-Poedit-Basepath: .\n"
+"Language: es_ES\n"
+"X-Generator: Poedit 1.8.4\n"
 "X-Poedit-SearchPath-0: ..\n"
 
 #: ../404.php:7
 msgid "Well, this is embarrassing…"
-msgstr ""
+msgstr "Bueno, esto es vergonzoso…"
 
 #: ../404.php:10
 msgid "We hate to say it, but we couldn’t find the page or file you’re looking for."
-msgstr ""
+msgstr "No nos gusta decirlo, pero no hemos podido encontrar la página o el archivo que estás buscando."
 
 #: ../404.php:11
 msgid "If you typed in the address, try double-checking the spelling."
-msgstr ""
+msgstr "Si escribió la dirección, trate de doble comprobación de la ortografía."
 
 #: ../404.php:12
 msgid "If you followed a link from somewhere, please let us know at <em>webmaster at mozilla dot com</em>. Be sure to tell us where you came from and what you were looking for, and we’ll do our best to fix it."
-msgstr ""
+msgstr "Si has seguido un enlace de algún sitio, por favor háganoslo saber a <em> webmaster en mozilla dot com </ em>. Asegúrate de decirnos de dónde vienes y lo que estaba buscando, y nosotros haremos nuestro mejor esfuerzo para solucionarlo."
 
 #: ../archive.php:14
 #, php-format
@@ -37,70 +39,56 @@ msgstr ""
 #: ../archive.php:15
 #, php-format
 msgid "Posts tagged with “%s”"
-msgstr ""
+msgstr "Mensajes etiquetados con \"%s\""
 
-#: ../archive.php:16
-#: ../archive.php:17
-#: ../archive.php:18
-#: ../header.php:46
-#: ../header.php:47
-#: ../header.php:48
+#: ../archive.php:16 ../archive.php:17 ../archive.php:18 ../header.php:46
+#: ../header.php:47 ../header.php:48
 #, php-format
 msgid "Posts from %s"
-msgstr ""
+msgstr "Publicación de %s"
 
 #: ../archive.php:19
 #, php-format
 msgid "Posts by %s"
-msgstr ""
+msgstr "Artículo de %s"
 
 #: ../archive.php:21
 msgid "Archives"
-msgstr ""
+msgstr "Archivos"
 
-#: ../archive.php:28
-#: ../archive.php:44
-#: ../index.php:43
-#: ../search.php:18
+#: ../archive.php:28 ../archive.php:44 ../index.php:43 ../search.php:18
 #: ../search.php:34
 msgid "Older posts"
-msgstr ""
+msgstr "Artículo anterior"
 
-#: ../archive.php:29
-#: ../archive.php:45
-#: ../index.php:44
-#: ../search.php:19
+#: ../archive.php:29 ../archive.php:45 ../index.php:44 ../search.php:19
 #: ../search.php:35
 msgid "Newer posts"
-msgstr ""
+msgstr "Ultimo artículo"
 
-#: ../archive.php:54
-#: ../index.php:53
-#: ../search.php:42
+#: ../archive.php:54 ../index.php:53 ../search.php:42
 msgid "Nothing Found"
-msgstr ""
+msgstr "No encontrado"
 
 #: ../archive.php:58
 msgid "Apologies, but no results were found for the requested archive. Perhaps searching will help find a related post."
-msgstr ""
+msgstr "Disculpas, pero no se encontraron resultados para el archivo solicitado. Puede que la búsqueda le ayudará a encontrar una entrada relacionada."
 
 #: ../comments.php:14
 msgid "This post is password protected. Enter the password to view any comments."
-msgstr ""
+msgstr "Esta entrada está protegida. Introduzca la contraseña para ver los comentarios."
 
-#: ../comments.php:26
-#: ../content-summary.php:21
-#: ../content.php:22
+#: ../comments.php:26 ../content-summary.php:21 ../content.php:22
 msgid "No responses yet"
-msgstr ""
+msgstr "Aún no hay respuesta"
 
 #: ../comments.php:27
 msgid "Post a comment"
-msgstr ""
+msgstr "Comentar Artículo"
 
 #: ../comments.php:36
 msgid "More comments:"
-msgstr ""
+msgstr "Más comentarios"
 
 #: ../comments.php:46
 #, php-format
@@ -109,12 +97,12 @@ msgstr ""
 
 #: ../comments.php:51
 msgid "Post Your Comment"
-msgstr ""
+msgstr "Deja tu comentario"
 
 #: ../comments.php:51
 #, php-format
 msgid "Reply to %s"
-msgstr ""
+msgstr "Responder a %s"
 
 #: ../comments.php:55
 #, php-format
@@ -123,31 +111,31 @@ msgstr ""
 
 #: ../comments.php:58
 msgid "Name"
-msgstr ""
+msgstr "Nombre"
 
 #: ../comments.php:58
 msgid "(required)"
-msgstr ""
+msgstr "(requerido)"
 
 #: ../comments.php:62
 msgid "E-mail"
-msgstr ""
+msgstr "Correo Electrónico"
 
 #: ../comments.php:62
 msgid "(required, will not be published)"
-msgstr ""
+msgstr "(requerido, no será publicado)"
 
 #: ../comments.php:66
 msgid "Website"
-msgstr ""
+msgstr "Sitio Web"
 
 #: ../comments.php:70
 msgid "Your comment"
-msgstr ""
+msgstr "Tu Comentario"
 
 #: ../comments.php:71
 msgid "Submit Comment"
-msgstr ""
+msgstr "Enviar Comentario"
 
 #: ../comments.php:83
 msgid "You must provide a name and e-mail (your e-mail address won’t be published)."
@@ -171,45 +159,34 @@ msgstr ""
 
 #: ../content-page.php:7
 msgid "Edit Page"
-msgstr ""
+msgstr "Editar página"
 
-#: ../content-page.php:9
-#: ../content-single.php:20
-#: ../content.php:30
+#: ../content-page.php:9 ../content-single.php:20 ../content.php:30
 #: ../image.php:41
 msgid "Pages:"
-msgstr ""
+msgstr "Paginas:"
 
-#: ../content-single.php:8
-#: ../content-single.php:10
-#: ../content-summary.php:8
-#: ../content-summary.php:10
-#: ../content.php:9
-#: ../content.php:11
+#: ../content-single.php:8 ../content-single.php:10 ../content-summary.php:8
+#: ../content-summary.php:10 ../content.php:9 ../content.php:11
 #, php-format
 msgid "See all posts from %s"
 msgstr ""
 
-#: ../content-single.php:17
-#: ../content.php:33
+#: ../content-single.php:17 ../content.php:33
 msgid "Edit Post"
-msgstr ""
+msgstr "Editar artículo"
 
-#: ../content-single.php:26
-#: ../content-summary.php:33
-#: ../content.php:38
+#: ../content-single.php:26 ../content-summary.php:33 ../content.php:38
 msgid "Tags"
 msgstr "Etiquetas"
 
-#: ../content-single.php:28
-#: ../content-summary.php:35
-#: ../content.php:40
+#: ../content-single.php:28 ../content-summary.php:35 ../content.php:40
 msgid "Categories"
 msgstr "Categorías"
 
 #: ../content.php:29
 msgid "Continue reading &hellip;"
-msgstr ""
+msgstr "Sigue leyendo"
 
 #: ../footer.php:8
 msgid "Return to top"
@@ -222,32 +199,32 @@ msgstr ""
 
 #: ../footer.php:18
 msgid "Contact Us"
-msgstr ""
+msgstr "Contáctenos"
 
 #: ../footer.php:19
 msgid "Privacy Policy"
-msgstr ""
+msgstr "Políticas de privacidad"
 
 #: ../footer.php:20
 msgid "Legal Notices"
-msgstr ""
+msgstr "Aviso legal"
 
 #: ../footer.php:21
 msgid "Report Trademark Abuse"
-msgstr ""
+msgstr "Reportar abusos"
 
 #: ../functions.php:35
 msgid "Primary Menu"
-msgstr ""
+msgstr "Menu principal"
 
 #: ../functions.php:68
 msgid "Firefox Logo"
-msgstr ""
+msgstr "Logo Firefox"
 
 #: ../functions.php:194
 #, php-format
 msgid "Page %s"
-msgstr ""
+msgstr "Página %s"
 
 #: ../functions.php:231
 msgid "This post is password protected. To view it, please enter the password."
@@ -255,7 +232,7 @@ msgstr ""
 
 #: ../functions.php:232
 msgid "Password"
-msgstr ""
+msgstr "Contraseña"
 
 #: ../functions.php:358
 msgid "Feature this post?"
@@ -263,36 +240,31 @@ msgstr ""
 
 #: ../functions.php:363
 msgid "Featured Post"
-msgstr ""
+msgstr "Artículo destacado"
 
 #: ../functions.php:391
 msgid "Continue reading"
-msgstr ""
+msgstr "Continuar leyendo"
 
 #: ../functions.php:438
 msgid "Sidebar"
-msgstr ""
+msgstr "Barra lateral"
 
 #: ../functions.php:539
 msgid "Trackback from "
 msgstr ""
 
-#: ../functions.php:541
-#: ../functions.php:550
+#: ../functions.php:541 ../functions.php:550
 msgid "on"
 msgstr ""
 
-#: ../functions.php:542
-#: ../functions.php:551
-#: ../functions.php:566
+#: ../functions.php:542 ../functions.php:551 ../functions.php:566
 #: ../functions.php:576
 msgid "Permanent link to this comment by "
 msgstr ""
 
 # Comment headings read "<Name> wrote on <Date> at <Time>"
-#: ../functions.php:545
-#: ../functions.php:554
-#: ../functions.php:569
+#: ../functions.php:545 ../functions.php:554 ../functions.php:569
 #: ../functions.php:579
 #, php-format
 msgid "%1$s at %2$s"
@@ -302,8 +274,7 @@ msgstr ""
 msgid "Pingback from "
 msgstr ""
 
-#: ../functions.php:565
-#: ../functions.php:575
+#: ../functions.php:565 ../functions.php:575
 msgid "wrote on"
 msgstr ""
 
@@ -313,7 +284,7 @@ msgstr ""
 
 #: ../functions.php:593
 msgid "Edit Comment"
-msgstr ""
+msgstr "Editar comentario"
 
 #: ../functions.php:607
 msgid "This widget shows the three most recent featured posts."
@@ -321,20 +292,20 @@ msgstr ""
 
 #: ../functions.php:619
 msgid "Title:"
-msgstr ""
+msgstr "Título:"
 
 #: ../header.php:45
 #, php-format
 msgid "Search results for “%s”"
-msgstr ""
+msgstr "Buscar resultado para \"%s\""
 
 #: ../header.php:49
 msgid "Not Found"
-msgstr ""
+msgstr "No encontrado"
 
 #: ../header.php:64
 msgid "Skip to main content"
-msgstr ""
+msgstr "Saltar al contenido principal"
 
 #: ../header.php:65
 msgid "Skip to sidebar"
@@ -347,11 +318,11 @@ msgstr ""
 #: ../image.php:13
 #, php-format
 msgid "Published <time class=\"published\" title=\"%1$s\" datetime=\"%1$s\">%2$s</time> at <a href=\"%3$s\" title=\"Link to full-size image\">%4$s &times; %5$s</a>"
-msgstr ""
+msgstr "Publicado <time class=\"published\" title=\"%1$s\" datetime=\"%1$s\">%2$s</time> at <a href=\"%3$s\" title=\"Link to full-size image\">%4$s &times; %5$s</a>"
 
 #: ../image.php:22
 msgid "Edit Attachment"
-msgstr ""
+msgstr "Editar adjunto"
 
 #: ../index.php:10
 msgid "Featured"
@@ -374,29 +345,26 @@ msgstr ""
 msgid "Search"
 msgstr "Búsqueda"
 
-#: ../sidebar.php:9
-#: ../sidebar.php:55
+#: ../sidebar.php:9 ../sidebar.php:55
 msgid "About"
-msgstr ""
+msgstr "Nosotros"
 
-#: ../sidebar.php:35
-#: ../sidebar.php:81
+#: ../sidebar.php:35 ../sidebar.php:81
 #, php-format
 msgid "More from %s"
-msgstr ""
+msgstr "Más de %s"
 
 #: ../inc/theme-options.php:46
 msgid "Color Scheme"
-msgstr ""
+msgstr "Esquema de colores"
 
 #: ../inc/theme-options.php:54
 msgid "Hide post authors"
 msgstr ""
 
-#: ../inc/theme-options.php:88
-#: ../inc/theme-options.php:89
+#: ../inc/theme-options.php:88 ../inc/theme-options.php:89
 msgid "Theme Options"
-msgstr ""
+msgstr "Opciones del tema"
 
 #: ../inc/theme-options.php:104
 msgid "Some themes provide customization options that are grouped together on a Theme Options screen. If you change themes, options may change or disappear, as they are theme-specific. Your current theme, One Mozilla, provides the following Theme Options:"
@@ -416,7 +384,7 @@ msgstr ""
 
 #: ../inc/theme-options.php:111
 msgid "For more information:"
-msgstr ""
+msgstr "Para más información"
 
 #: ../inc/theme-options.php:112
 msgid "<a href=\"http://codex.wordpress.org/Appearance_Theme_Options_Screen\" target=\"_blank\">Documentation on Theme Options</a>"
@@ -453,5 +421,4 @@ msgstr ""
 #: ../inc/theme-options.php:227
 #, php-format
 msgid "%s Theme Options"
-msgstr ""
-
+msgstr "%s Opciones del tema"
