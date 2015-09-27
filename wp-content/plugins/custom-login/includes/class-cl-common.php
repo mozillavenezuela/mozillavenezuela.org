@@ -13,6 +13,22 @@ if ( !defined( 'ABSPATH' ) ) exit;
 class CL_Common {
 
 	/**
+	 * Return the RSS feed object.
+	 *
+	 * @param string $feed The feed to fetch.
+	 *
+	 * @return object
+	 */
+	public static function fetch_feed( $feed ) {
+
+		if ( !function_exists( 'fetch_feed' ) ) {
+			include_once( ABSPATH . WPINC . '/feed.php' );
+		}
+
+		return fetch_feed( $feed );
+	}
+
+	/**
 	 * Fetch RSS items from the feed.
 	 *
 	 * @param 	int    $num  Number of items to fetch.
@@ -20,24 +36,29 @@ class CL_Common {
 	 * @return 	array|bool False on error, array of RSS items on success.
 	 */
 	public static function fetch_rss_items( $num, $feed ) {
-
-		if ( !function_exists( 'fetch_feed' ) )
-			include_once( ABSPATH . WPINC . '/feed.php' );
 			
-		$rss = fetch_feed( $feed );
+		$rss = self::fetch_feed( $feed );
+		$maxitems = 0;
 
-		// Bail if feed doesn't work
-		if ( !$rss || is_wp_error( $rss ) )
+		if ( !is_wp_error( $rss ) ) { // Checks that the object is created correctly
+
+			// Figure out how many total items there are, but limit it to 5.
+			$maxitems = $rss->get_item_quantity( $num );
+
+			// Build an array of all the items, starting with element 0 (first element).
+			$rss_items = $rss->get_items( 0, $maxitems );
+
+		}
+		else {
 			return false;
-
-		$rss_items = $rss->get_items( 0, $rss->get_item_quantity( $num ) );
+		}
 
 		// If the feed was erroneous
-		if ( !$rss_items ) {
+		if ( !$rss_items || $maxitems == 0 ) {
 			$md5 = md5( $feed );
 			delete_transient( 'feed_' . $md5 );
 			delete_transient( 'feed_mod_' . $md5 );
-			$rss       = fetch_feed( $feed );
+			$rss       = self::fetch_feed( $feed );
 			$rss_items = $rss->get_items( 0, $rss->get_item_quantity( $num ) );
 		}
 

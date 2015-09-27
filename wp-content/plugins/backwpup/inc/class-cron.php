@@ -54,6 +54,8 @@ class BackWPup_Cron {
 	public static function check_cleanup() {
 
 		$job_object = BackWPup_Job::get_working_data();
+		$log_folder = get_site_option( 'backwpup_cfg_logfolder' );
+		$log_folder = BackWPup_File::get_absolute_path( $log_folder );
 
 		// check aborted jobs for longer than a tow hours, abort them courtly and send mail
 		if ( is_object( $job_object ) && ! empty( $job_object->logfile ) ) {
@@ -66,20 +68,20 @@ class BackWPup_Cron {
 		}
 
 		//Compress not compressed logs
-		if ( function_exists( 'gzopen' ) && get_site_option( 'backwpup_cfg_gzlogs' ) &&! is_object( $job_object ) ) {
+		if ( is_readable( $log_folder ) && function_exists( 'gzopen' ) && get_site_option( 'backwpup_cfg_gzlogs' ) && ! is_object( $job_object ) ) {
 			//Compress old not compressed logs
-			if ( $dir = opendir( get_site_option( 'backwpup_cfg_logfolder' ) ) ) {
+			if ( $dir = opendir( $log_folder ) ) {
 				$jobids = BackWPup_Option::get_job_ids();
 				while ( FALSE !== ( $file = readdir( $dir ) ) ) {
-					if ( is_writeable( get_site_option( 'backwpup_cfg_logfolder' ) . $file ) && '.html' == substr( $file, -5 ) ) {
-						$compress = new BackWPup_Create_Archive( get_site_option( 'backwpup_cfg_logfolder' ) . $file . '.gz' );
-						if ( $compress->add_file( get_site_option( 'backwpup_cfg_logfolder' ) . $file ) ) {
-							unlink( get_site_option( 'backwpup_cfg_logfolder' ) . $file );
+					if ( is_writeable( $log_folder . $file ) && '.html' == substr( $file, -5 ) ) {
+						$compress = new BackWPup_Create_Archive( $log_folder . $file . '.gz' );
+						if ( $compress->add_file( $log_folder . $file ) ) {
+							unlink( $log_folder . $file );
 							//change last logfile in jobs
 							foreach( $jobids as $jobid ) {
 								$job_logfile = BackWPup_Option::get( $jobid, 'logfile' );
-								if ( ! empty( $job_logfile ) && $job_logfile == get_site_option( 'backwpup_cfg_logfolder' ) . $file )
-									BackWPup_Option::update( $jobid, 'logfile', get_site_option( 'backwpup_cfg_logfolder' ) . $file . '.gz' );
+								if ( ! empty( $job_logfile ) && $job_logfile === $log_folder . $file )
+									BackWPup_Option::update( $jobid, 'logfile', $log_folder . $file . '.gz' );
 							}
 						}
 						unset( $compress );
@@ -119,12 +121,14 @@ class BackWPup_Cron {
 	public static function cron_active() {
 
 		//only if cron active
-		if ( ! defined( 'DOING_CRON' ) || ! DOING_CRON )
+		if ( ! defined( 'DOING_CRON' ) || ! DOING_CRON ) {
 			return;
+		}
 
 		//only work if backwpup_run as query var ist set and nothing else and the value ist right
-		if ( empty( $_GET[ 'backwpup_run' ] ) || ! in_array( $_GET[ 'backwpup_run' ], array( 'test','restart', 'runnow', 'runnowalt', 'runext', 'cronrun' ) ) )
+		if ( empty( $_GET[ 'backwpup_run' ] ) || ! in_array( $_GET[ 'backwpup_run' ], array( 'test','restart', 'runnow', 'runnowalt', 'runext', 'cronrun' ) ) ) {
 			return;
+		}
 
 		//special header
 		@session_write_close();
@@ -134,28 +138,34 @@ class BackWPup_Cron {
 		nocache_headers();
 
 		//on test die for fast feedback
-		if ( $_GET[ 'backwpup_run' ] == 'test' )
+		if ( $_GET[ 'backwpup_run' ] == 'test' ) {
 			die( 'BackWPup Test' );
+		}
 
 		// generate normal nonce
 		$nonce = substr( wp_hash( wp_nonce_tick() . 'backwpup_job_run-' . $_GET[ 'backwpup_run' ], 'nonce' ), - 12, 10 );
 		//special nonce on external start
-		if ( $_GET[ 'backwpup_run' ] == 'runext' )
+		if ( $_GET[ 'backwpup_run' ] == 'runext' ) {
 			$nonce = get_site_option( 'backwpup_cfg_jobrunauthkey' );
+		}
 		// check nonce
-		if ( empty( $_GET['_nonce'] ) || $nonce != $_GET['_nonce'] )
+		if ( empty( $_GET['_nonce'] ) || $nonce != $_GET['_nonce'] ) {
 			return;
+		}
 
 		//check runext is allowed for job
 		if ( $_GET[ 'backwpup_run' ] == 'runext' ) {
-			$jobids_external = BackWPup_Option::get_job_ids( 'activetype', 'link' );
-			if ( !isset( $_GET[ 'jobid' ] ) || ! in_array( $_GET[ 'jobid' ], $jobids_external ) )
+			$jobids_link = BackWPup_Option::get_job_ids( 'activetype', 'link' );
+			$jobids_easycron = BackWPup_Option::get_job_ids( 'activetype', 'easycron' );
+			$jobids_external = array_merge( $jobids_link, $jobids_easycron );
+			if ( ! isset( $_GET[ 'jobid' ] ) || ! in_array( $_GET[ 'jobid' ], $jobids_external ) ) {
 				return;
+			}
 		}
 
 		//run BackWPup job
 		BackWPup_Job::start_http( $_GET[ 'backwpup_run' ] );
-		die();
+		die( '' );
 	}
 
 

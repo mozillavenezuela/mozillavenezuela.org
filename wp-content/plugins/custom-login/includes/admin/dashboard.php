@@ -28,11 +28,13 @@ class CL_Dashboard {
 	private static $headers = array();
 	private static $scripts = array();
 
+	const FEED_URL = 'https://frosty.media/feed/';
+
 	/**
 	 * Main Instance
 	 *
 	 * @staticvar 	array 	$instance
-	 * @return 		The one true instance
+	 * @return 		CL_Dashboard The one true instance
 	 */
 	public static function instance() {
 		if ( ! isset( self::$instance ) ) {
@@ -44,6 +46,9 @@ class CL_Dashboard {
 	}
 
 	private function actions() {
+
+		if ( !is_admin() )
+			return;
 
 		add_action( 'wp_dashboard_setup',			array( $this, 'add_dashboard_widget' ) );
 	//	add_action( 'admin_enqueue_scripts',		array( $this, 'enqueue_scripts' ) );
@@ -81,7 +86,6 @@ class CL_Dashboard {
 		);
 	}
 
-
 	/**
 	 * Scripts & Styles
 	 */
@@ -104,22 +108,29 @@ class CL_Dashboard {
 		}
 	}
 
-	private function get_feed( $count = 1, $feed = 'https://frosty.media/feed/' ) {
+	private function get_feed( $count = 1, $feed = self::FEED_URL ) {
 		return CL_Common::fetch_rss_items( $count, $feed );
 	}
 
-	private function get_feed_url( $key = 0 ) {
+	private function get_feed_url() {
 
 		$rss_items	= $this->get_feed();
-		$feed_url	= preg_replace( '/#.*/', '', esc_url( $rss_items[ $key ]->get_permalink(), null, 'display' ) );
 
-		return esc_url( add_query_arg( array( 'utm_medium' => 'wpadmin_dashboard', 'utm_term' => 'newsitem', 'utm_campaign' => CUSTOM_LOGIN_DIRNAME ), $feed_url ) );
+		if ( false !== $rss_items && isset( $rss_items[0] ) ) {
+
+			$feed_url = preg_replace( '/#.*/', '', esc_url( $rss_items[0]->get_permalink(), null, 'display' ) );
+
+			return esc_url( add_query_arg( array( 'utm_medium' => 'wpadmin_dashboard', 'utm_term' => 'newsitem', 'utm_campaign' => CUSTOM_LOGIN_DIRNAME ), $feed_url ) );
+		}
+
+		return esc_url( self::FEED_URL );
 	}
 
-	private function get_feed_title( $key = 0 ) {
+	private function get_feed_title() {
+
 		$rss_items = $this->get_feed();
 
-		return esc_html( $rss_items[ $key ]->get_title() );
+		return isset( $rss_items[0] ) ? esc_html( $rss_items[0]->get_title() ) : 'Unknown';
 	}
 
 	/**
@@ -128,7 +139,7 @@ class CL_Dashboard {
 	public function widget() {
 
 		// FEED
-		$rss_items = $this->get_feed( 1, 'https://frosty.media/feed/' );
+		$rss_items = $this->get_feed();
 
 		$content  = '<div class="rss-widget">';
 		$content .= '<ul>';
@@ -153,7 +164,7 @@ class CL_Dashboard {
 
 
 		// Plugins
-		$rss_items = CL_Common::fetch_rss_items( 3, 'https://frosty.media/feed/?post_type=plugin&plugin_tag=custom-login-extension' );
+		$rss_items = $this->get_feed( 3, sprintf( '%s?post_type=plugin&plugin_tag=custom-login-extension', self::FEED_URL ) );
 
 		$content .= '<div class="rss-widget">';
 		$content .= '<ul>';
@@ -292,4 +303,4 @@ jQuery(document).ready(function($) {
 }
 
 // Only load on the WordPress Dashboard (index.php) page.
-add_action( 'load-index.php', array( 'CL_Dashboard', 'instance' ) );
+add_action( 'load-index.php', array( 'CL_Dashboard', 'instance' ), 99 );

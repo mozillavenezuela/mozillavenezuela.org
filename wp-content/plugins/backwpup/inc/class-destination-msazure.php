@@ -49,7 +49,6 @@ class BackWPup_Destination_MSAzure extends BackWPup_Destinations {
 				<td>
 					<input id="msazurecontainerselected" name="msazurecontainerselected" type="hidden" value="<?php echo esc_attr( BackWPup_Option::get( $jobid, 'msazurecontainer' ) );?>" />
 					<?php if ( BackWPup_Option::get( $jobid, 'msazureaccname' ) && BackWPup_Option::get( $jobid, 'msazurekey' ) ) $this->edit_ajax( array(
-																																						 'msazurehost'     => BackWPup_Option::get( $jobid, 'msazurehost' ),
 																																						 'msazureaccname'  => BackWPup_Option::get( $jobid, 'msazureaccname' ),
 																																						 'msazurekey'      => BackWPup_Encryption::decrypt( BackWPup_Option::get( $jobid, 'msazurekey' ) ),
 																																						 'msazureselected' => BackWPup_Option::get( $jobid, 'msazurecontainer' )
@@ -137,7 +136,7 @@ class BackWPup_Destination_MSAzure extends BackWPup_Destinations {
 	 */
 	public function file_delete( $jobdest, $backupfile ) {
 
-		$files = get_site_transient( 'backwpup_'. strtolower( $jobdest ), FALSE );
+		$files = get_site_transient( 'backwpup_'. strtolower( $jobdest ) );
 		list( $jobid, $dest ) = explode( '_', $jobdest );
 
 		if ( BackWPup_Option::get( $jobid, 'msazureaccname' ) && BackWPup_Option::get( $jobid, 'msazurekey' ) && BackWPup_Option::get( $jobid, 'msazurecontainer' ) ) {
@@ -196,7 +195,7 @@ class BackWPup_Destination_MSAzure extends BackWPup_Destinations {
 	 * @param $job_object
 	 * @return bool
 	 */
-	public function job_run_archive( &$job_object ) {
+	public function job_run_archive( BackWPup_Job $job_object ) {
 
 		$job_object->substeps_todo = $job_object->backup_filesize + 2;
 
@@ -234,27 +233,32 @@ class BackWPup_Destination_MSAzure extends BackWPup_Destinations {
 			}
 
 			//Prepare Upload
-			$file_handel = fopen( $job_object->backup_folder . $job_object->backup_file, 'rb' );
-			fseek( $file_handel, $job_object->substeps_done );
+			if ( $file_handel = fopen( $job_object->backup_folder . $job_object->backup_file, 'rb' ) ) {
+				fseek( $file_handel, $job_object->substeps_done );
 
-			if ( empty( $job_object->steps_data[ $job_object->step_working ][ 'BlockList' ] ) )
-				$job_object->steps_data[ $job_object->step_working ][ 'BlockList' ] = array();
+				if ( empty( $job_object->steps_data[ $job_object->step_working ][ 'BlockList' ] ) ) {
+					$job_object->steps_data[ $job_object->step_working ][ 'BlockList' ] = array();
+				}
 
-			while ( ! feof( $file_handel ) ) {
-				$chunk_upload_start = microtime( TRUE );
-				$block_count = count( $job_object->steps_data[ $job_object->step_working ][ 'BlockList' ] ) + 1;
-				$data = fread( $file_handel, 1048576 * 4 ); //4MB
-				$block_id = md5( $data ) . str_pad( $block_count, 6, "0", STR_PAD_LEFT );
-				$blobRestProxy->createBlobBlock( $job_object->job[ 'msazurecontainer' ], $job_object->job[ 'msazuredir'  ] . $job_object->backup_file, $block_id, $data );
-				$job_object->steps_data[ $job_object->step_working ][ 'BlockList' ][] =  $block_id;
-				$chunk_upload_time = microtime( TRUE ) - $chunk_upload_start;
-				$job_object->substeps_done = $job_object->substeps_done + strlen( $data );
-				$time_remaining = $job_object->do_restart_time();
-				if ( $time_remaining < $chunk_upload_time )
-					$job_object->do_restart_time( TRUE );
-				$job_object->update_working_data();
+				while ( ! feof( $file_handel ) ) {
+					$chunk_upload_start = microtime( TRUE );
+					$block_count = count( $job_object->steps_data[ $job_object->step_working ][ 'BlockList' ] ) + 1;
+					$data = fread( $file_handel, 1048576 * 4 ); //4MB
+					$block_id = md5( $data ) . str_pad( $block_count, 6, "0", STR_PAD_LEFT );
+					$blobRestProxy->createBlobBlock( $job_object->job[ 'msazurecontainer' ], $job_object->job[ 'msazuredir'  ] . $job_object->backup_file, $block_id, $data );
+					$job_object->steps_data[ $job_object->step_working ][ 'BlockList' ][] =  $block_id;
+					$chunk_upload_time = microtime( TRUE ) - $chunk_upload_start;
+					$job_object->substeps_done = $job_object->substeps_done + strlen( $data );
+					$time_remaining = $job_object->do_restart_time();
+					if ( $time_remaining < $chunk_upload_time )
+						$job_object->do_restart_time( TRUE );
+					$job_object->update_working_data();
+				}
+				fclose( $file_handel );
+			} else {
+				$job_object->log( __( 'Can not open source file for transfer.', 'backwpup' ), E_USER_ERROR );
+				return FALSE;
 			}
-			fclose( $file_handel );
 
 			//crate blog list
 			$blocklist = new WindowsAzure\Blob\Models\BlockList();
@@ -270,7 +274,7 @@ class BackWPup_Destination_MSAzure extends BackWPup_Destinations {
 				BackWPup_Option::update( $job_object->job[ 'jobid' ] , 'lastbackupdownloadurl', network_admin_url( 'admin.php' ) . '?page=backwpupbackups&action=downloadmsazure&file=' . $job_object->job[ 'msazuredir'  ] . $job_object->backup_file . '&jobid=' . $job_object->job[ 'jobid' ] );
 		}
 		catch ( Exception $e ) {
-			$job_object->log( E_USER_ERROR, sprintf( __( 'Microsoft Azure API: %s', 'backwpup' ), htmlentities( $e->getMessage() ) ), $e->getFile(), $e->getLine() );
+			$job_object->log( E_USER_ERROR, sprintf( __( 'Microsoft Azure API: %s', 'backwpup' ), $e->getMessage() ), $e->getFile(), $e->getLine() );
 			$job_object->substeps_done = 0;
 			unset( $job_object->steps_data[ $job_object->step_working ][ 'BlockList' ] );
 			if ( isset( $file_handel ) && is_resource( $file_handel ) )
@@ -326,7 +330,7 @@ class BackWPup_Destination_MSAzure extends BackWPup_Destinations {
 			set_site_transient( 'backwpup_' . $job_object->job[ 'jobid' ] . '_msazure', $files, 60 * 60 * 24 * 7 );
 		}
 		catch ( Exception $e ) {
-			$job_object->log( E_USER_ERROR, sprintf( __( 'Microsoft Azure API: %s', 'backwpup' ), htmlentities( $e->getMessage() ) ), $e->getFile(), $e->getLine() );
+			$job_object->log( E_USER_ERROR, sprintf( __( 'Microsoft Azure API: %s', 'backwpup' ), $e->getMessage() ), $e->getFile(), $e->getLine() );
 
 			return FALSE;
 		}
@@ -337,18 +341,18 @@ class BackWPup_Destination_MSAzure extends BackWPup_Destinations {
 	}
 
 	/**
-	 * @param $job_object
+	 * @param $job_settings array
 	 * @return bool
 	 */
-	public function can_run( $job_object ) {
+	public function can_run( array $job_settings ) {
 
-		if ( empty( $job_object->job[ 'msazureaccname' ] ) )
+		if ( empty( $job_settings[ 'msazureaccname' ] ) )
 			return FALSE;
 
-		if ( empty( $job_object->job[ 'msazurekey' ]) )
+		if ( empty( $job_settings[ 'msazurekey' ]) )
 			return FALSE;
 
-		if ( empty( $job_object->job[ 'msazurecontainer' ] ) )
+		if ( empty( $job_settings[ 'msazurecontainer' ] ) )
 			return FALSE;
 
 		return TRUE;

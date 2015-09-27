@@ -1,18 +1,8 @@
 <?php
-/*
- * Back compat. only.
- *
- * This file satisfies the older copy of `advanced-cache.php`.
- * Important only during an upgrade from the old to new copy.
- */
 namespace zencache // Root namespace.
 {
 	if(!defined('WPINC')) // MUST have WordPress.
 		exit('Do NOT access this file directly: '.basename(__FILE__));
-
-	$_SERVER['ZENCACHE_ALLOWED'] = FALSE; // Disallow.
-	if(!defined('ZENCACHE_ALLOWED')) // Disallow.
-		define('ZENCACHE_ALLOWED', FALSE);
 
 	if(!class_exists('\\'.__NAMESPACE__.'\\share'))
 	{
@@ -62,7 +52,7 @@ namespace zencache // Root namespace.
 			 *
 			 * @var boolean `TRUE` for ZenCache Pro.
 			 */
-			public $is_pro = TRUE;
+			public $is_pro = FALSE;
 
 			/**
 			 * Version string in YYMMDD[+build] format.
@@ -71,12 +61,14 @@ namespace zencache // Root namespace.
 			 *
 			 * @var string Current version of the software.
 			 */
-			public $version = '150409';
+			public $version = '150718';
 
 			/**
 			 * Plugin slug; based on `__NAMESPACE__`.
 			 *
 			 * @since 150218 Refactoring.
+			 *
+			 * @var string Plugin slug; based on `__NAMESPACE__`.
 			 */
 			public $slug = '';
 
@@ -1303,40 +1295,6 @@ namespace zencache // Root namespace.
 			/* --------------------------------------------------------------------------------------
 			 * Misc. utility methods.
 			 -------------------------------------------------------------------------------------- */
-
-			/**
-			 * Trims strings deeply.
-			 *
-			 * @since 150409
-			 *
-			 * @param mixed  $values Any value can be converted into a trimmed string.
-			 *    Actually, objects can't, but this recurses into objects.
-			 *
-			 * @param string $chars Specific chars to trim.
-			 *    Defaults to PHP's trim: " \r\n\t\0\x0B". Use an empty string to bypass.
-			 *
-			 * @param string $extra_chars Additional chars to trim.
-			 *
-			 * @return string|array|object Trimmed string, array, object.
-			 */
-			public function trim_deep($values, $chars = '', $extra_chars = '')
-			{
-				if(is_array($values) || is_object($values))
-				{
-					foreach($values as $_key => &$_values)
-						$_values = $this->trim_deep($_values, $chars, $extra_chars);
-					unset($_key, $_values); // Housekeeping.
-					return $values; // Trimmed deeply.
-				}
-				$string      = (string)$values;
-				$chars       = (string)$chars;
-				$extra_chars = (string)$extra_chars;
-
-				$chars = isset($chars[0]) ? $chars : " \r\n\t\0\x0B";
-				$chars = $chars.$extra_chars; // Concatenate.
-
-				return trim($string, $chars);
-			}
 
 			/**
 			 * Escape single quotes.

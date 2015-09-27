@@ -149,16 +149,20 @@ class BackWPup_Page_Backups extends WP_List_Table {
 		//only display items on page
 		$start = intval( ( $this->get_pagenum() - 1 ) * $per_page );
 		$end   = $start + $per_page;
-		if ( $end > count( $this->items ) )
+		if ( $end > count( $this->items ) ) {
 			$end = count( $this->items );
+		}
 
 		$i = -1;
+		$paged_items = array();
 		foreach ( $this->items as $item ) {
 			$i++;
-			if ( $i < $start )
+			if ( $i < $start ) {
 				continue;
-			if ( $i >= $end )
+			}
+			if ( $i >= $end ) {
 				break;
+			}
 			$paged_items[] = $item;
 		}
 
@@ -346,7 +350,6 @@ class BackWPup_Page_Backups extends WP_List_Table {
 
 		$item[ 'time' ] = $item[ 'time' ] + get_option( 'gmt_offset' ) * 3600;
 		return sprintf( __( '%1$s at %2$s', 'backwpup' ), date_i18n( get_option( 'date_format' ), $item[ 'time' ], TRUE ), date_i18n( get_option( 'time_format' ), $item[ 'time' ], TRUE ) );
-
 	}
 
 
@@ -386,14 +389,16 @@ class BackWPup_Page_Backups extends WP_List_Table {
 				}
 				break;
 			default:
-				$dest = strtoupper( str_replace( 'download', '', self::$listtable->current_action() ) );
-				if ( !empty( $dest ) && strstr( self::$listtable->current_action(), 'download') ) {
-					if ( ! current_user_can( 'backwpup_backups_download' ) )
-						wp_die( __( 'Sorry, you don\'t have permissions to do that.', 'backwpup') );
-					check_admin_referer( 'download-backup' );
-					$dest_class = BackWPup::get_destination( $dest );
-					$dest_class->file_download( (int)$_GET[ 'jobid' ], $_GET[ 'file' ] );
-					die();
+				if ( isset( $_GET[ 'jobid' ] ) ) {
+					$dest = strtoupper( str_replace( 'download', '', self::$listtable->current_action() ) );
+					if ( ! empty( $dest ) && strstr( self::$listtable->current_action(), 'download' ) ) {
+						if ( ! current_user_can( 'backwpup_backups_download' ) )
+							wp_die( __( 'Sorry, you don\'t have permissions to do that.', 'backwpup') );
+						check_admin_referer( 'download-backup' );
+						$dest_class = BackWPup::get_destination( $dest );
+						$dest_class->file_download( (int)$_GET[ 'jobid' ], $_GET[ 'file' ] );
+						die();
+					}
 				}
 				break;
 		}

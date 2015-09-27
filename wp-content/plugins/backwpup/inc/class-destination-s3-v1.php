@@ -264,7 +264,7 @@ class BackWPup_Destination_S3_V1 extends BackWPup_Destinations {
 	 */
 	public function file_delete( $jobdest, $backupfile ) {
 
-		$files = get_site_transient( 'backwpup_'. strtolower( $jobdest ), array() );
+		$files = get_site_transient( 'backwpup_'. strtolower( $jobdest ) );
 		list( $jobid, $dest ) = explode( '_', $jobdest );
 
 		if ( BackWPup_Option::get( $jobid, 's3accesskey' ) && BackWPup_Option::get( $jobid, 's3secretkey' ) && BackWPup_Option::get( $jobid, 's3bucket' ) ) {
@@ -286,9 +286,10 @@ class BackWPup_Destination_S3_V1 extends BackWPup_Destinations {
 
 				$s3->delete_object( BackWPup_Option::get( $jobid, 's3bucket' ), $backupfile );
 				//update file list
-				foreach ( $files as $key => $file ) {
-					if ( is_array( $file ) && $file[ 'file' ] == $backupfile )
+				foreach ( (array) $files as $key => $file ) {
+					if ( is_array( $file ) && $file[ 'file' ] == $backupfile ) {
 						unset( $files[ $key ] );
+					}
 				}
 				unset( $s3 );
 			}
@@ -352,10 +353,10 @@ class BackWPup_Destination_S3_V1 extends BackWPup_Destinations {
 	}
 
 	/**
-	 * @param $job_object
+	 * @param $job_object BackWPup_Job
 	 * @return bool
 	 */
-	public function job_run_archive( &$job_object ) {
+	public function job_run_archive( BackWPup_Job $job_object ) {
 
 		$job_object->substeps_todo = 2 + $job_object->backup_filesize;
 		$job_object->log( sprintf( __( '%d. Trying to send backup file to S3 Service&#160;&hellip;', 'backwpup' ), $job_object->steps_data[ $job_object->step_working ][ 'STEP_TRY' ] ), E_USER_NOTICE );
@@ -415,7 +416,7 @@ class BackWPup_Destination_S3_V1 extends BackWPup_Destinations {
 			}
 		}
 		catch ( Exception $e ) {
-			$job_object->log( E_USER_ERROR, sprintf( __( 'S3 Service API: %s', 'backwpup' ), htmlentities( $e->getMessage() ) ), $e->getFile(), $e->getLine() );
+			$job_object->log( E_USER_ERROR, sprintf( __( 'S3 Service API: %s', 'backwpup' ), $e->getMessage() ), $e->getFile(), $e->getLine() );
 
 			return FALSE;
 		}
@@ -466,7 +467,7 @@ class BackWPup_Destination_S3_V1 extends BackWPup_Destinations {
 			set_site_transient( 'backwpup_' . $job_object->job[ 'jobid' ] . '_s3', $files, 60 * 60 * 24 * 7 );
 		}
 		catch ( Exception $e ) {
-			$job_object->log( E_USER_ERROR, sprintf( __( 'S3 Service API: %s', 'backwpup' ), htmlentities( $e->getMessage() ) ), $e->getFile(), $e->getLine() );
+			$job_object->log( E_USER_ERROR, sprintf( __( 'S3 Service API: %s', 'backwpup' ), $e->getMessage() ), $e->getFile(), $e->getLine() );
 
 			return FALSE;
 		}
@@ -477,18 +478,18 @@ class BackWPup_Destination_S3_V1 extends BackWPup_Destinations {
 
 
 	/**
-	 * @param $job_object
+	 * @param $job_settings array
 	 * @return bool
 	 */
-	public function can_run( $job_object ) {
+	public function can_run( array $job_settings ) {
 
-		if ( empty( $job_object->job[ 's3accesskey' ] ) )
+		if ( empty( $job_settings[ 's3accesskey' ] ) )
 			return FALSE;
 
-		if ( empty( $job_object->job[ 's3secretkey' ] ) )
+		if ( empty( $job_settings[ 's3secretkey' ] ) )
 			return FALSE;
 
-		if ( empty( $job_object->job[ 's3bucket' ] ) )
+		if ( empty( $job_settings[ 's3bucket' ] ) )
 			return FALSE;
 
 		return TRUE;
