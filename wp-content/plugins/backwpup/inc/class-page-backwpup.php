@@ -125,65 +125,65 @@ class BackWPup_Page_BackWPup {
 					<?php
 						add_action( 'wp_feed_options', array( __CLASS__, 'wp_feed_options' ) );
 
-						$rss = fetch_feed( _x( 'http://marketpress.com/news/plugins/backwpup/feed/', 'BackWPup News RSS Feed URL', 'backwpup' ) );
+						$rss = fetch_feed( _x( 'https://marketpress.com/tag/backwpup/feed/', 'BackWPup News RSS Feed URL', 'backwpup' ) );
 
 						remove_action( 'wp_feed_options', array( __CLASS__, 'wp_feed_options' ) );
 
 						if ( is_wp_error($rss) ) {
 							echo '<p>' . sprintf( __('<strong>RSS Error</strong>: %s', 'backwpup' ), $rss->get_error_message() ) . '</p>';
-							return;
 						}
 
-						if ( !$rss->get_item_quantity() ) {
+						elseif ( !$rss->get_item_quantity() ) {
 							echo '<ul><li>' . __( 'An error has occurred, which probably means the feed is down. Try again later.', 'backwpup' ) . '</li></ul>';
 							$rss->__destruct();
 							unset($rss);
-							return;
 						}
 
-						echo '<ul>';
-						$first = TRUE;
-						foreach ( $rss->get_items( 0, 4 ) as $item ) {
-							$link = $item->get_link();
-							while ( stristr($link, 'http') != $link )
-								$link = substr($link, 1);
-							$link = esc_url(strip_tags($link));
-							$title = esc_attr(strip_tags($item->get_title()));
-							if ( empty($title) )
-								$title = __( 'Untitled', 'backwpup' );
+						else {
+							echo '<ul>';
+							$first = TRUE;
+							foreach ( $rss->get_items( 0, 4 ) as $item ) {
+								$link = $item->get_link();
+								while ( stristr($link, 'http') != $link )
+									$link = substr($link, 1);
+								$link = esc_url(strip_tags($link));
+								$title = esc_attr(strip_tags($item->get_title()));
+								if ( empty($title) )
+									$title = __( 'Untitled', 'backwpup' );
 
-							$desc = str_replace( array("\n", "\r"), ' ', esc_attr( strip_tags( @html_entity_decode( $item->get_description(), ENT_QUOTES, get_option( 'blog_charset' ) ) ) ) );
-							$excerpt = wp_html_excerpt( $desc, 360 );
+								$desc = str_replace( array("\n", "\r"), ' ', esc_attr( strip_tags( @html_entity_decode( $item->get_description(), ENT_QUOTES, get_option( 'blog_charset' ) ) ) ) );
+								$excerpt = wp_html_excerpt( $desc, 360 );
 
-							// Append ellipsis. Change existing [...] to [&hellip;].
-							if ( '[...]' == substr( $excerpt, -5 ) )
-								$excerpt = substr( $excerpt, 0, -5 ) . '[&hellip;]';
-							elseif ( '[&hellip;]' != substr( $excerpt, -10 ) && $desc != $excerpt )
-								$excerpt .= ' [&hellip;]';
+								// Append ellipsis. Change existing [...] to [&hellip;].
+								if ( '[...]' == substr( $excerpt, -5 ) )
+									$excerpt = substr( $excerpt, 0, -5 ) . '[&hellip;]';
+								elseif ( '[&hellip;]' != substr( $excerpt, -10 ) && $desc != $excerpt )
+									$excerpt .= ' [&hellip;]';
 
-							$excerpt = esc_html( $excerpt );
+								$excerpt = esc_html( $excerpt );
 
-							if ( $first ) {
-								$summary = "<div class='rssSummary'>$excerpt</div>";
-							} else {
-								$summary = '';
-							}
-
-							$date = '';
-							if ( $first ) {
-								$date = $item->get_date( 'U' );
-
-								if ( $date ) {
-									$date = ' <span class="rss-date">' . date_i18n( get_option( 'date_format' ), $date ) . '</span>';
+								if ( $first ) {
+									$summary = "<div class='rssSummary'>$excerpt</div>";
+								} else {
+									$summary = '';
 								}
-							}
 
-							echo "<li><a href=\"$link\" title=\"$desc\">$title</a>{$date}{$summary}</li>";
-							$first = FALSE;
+								$date = '';
+								if ( $first ) {
+									$date = $item->get_date( 'U' );
+
+									if ( $date ) {
+										$date = ' <span class="rss-date">' . date_i18n( get_option( 'date_format' ), $date ) . '</span>';
+									}
+								}
+
+								echo "<li><a href=\"$link\" title=\"$desc\">$title</a>{$date}{$summary}</li>";
+								$first = FALSE;
+							}
+							echo '</ul>';
+							$rss->__destruct();
+							unset($rss);
 						}
-						echo '</ul>';
-						$rss->__destruct();
-						unset($rss);
 					?>
 				</div>
 			</div>
@@ -217,6 +217,32 @@ class BackWPup_Page_BackWPup {
 					echo '</form></div>';
 				}
 			} ?>
+
+
+	        <div class="metabox-holder postbox backwpup-floated-postbox">
+		        <h3 class="hndle"><span><a href="https://www.ostraining.com/">OSTraining</a> <?php  _e( 'Video: Introduction', 'backwpup' ); ?></span></h3>
+		        <iframe class="inside" width="340" height="190" src="https://www.youtube.com/embed/pECMkLE27QQ?rel=0&amp;showinfo=0" frameborder="0" allowfullscreen></iframe>
+	        </div>
+
+	        <div class="metabox-holder postbox backwpup-floated-postbox">
+		        <h3 class="hndle"><span><a href="https://www.ostraining.com/">OSTraining</a> <?php  _e( 'Video: Settings', 'backwpup' ); ?></span></h3>
+		        <iframe class="inside" width="340" height="190" src="https://www.youtube.com/embed/F55xEoDnS0U?rel=0&amp;showinfo=0" frameborder="0" allowfullscreen></iframe>
+	        </div>
+
+	        <div class="metabox-holder postbox backwpup-floated-postbox">
+		        <h3 class="hndle"><span><a href="https://www.ostraining.com/">OSTraining</a> <?php  _e( 'Video: Daily Backups', 'backwpup' ); ?></span></h3>
+		        <iframe class="inside" width="340" height="190" src="https://www.youtube.com/embed/staZo0DS5m4?rel=0&amp;showinfo=0" frameborder="0" allowfullscreen></iframe>
+	        </div>
+
+	        <div class="metabox-holder postbox backwpup-floated-postbox">
+		        <h3 class="hndle"><span><a href="https://www.ostraining.com/">OSTraining</a> <?php  _e( 'Video: Creating Full Backups', 'backwpup' ); ?></span></h3>
+		        <iframe class="inside" width="340" height="190" src="https://www.youtube.com/embed/3N9FbmBuaac?rel=0&amp;showinfo=0" frameborder="0" allowfullscreen></iframe>
+	        </div>
+
+	        <div class="metabox-holder postbox backwpup-floated-postbox">
+		        <h3 class="hndle"><span><a href="https://www.ostraining.com/">OSTraining</a> <?php  _e( 'Video: Restoring Backups', 'backwpup' ); ?></span></h3>
+		        <iframe class="inside" width="340" height="190" src="https://www.youtube.com/embed/VIwDp87vYZY?rel=0&amp;showinfo=0" frameborder="0" allowfullscreen></iframe>
+	        </div>
 
 			<div id="backwpup-stats" class="metabox-holder postbox backwpup-cleared-postbox backwpup-max-width">
 				<div class="backwpup-table-wrap">
@@ -264,10 +290,13 @@ class BackWPup_Page_BackWPup {
 			<?php
 			//get log files
 			$logfiles = array();
-			if ( is_writeable( get_site_option( 'backwpup_cfg_logfolder' ) ) && $dir = @opendir( get_site_option( 'backwpup_cfg_logfolder' ) ) ) {
+			$log_folder = get_site_option( 'backwpup_cfg_logfolder' );
+			$log_folder = BackWPup_File::get_absolute_path( $log_folder );
+			if ( is_readable( $log_folder ) && $dir = opendir( $log_folder ) ) {
 				while ( ( $file = readdir( $dir ) ) !== FALSE ) {
-					if ( is_readable( get_site_option( 'backwpup_cfg_logfolder' ) . $file ) && is_file( get_site_option( 'backwpup_cfg_logfolder' ) . $file ) && FALSE !== strpos( $file, 'backwpup_log_' ) && FALSE !== strpos( $file, '.html' ) )
-						$logfiles[ filemtime( get_site_option( 'backwpup_cfg_logfolder' ) . '/' . $file ) ] = $file;
+					if ( is_readable( $log_folder . $file ) && is_file( $log_folder . $file ) && FALSE !== strpos( $file, 'backwpup_log_' ) && FALSE !== strpos( $file, '.html' ) ) {
+						$logfiles[ filemtime( $log_folder . $file ) ] = $file;
+					}
 				}
 				closedir( $dir );
 				krsort( $logfiles, SORT_NUMERIC );
@@ -277,7 +306,7 @@ class BackWPup_Page_BackWPup {
 				$count = 0;
 				$alternate = TRUE;
 				foreach ( $logfiles as $logfile ) {
-					$logdata = BackWPup_Job::read_logheader( get_site_option( 'backwpup_cfg_logfolder' ) . $logfile );
+					$logdata = BackWPup_Job::read_logheader( $log_folder . $logfile );
 					if ( ! $alternate ) {
 						echo '<tr>';
 						$alternate = TRUE;

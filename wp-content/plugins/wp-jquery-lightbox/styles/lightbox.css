@@ -1,6 +1,6 @@
 /**
  * WP jQuery Lightbox
- * Version 1.4.6 - 2015-03-21
+ * Version 1.4.6.1 - 2015-03-21
  * http://wordpress.org/extend/plugins/wp-jquery-lightbox/ 
  * 
  * WP jQuery Lightbox uses the minified version of this stylesheet (lightbox.min.css).
@@ -75,6 +75,7 @@
 }
 #imageContainer{
 	padding: 10px;
+	text-align: center;
 }
 #jqlb_loading{
 	position: absolute;

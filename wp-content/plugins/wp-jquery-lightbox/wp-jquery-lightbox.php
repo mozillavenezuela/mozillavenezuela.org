@@ -3,7 +3,7 @@
 Plugin Name: wp-jquery-lightbox
 Plugin URI: http://wordpress.org/extend/plugins/wp-jquery-lightbox/
 Description: A drop in replacement for LightBox-2 and similar plugins. Uses jQuery to save you from the JS-library mess in your header. :)
-Version: 1.4.6
+Version: 1.4.7
 Author: Ulf Benjaminsson
 Author URI: http://www.ulfben.com
 License: GPLv2 or later
@@ -21,7 +21,7 @@ function jqlb_init() {
 	//JQLB_LANGUAGES_DIR = plugin_dir_path(__FILE__) . 'languages/'
 	define('JQLB_SCRIPT', 'jquery.lightbox.min.js'); 
 	define('JQLB_TOUCH_SCRIPT', 'jquery.touchwipe.min.js');
-	load_plugin_textdomain('jqlb', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/');	
+	load_plugin_textdomain('wp-jquery-lightbox', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/');	
 	add_action('admin_init', 'jqlb_register_settings');
 	add_action('admin_menu', 'jqlb_register_menu_item');
 	add_action('wp_print_styles', 'jqlb_css');	
@@ -38,7 +38,7 @@ function jqlb_set_plugin_meta( $links, $file ) { // Add a link to this plugin's 
 	static $this_plugin;
 	if(!$this_plugin) $this_plugin = plugin_basename(__FILE__);
 	if($file == $this_plugin) {
-		$settings_link = '<a href="options-general.php?page=jquery-lightbox-options">'.__('Settings', 'jqlb').'</a>';	
+		$settings_link = '<a href="options-general.php?page=jquery-lightbox-options">'.__('Settings', 'wp-jquery-lightbox').'</a>';	
 		array_unshift($links, $settings_link);
 	}
 	return $links; 
@@ -62,13 +62,13 @@ function jqlb_register_settings(){
 	register_setting( 'jqlb-settings-group', 'jqlb_use_theme_styles', 'jqlb_bool_intval');			
 	add_option('jqlb_showTitle', 1);
 	add_option('jqlb_showCaption', 1);
-	add_option('jqlb_showNumbers', 1);
-	add_option('jqlb_link_target', '_self');
+	add_option('jqlb_showNumbers', 1);	
 	add_option('jqlb_automate', 1); //default is to auto-lightbox.
 	add_option('jqlb_comments', 1);
 	add_option('jqlb_resize_on_demand', 0); 
 	add_option('jqlb_showDownload', 0); 
 	add_option('jqlb_navbarOnTop', 0);
+	add_option('jqlb_margin_size', 0);
 	add_option('jqlb_resize_speed', 400); 
 	add_option('jqlb_slideshow_speed', 4000); 	
 	add_option('jqlb_use_theme_styles', 0); 
@@ -126,14 +126,14 @@ function jqlb_js() {
 		'marginSize' => get_option('jqlb_margin_size'),		
 		'slideshowSpeed' => get_option('jqlb_slideshow_speed'),
 		/* translation */		
-		'prevLinkTitle' => __('previous image', 'jqlb'),
-		'nextLinkTitle' => __('next image', 'jqlb'),		
-		'closeTitle' => __('close image gallery', 'jqlb'),
-		'image' => __('Image ', 'jqlb'),
-		'of' => __(' of ', 'jqlb'),
-		'download' => __('Download', 'jqlb'),
-		'pause' => __('(pause slideshow)', 'jqlb'),
-		'play' => __('(play slideshow)', 'jqlb')
+		'prevLinkTitle' => __('previous image', 'wp-jquery-lightbox'),
+		'nextLinkTitle' => __('next image', 'wp-jquery-lightbox'),		
+		'closeTitle' => __('close image gallery', 'wp-jquery-lightbox'),
+		'image' => __('Image ', 'wp-jquery-lightbox'),
+		'of' => __(' of ', 'wp-jquery-lightbox'),
+		'download' => __('Download', 'wp-jquery-lightbox'),
+		'pause' => __('(pause slideshow)', 'wp-jquery-lightbox'),
+		'play' => __('(play slideshow)', 'wp-jquery-lightbox')
 	));
 }
 
@@ -196,7 +196,7 @@ function jqlb_pos_intval($v){
 }
 function jqlb_options_panel(){
 	if(!function_exists('current_user_can') || !current_user_can('manage_options')){
-			die(__('Cheatin&#8217; uh?', 'jqlb'));
+			die(__('Cheatin&#8217; uh?', 'wp-jquery-lightbox'));
 	} 
 	add_action('in_admin_footer', 'jqlb_add_admin_footer');
 	?>
@@ -211,42 +211,42 @@ function jqlb_options_panel(){
 				<td colspan="">
 					<?php $check = get_option('jqlb_automate') ? ' checked="yes" ' : ''; ?>
 					<input type="checkbox" id="jqlb_automate" name="jqlb_automate" value="1" <?php echo $check; ?>/>
-					<label for="jqlb_automate" title="<?php _e('Let the plugin add necessary html to image links', 'jqlb') ?>"> <?php _e('Auto-lightbox image links', 'jqlb') ?></label>
+					<label for="jqlb_automate" title="<?php _e('Let the plugin add necessary html to image links', 'wp-jquery-lightbox') ?>"> <?php _e('Auto-lightbox image links', 'wp-jquery-lightbox') ?></label>
 				</td>
 			</tr>
 			<tr valign="baseline" colspan="2">
 				<td colspan="2">
 					<?php $check = get_option('jqlb_comments') ? ' checked="yes" ' : ''; ?>
 					<input type="checkbox" id="jqlb_comments" name="jqlb_comments" value="1" <?php echo $check; ?>/>
-					<label for="jqlb_comments" title="<?php _e('Note: this will disable the nofollow-attribute of comment links, that otherwise interfere with the lightbox.', 'jqlb') ?>"> <?php _e('Enable lightbox in comments (disables <a href="http://codex.wordpress.org/Nofollow">the nofollow attribute!</a>)', 'jqlb') ?></label>
+					<label for="jqlb_comments" title="<?php _e('Note: this will disable the nofollow-attribute of comment links, that otherwise interfere with the lightbox.', 'wp-jquery-lightbox') ?>"> <?php _e('Enable lightbox in comments (disables <a href="http://codex.wordpress.org/Nofollow">the nofollow attribute!</a>)', 'wp-jquery-lightbox') ?></label>
 				</td>
 			</tr>
 			<tr>
 				<td>
 					<?php $check = get_option('jqlb_showTitle') ? ' checked="yes" ' : ''; ?>
 					<input type="checkbox" id="jqlb_showTitle" name="jqlb_showTitle" value="1" <?php echo $check; ?> />
-					<label for="jqlb_showTitle"> <?php _e('Show title', 'jqlb') ?> </label>
+					<label for="jqlb_showTitle"> <?php _e('Show title', 'wp-jquery-lightbox') ?> </label>
 				</td>
 			</tr>
 			<tr>
 				<td>
 					<?php $check = get_option('jqlb_showCaption') ? ' checked="yes" ' : ''; ?>
 					<input type="checkbox" id="jqlb_showCaption" name="jqlb_showCaption" value="1" <?php echo $check; ?> />
-					<label for="jqlb_showCaption"> <?php _e('Show caption', 'jqlb') ?> </label>
+					<label for="jqlb_showCaption"> <?php _e('Show caption', 'wp-jquery-lightbox') ?> </label>
 				</td>
 			</tr>
 			<tr valign="baseline">				
 				<td>
 					<?php $check = get_option('jqlb_showNumbers') ? ' checked="yes" ' : ''; ?>
 					<input type="checkbox" id="jqlb_showNumbers" name="jqlb_showNumbers" value="1" <?php echo $check; ?> />
-					<label for="jqlb_showNumbers"> <?php _e('Show image numbers:', 'jqlb');  printf(' <code>"%s # %s #"</code>', __('Image ', 'jqlb'), __(' of ', 'jqlb')); ?> </label>
+					<label for="jqlb_showNumbers"> <?php _e('Show image numbers:', 'wp-jquery-lightbox');  printf(' <code>"%s # %s #"</code>', __('Image ', 'wp-jquery-lightbox'), __(' of ', 'wp-jquery-lightbox')); ?> </label>
 				</td>				
 			</tr>			
 			<tr valign="baseline">				
 				<td>
 					<?php $check = get_option('jqlb_showDownload') ? ' checked="yes" ' : ''; ?>
 					<input type="checkbox" id="jqlb_showDownload" name="jqlb_showDownload" value="1" <?php echo $check; ?> />
-					<label for="jqlb_showDownload"> <?php _e('Show download link', 'jqlb') ?> </label>
+					<label for="jqlb_showDownload"> <?php _e('Show download link', 'wp-jquery-lightbox') ?> </label>
 				</td>				
 			</tr>
       <tr valign="baseline" colspan="2">
@@ -254,7 +254,7 @@ function jqlb_options_panel(){
           <?php $check = get_option('jqlb_navbarOnTop') ? ' checked="yes" ' : ''; ?>
           <input type="checkbox" id="jqlb_navbarOnTop" name="jqlb_navbarOnTop" value="1" <?php echo $check; ?> />
           <label for="jqlb_navbarOnTop">
-            <?php _e('Show image info on top', 'jqlb') ?>
+            <?php _e('Show image info on top', 'wp-jquery-lightbox') ?>
           </label>
         </td>
       </tr>
@@ -262,12 +262,12 @@ function jqlb_options_panel(){
 			<td>
 				<?php $check = get_option('jqlb_resize_on_demand') ? ' checked="yes" ' : ''; ?>
 				<input type="checkbox" id="jqlb_resize_on_demand" name="jqlb_resize_on_demand" value="1" <?php echo $check; ?> />
-				<label for="jqlb_resize_on_demand"><?php _e('Shrink large images to fit smaller screens', 'jqlb') ?></label> 
+				<label for="jqlb_resize_on_demand"><?php _e('Shrink large images to fit smaller screens', 'wp-jquery-lightbox') ?></label> 
 			</td>
 			<?php IF($check != ''): ?>
 			<td>					
 				<input type="text" id="jqlb_margin_size" name="jqlb_margin_size" value="<?php echo floatval(get_option('jqlb_margin_size')) ?>" size="3" />
-				<label for="jqlb_margin_size" title="<?php _e('Keep a distance between the image and the screen edges.', 'jqlb') ?>"><?php _e('Minimum margin to screen edge (default: 0)', 'jqlb') ?></label>			
+				<label for="jqlb_margin_size" title="<?php _e('Keep a distance between the image and the screen edges.', 'wp-jquery-lightbox') ?>"><?php _e('Minimum margin to screen edge (default: 0)', 'wp-jquery-lightbox') ?></label>			
 			</td>
 			<?php ENDIF; ?>
 		</tr>
@@ -275,24 +275,24 @@ function jqlb_options_panel(){
 			<td>
 				<?php $check = get_option('jqlb_use_theme_styles') ? ' checked="yes" ' : ''; ?>
 				<input type="checkbox" id="jqlb_use_theme_styles" name="jqlb_use_theme_styles" value="1" <?php echo $check; ?> />	
-				<label for="jqlb_use_theme_styles" title="You must put lightbox.min.css or lightbox.min.[locale].css in your theme's style-folder. This is good to keep your CSS edits when updating the plugin."><?php _e('Use custom stylesheet', 'jqlb'); ?></label>						
+				<label for="jqlb_use_theme_styles" title="You must put lightbox.min.css or lightbox.min.[locale].css in your theme's style-folder. This is good to keep your CSS edits when updating the plugin."><?php _e('Use custom stylesheet', 'wp-jquery-lightbox'); ?></label>						
 			</td>			
 		</tr>						
 		<tr valign="baseline" colspan="2">
 			<td colspan="2">					
 				<input type="text" id="jqlb_resize_speed" name="jqlb_resize_speed" value="<?php echo intval(get_option('jqlb_resize_speed')) ?>" size="3" />
-				<label for="jqlb_resize_speed"><?php _e('Animation duration (in milliseconds) ', 'jqlb') ?></label>			
+				<label for="jqlb_resize_speed"><?php _e('Animation duration (in milliseconds) ', 'wp-jquery-lightbox') ?></label>			
 			</td>
 		</tr>
 		<tr valign="baseline" colspan="2">
 			<td colspan="2">					
 				<input type="text" id="jqlb_slideshow_speed" name="jqlb_slideshow_speed" value="<?php echo intval(get_option('jqlb_slideshow_speed')) ?>" size="3" />
-				<label for="jqlb_slideshow_speed"><?php _e('Slideshow speed (in milliseconds). 0 to disable.', 'jqlb') ?></label>			
+				<label for="jqlb_slideshow_speed"><?php _e('Slideshow speed (in milliseconds). 0 to disable.', 'wp-jquery-lightbox') ?></label>			
 			</td>
 		</tr>		
 		 </table>		
 		<p class="submit">
-		  <input type="submit" name="Submit" value="<?php _e('Save Changes', 'jqlb') ?>" />
+		  <input type="submit" name="Submit" value="<?php _e('Save Changes', 'wp-jquery-lightbox') ?>" />
 		</p>
 	</form>
 	<?php

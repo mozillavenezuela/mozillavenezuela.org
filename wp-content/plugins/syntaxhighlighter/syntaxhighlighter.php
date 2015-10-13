@@ -4,7 +4,7 @@
 
 Plugin Name:  SyntaxHighlighter Evolved
 Plugin URI:   http://www.viper007bond.com/wordpress-plugins/syntaxhighlighter/
-Version:      3.1.11
+Version:      3.1.13
 Description:  Easily post syntax-highlighted code to your site without having to modify the code at all. Uses Alex Gorbatchev's <a href="http://alexgorbatchev.com/wiki/SyntaxHighlighter">SyntaxHighlighter</a>. <strong>TIP:</strong> Don't use the Visual editor if you don't want your code mangled. TinyMCE will "clean up" your HTML.
 Author:       Alex Mills (Viper007Bond)
 Author URI:   http://www.viper007bond.com/
@@ -21,7 +21,7 @@ Thanks to:
 
 class SyntaxHighlighter {
 	// All of these variables are private. Filters are provided for things that can be modified.
-	var $pluginver            = '3.1.11';  // Plugin version
+	var $pluginver            = '3.1.13';  // Plugin version
 	var $agshver              = false;    // Alex Gorbatchev's SyntaxHighlighter version (dynamically set below due to v2 vs v3)
 	var $shfolder             = false;    // Controls what subfolder to load SyntaxHighlighter from (v2 or v3)
 	var $settings             = array();  // Contains the user's settings
@@ -406,13 +406,16 @@ class SyntaxHighlighter {
 		// In certain weird circumstances, the content gets run through "content_save_pre" twice
 		// Keep track and don't allow this filter to be run twice
 		// I couldn't easily figure out why this happens and didn't bother looking into it further as this works fine
-		if ( true == $this->content_save_pre_ran )
+		if ( true == $this->content_save_pre_ran ) {
 			return $content;
+		}
 		$this->content_save_pre_ran = true;
 
 		// Post quick edits aren't decoded for display, so we don't need to encode them (again)
-		if ( ! empty( $_POST ) && !empty( $_POST['action'] ) && 'inline-save' == $_POST['action'] )
+		// This also aborts for (un)trashing to avoid extra encoding.
+		if ( empty( $_POST ) || ( ! empty( $_POST['action'] ) && 'inline-save' == $_POST['action'] ) ) {
 			return $content;
+		}
 
 		return $this->encode_shortcode_contents_slashed( $content );
 	}
@@ -1238,8 +1241,8 @@ class SyntaxHighlighter {
 				$settings['padlinenumbers'] = (int) $settings['padlinenumbers'];
 
 			$settings['classname']      = ( !empty($settings['classname']) )       ? preg_replace( '/[^ A-Za-z0-9_-]*/', '', $settings['classname'] ) : '';
-			$settings['firstline']      = (int) ( !empty($settings['firstline']) ) ? $settings['firstline'] : $this->defaultsettings['firstline'];
-			$settings['tabsize']        = (int) ( !empty($settings['tabsize']) )   ? $settings['tabsize']   : $this->defaultsettings['tabsize'];
+			$settings['firstline']      = (int) ( ( !empty($settings['firstline']) ) ? $settings['firstline'] : $this->defaultsettings['firstline'] );
+			$settings['tabsize']        = (int) ( ( !empty($settings['tabsize']) )   ? $settings['tabsize']   : $this->defaultsettings['tabsize'] );
 		}
 
 		return $settings;

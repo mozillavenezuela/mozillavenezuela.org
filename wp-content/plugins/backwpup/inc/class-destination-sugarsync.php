@@ -218,10 +218,10 @@ class BackWPup_Destination_SugarSync extends BackWPup_Destinations {
 	}
 
 	/**
-	 * @param $job_object
+	 * @param $job_object BackWPup_Job
 	 * @return bool
 	 */
-	public function job_run_archive( &$job_object ) {
+	public function job_run_archive( BackWPup_Job $job_object ) {
 
 		$job_object->substeps_todo = 2 + $job_object->backup_filesize;
 		$job_object->log( sprintf( __( '%d. Try to send backup to SugarSync&#160;&hellip;', 'backwpup' ), $job_object->steps_data[ $job_object->step_working ][ 'STEP_TRY' ] ), E_USER_NOTICE );
@@ -302,7 +302,7 @@ class BackWPup_Destination_SugarSync extends BackWPup_Destinations {
 			set_site_transient( 'BackWPup_' .  $job_object->job[ 'jobid' ] . '_SUGARSYNC', $files, 60 * 60 * 24 * 7 );
 		}
 		catch ( Exception $e ) {
-			$job_object->log( E_USER_ERROR, sprintf( __( 'SugarSync API: %s', 'backwpup' ), htmlentities( $e->getMessage() ) ), $e->getFile(), $e->getLine() );
+			$job_object->log( E_USER_ERROR, sprintf( __( 'SugarSync API: %s', 'backwpup' ), $e->getMessage() ), $e->getFile(), $e->getLine() );
 
 			return FALSE;
 		}
@@ -312,15 +312,15 @@ class BackWPup_Destination_SugarSync extends BackWPup_Destinations {
 	}
 
 	/**
-	 * @param $job_object
+	 * @param $job_settings array
 	 * @return bool
 	 */
-	public function can_run( $job_object ) {
+	public function can_run( array $job_settings ) {
 
-		if ( empty( $job_object->job[ 'sugarrefreshtoken' ] ) )
+		if ( empty( $job_settings[ 'sugarrefreshtoken' ] ) )
 			return FALSE;
 
-		if ( empty( $job_object->job[ 'sugarroot' ] ) )
+		if ( empty( $job_settings[ 'sugarroot' ] ) )
 			return FALSE;
 
 		return TRUE;
@@ -416,7 +416,7 @@ class BackWPup_Destination_SugarSync_API {
 		if ( ini_get( 'open_basedir' ) == '' ) curl_setopt( $curl, CURLOPT_FOLLOWLOCATION, TRUE );
 		curl_setopt( $curl, CURLOPT_RETURNTRANSFER, TRUE );
 		if ( BackWPup::get_plugin_data( 'cacert' ) ) {
-			curl_setopt( $curl, CURLOPT_SSLVERSION, 3 );
+			curl_setopt( $curl, CURLOPT_SSLVERSION, 1 );
 			curl_setopt( $curl, CURLOPT_SSL_VERIFYPEER, TRUE );
 			curl_setopt( $curl, CURLOPT_CAINFO, BackWPup::get_plugin_data( 'cacert' ) );
 			curl_setopt( $curl, CURLOPT_CAPATH, dirname( BackWPup::get_plugin_data( 'cacert' ) ) );
@@ -433,7 +433,7 @@ class BackWPup_Destination_SugarSync_API {
 		elseif ( $method == 'PUT' ) {
 			if ( is_readable( $data ) ) {
 				$headers[ ] = 'Content-Length: ' . filesize( $data );
-				$datafilefd = fopen( $data, 'r' );
+				$datafilefd = fopen( $data, 'rb' );
 				curl_setopt( $curl, CURLOPT_PUT, TRUE );
 				curl_setopt( $curl, CURLOPT_INFILE, $datafilefd );
 				curl_setopt( $curl, CURLOPT_INFILESIZE, filesize( $data ) );
@@ -503,7 +503,7 @@ class BackWPup_Destination_SugarSync_API {
 		if ( ini_get( 'open_basedir' ) == ''  ) curl_setopt( $curl, CURLOPT_FOLLOWLOCATION, TRUE );
 		curl_setopt( $curl, CURLOPT_RETURNTRANSFER, TRUE );
 		if ( BackWPup::get_plugin_data( 'cacert' ) ) {
-			curl_setopt( $curl, CURLOPT_SSLVERSION, 3 );
+			curl_setopt( $curl, CURLOPT_SSLVERSION, 1 );
 			curl_setopt( $curl, CURLOPT_SSL_VERIFYPEER, TRUE );
 			curl_setopt( $curl, CURLOPT_CAINFO, BackWPup::get_plugin_data( 'cacert' ) );
 			curl_setopt( $curl, CURLOPT_CAPATH, dirname( BackWPup::get_plugin_data( 'cacert' ) ) );
@@ -565,7 +565,7 @@ class BackWPup_Destination_SugarSync_API {
 		if ( ini_get( 'open_basedir' ) == '' ) curl_setopt( $curl, CURLOPT_FOLLOWLOCATION, TRUE );
 		curl_setopt( $curl, CURLOPT_RETURNTRANSFER, TRUE );
 		if ( BackWPup::get_plugin_data( 'cacert' ) ) {
-			curl_setopt( $curl, CURLOPT_SSLVERSION, 3 );
+			curl_setopt( $curl, CURLOPT_SSLVERSION, 1 );
 			curl_setopt( $curl, CURLOPT_SSL_VERIFYPEER, TRUE );
 			curl_setopt( $curl, CURLOPT_CAINFO, BackWPup::get_plugin_data( 'cacert' ) );
 			curl_setopt( $curl, CURLOPT_CAPATH, dirname( BackWPup::get_plugin_data( 'cacert' ) ) );
@@ -625,13 +625,13 @@ class BackWPup_Destination_SugarSync_API {
 		if ( ini_get( 'open_basedir' ) == '' ) curl_setopt( $curl, CURLOPT_FOLLOWLOCATION, TRUE );
 		curl_setopt( $curl, CURLOPT_RETURNTRANSFER, TRUE );
 		if ( BackWPup::get_plugin_data( 'cacert' ) ) {
-			curl_setopt( $curl, CURLOPT_SSLVERSION, 3 );
+			curl_setopt( $curl, CURLOPT_SSLVERSION, 1 );
 			curl_setopt( $curl, CURLOPT_SSL_VERIFYPEER, TRUE );
 			curl_setopt( $curl, CURLOPT_CAINFO, BackWPup::get_plugin_data( 'cacert' ) );
 			curl_setopt( $curl, CURLOPT_CAPATH, dirname( BackWPup::get_plugin_data( 'cacert' ) ) );
 		} else {
 			curl_setopt( $curl, CURLOPT_SSL_VERIFYPEER, FALSE );
-		}	curl_setopt( $curl, CURLOPT_SSL_VERIFYPEER, FALSE );
+		}
 		curl_setopt( $curl, CURLOPT_HEADER, TRUE );
 		curl_setopt( $curl, CURLOPT_HTTPHEADER, array( 'Content-Type: application/xml; charset=UTF-8', 'Content-Length: ' . strlen( $auth ) ) );
 		curl_setopt( $curl, CURLOPT_POSTFIELDS, $auth );
@@ -842,19 +842,16 @@ class BackWPup_Destination_SugarSync_API {
 	 */
 	public function upload( $file, $name = '' ) {
 
-		if ( empty( $name ) )
+		if ( empty( $name ) ) {
 			$name = basename( $file );
+		}
+
+		$content_type = BackWPup_Job::get_mime_type( $file );
 
 		$xmlrequest = '<?xml version="1.0" encoding="UTF-8"?>';
 		$xmlrequest .= '<file>';
 		$xmlrequest .= '<displayName>' . mb_convert_encoding( $name, 'UTF-8', $this->encoding ) . '</displayName>';
-
-		if ( ! is_readable( $file ) ) {
-			$finfo = fopen( $file, 'r' );
-			$xmlrequest .= '<mediaType>' . mime_content_type( $finfo ) . '</mediaType>';
-			fclose( $finfo );
-		}
-
+		$xmlrequest .= '<mediaType>' . $content_type . '</mediaType>';
 		$xmlrequest .= '</file>';
 
 		$this->doCall( $this->folder, $xmlrequest, 'POST' );

@@ -3,7 +3,7 @@
  * Plugin Name: Custom Login
  * Plugin URI: https://frosty.media/plugins/custom-login
  * Description: A simple way to customize your WordPress <code>wp-login.php</code> screen! A <a href="https://frosty.media/">Frosty Media</a> plugin.
- * Version: 3.2.3
+ * Version: 3.2.4
  * Author: Austin Passy
  * Author URI: http://austin.passy.co
  * Text Domain: custom-login
@@ -38,7 +38,7 @@ final class Custom_Login {
 	 * Plugin vars
 	 * @return string
 	 */
-	var	$version = '3.2.3',
+	var	$version = '3.2.4',
 		$menu_page,
 		$prefix;
 
@@ -51,7 +51,7 @@ final class Custom_Login {
 	 * Main Instance
 	 *
 	 * @staticvar 	array 	$instance
-	 * @return 		The one true instance
+	 * @return 		Custom_Login The one true instance
 	 */
 	public static function instance() {
 		if ( ! isset( self::$instance ) && ! ( self::$instance instanceof Custom_Login ) ) {
@@ -156,7 +156,7 @@ final class Custom_Login {
 
 		$this->prefix = CUSTOM_LOGIN_OPTION;
 
-		register_activation_hook( CUSTOM_LOGIN_FILE,				array( $this, 'activate' ) );
+		register_activation_hook( CUSTOM_LOGIN_FILE,			array( $this, 'activate' ) );
 
 		add_action( 'login_head',								array( $this, 'cl_version_in_header' ), 1 );
 		add_action( 'wp_head',									array( $this, 'cl_version_in_header' ) );
@@ -164,7 +164,7 @@ final class Custom_Login {
 		add_action( 'admin_init',								array( $this, 'load_settings' ), 8 );
 		add_action( $this->prefix . '_after_sanitize_options',	array( $this, 'delete_transients' ), 8 );
 
-		add_action( 'admin_notices',								array( $this, 'show_notifications' ) );
+		add_action( 'admin_notices',							array( $this, 'show_notifications' ) );
 		add_action( 'admin_init',								array( $this, 'notification_ignore' ) );
 
 		do_action( $this->prefix . '_actions' );
@@ -357,7 +357,7 @@ endif; // End if class_exists check
  *
  * Example: <?php $custom_login = CUSTOMLOGIN(); ?>
  *
- * @return The one true Instance
+ * @return Custom_Login
  */
 if ( !function_exists( 'CUSTOMLOGIN' ) ) {
 	function CUSTOMLOGIN() {

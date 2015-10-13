@@ -167,7 +167,7 @@ class BackWPup_Destination_RSC extends BackWPup_Destinations {
 	 */
 	public function file_delete( $jobdest, $backupfile ) {
 
-		$files = get_site_transient( 'backwpup_'. strtolower( $jobdest ), FALSE );
+		$files = get_site_transient( 'backwpup_'. strtolower( $jobdest ) );
 		list( $jobid, $dest ) = explode( '_', $jobdest );
 
 		if ( BackWPup_Option::get( $jobid, 'rscusername' ) && BackWPup_Option::get( $jobid, 'rscapikey' ) && BackWPup_Option::get( $jobid, 'rsccontainer' ) ) {
@@ -240,10 +240,10 @@ class BackWPup_Destination_RSC extends BackWPup_Destinations {
 	}
 
 	/**
-	 * @param $job_object
+	 * @param $job_object BAckWPup_Job
 	 * @return bool
 	 */
-	public function job_run_archive( &$job_object ) {
+	public function job_run_archive( BackWPup_Job $job_object ) {
 
 		$job_object->substeps_todo = 2 + $job_object->backup_filesize;
 		$job_object->substeps_done = 0;
@@ -264,7 +264,7 @@ class BackWPup_Destination_RSC extends BackWPup_Destinations {
 			$job_object->log( sprintf(__( 'Connected to Rackspace cloud files container %s', 'backwpup' ), $job_object->job[ 'rsccontainer' ] ) );
 		}
 		catch ( Exception $e ) {
-			$job_object->log( E_USER_ERROR, sprintf( __( 'Rackspace Cloud API: %s', 'backwpup' ), htmlentities( $e->getMessage() ) ), $e->getFile(), $e->getLine() );
+			$job_object->log( E_USER_ERROR, sprintf( __( 'Rackspace Cloud API: %s', 'backwpup' ), $e->getMessage() ), $e->getFile(), $e->getLine() );
 
 			return FALSE;
 		}
@@ -275,9 +275,13 @@ class BackWPup_Destination_RSC extends BackWPup_Destinations {
 			$job_object->substeps_done    = 0;
 			$job_object->log( __( 'Upload to Rackspace cloud started &hellip;', 'backwpup' ), E_USER_NOTICE );
 
-			$handle = fopen( $job_object->backup_folder . $job_object->backup_file, 'rb' );
-			$uploded = $container->uploadObject( $job_object->job[ 'rscdir' ] . $job_object->backup_file, $handle );
-			fclose( $handle );
+			if ( $handle = fopen( $job_object->backup_folder . $job_object->backup_file, 'rb' ) ) {
+				$uploded = $container->uploadObject( $job_object->job[ 'rscdir' ] . $job_object->backup_file, $handle );
+				fclose( $handle );
+			} else {
+				$job_object->log( __( 'Can not open source file for transfer.', 'backwpup' ), E_USER_ERROR );
+				return FALSE;
+			}
 
 //			$transfer = $container->setupObjectTransfer( array(
 //															 'name' => $job_object->job[ 'rscdir' ] . $job_object->backup_file,
@@ -288,10 +292,11 @@ class BackWPup_Destination_RSC extends BackWPup_Destinations {
 //			$uploded = $transfer->upload();
 
 			if ( $uploded ) {
-				$job_object->substeps_todo = 1 + $job_object->backup_filesize;
 				$job_object->log( __( 'Backup File transferred to RSC://', 'backwpup' ) . $job_object->job[ 'rsccontainer' ] . '/' . $job_object->job[ 'rscdir' ] . $job_object->backup_file, E_USER_NOTICE );
-				if ( !empty( $job_object->job[ 'jobid' ] ) )
+				$job_object->substeps_done = 1 + $job_object->backup_filesize;
+				if ( ! empty( $job_object->job[ 'jobid' ] ) ) {
 					BackWPup_Option::update( $job_object->job[ 'jobid' ], 'lastbackupdownloadurl', network_admin_url( 'admin.php' ) . '?page=backwpupbackups&action=downloadrsc&file=' . $job_object->job[ 'rscdir' ] . $job_object->backup_file . '&jobid=' . $job_object->job[ 'jobid' ] );
+				}
 			} else {
 				$job_object->log( __( 'Cannot transfer backup to Rackspace cloud.', 'backwpup' ), E_USER_ERROR );
 
@@ -299,7 +304,7 @@ class BackWPup_Destination_RSC extends BackWPup_Destinations {
 			}
 		}
 		catch ( Exception $e ) {
-			$job_object->log( E_USER_ERROR, sprintf( __( 'Rackspace Cloud API: %s', 'backwpup' ), htmlentities( $e->getMessage() ) ), $e->getFile(), $e->getLine() );
+			$job_object->log( E_USER_ERROR, sprintf( __( 'Rackspace Cloud API: %s', 'backwpup' ), $e->getMessage() ), $e->getFile(), $e->getLine() );
 
 			return FALSE;
 		}
@@ -344,7 +349,7 @@ class BackWPup_Destination_RSC extends BackWPup_Destinations {
 			set_site_transient( 'backwpup_' . $job_object->job[ 'jobid' ] . '_rsc', $files, 60 * 60 * 24 * 7 );
 		}
 		catch ( Exception $e ) {
-			$job_object->log( E_USER_ERROR, sprintf( __( 'Rackspace Cloud API: %s', 'backwpup' ), htmlentities( $e->getMessage() ) ), $e->getFile(), $e->getLine() );
+			$job_object->log( E_USER_ERROR, sprintf( __( 'Rackspace Cloud API: %s', 'backwpup' ), $e->getMessage() ), $e->getFile(), $e->getLine() );
 
 			return FALSE;
 		}
@@ -354,18 +359,18 @@ class BackWPup_Destination_RSC extends BackWPup_Destinations {
 	}
 
 	/**
-	 * @param $job_object
+	 * @param $job_settings array
 	 * @return bool
 	 */
-	public function can_run( $job_object ) {
+	public function can_run( array $job_settings ) {
 
-		if ( empty( $job_object->job[ 'rscusername'] ) )
+		if ( empty( $job_settings[ 'rscusername'] ) )
 			return FALSE;
 
-		if ( empty( $job_object->job[ 'rscapikey'] ) )
+		if ( empty( $job_settings[ 'rscapikey'] ) )
 			return FALSE;
 
-		if ( empty( $job_object->job[ 'rsccontainer'] ) )
+		if ( empty( $job_settings[ 'rsccontainer'] ) )
 			return FALSE;
 
 		return TRUE;

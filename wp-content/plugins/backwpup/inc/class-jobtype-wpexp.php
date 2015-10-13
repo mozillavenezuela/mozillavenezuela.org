@@ -102,7 +102,7 @@ class BackWPup_JobType_WPEXP extends BackWPup_JobTypes {
 	 * @param $job_object
 	 * @return bool
 	 */
-	public function job_run( &$job_object ) {
+	public function job_run( BackWPup_Job $job_object ) {
 		global $wpdb, $post, $wp_query;
 
 		$wxr_version = '1.2';
@@ -305,6 +305,7 @@ class BackWPup_JobType_WPEXP extends BackWPup_JobTypes {
 
 				// fetch 20 posts at a time rather than loading the entire table into memory
 				while ( $next_posts = array_splice( $job_object->steps_data[ $job_object->step_working ]['post_ids'], 0, 20 ) ) {
+					wp_cache_flush();
 					$where = 'WHERE ID IN (' . join( ',', $next_posts ) . ')';
 					$posts = $wpdb->get_results( "SELECT * FROM {$wpdb->posts} $where" );
 					$wxr_post = '';
@@ -495,9 +496,7 @@ class BackWPup_JobType_WPEXP extends BackWPup_JobTypes {
 			//add XML file to backup files
 			if ( is_readable( $job_object->steps_data[ $job_object->step_working ]['wpexportfile'] ) ) {
 				$job_object->additional_files_to_backup[ ] = $job_object->steps_data[ $job_object->step_working ]['wpexportfile'];
-				$job_object->count_files ++;
 				$filesize = filesize( $job_object->steps_data[ $job_object->step_working ][ 'wpexportfile' ] );
-				$job_object->count_filesize = $job_object->count_filesize + $filesize;
 				$job_object->log( sprintf( __( 'Added XML export "%1$s" with %2$s to backup file list.', 'backwpup' ), basename( $job_object->steps_data[ $job_object->step_working ]['wpexportfile'] ), size_format( $filesize, 2 ) ) );
 			}
 			$job_object->substeps_done ++;
@@ -692,7 +691,7 @@ class BackWPup_JobType_WPEXP extends BackWPup_JobTypes {
 	 * @since WordPress 2.3.0
 	 */
 	private function wxr_post_taxonomy() {
-		$post = get_post();
+		global $post;
 
 		$taxonomies = get_object_taxonomies( $post->post_type );
 		if ( empty( $taxonomies ) )

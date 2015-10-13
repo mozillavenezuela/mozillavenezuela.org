@@ -3,8 +3,8 @@ Contributors: ulfben
 Donate link: http://flattr.com/thing/367557/Support-my-WordPress-plugins
 Tags: lightbox, jquery, nodal, image, display, ulfben
 Requires at least: 3.9
-Tested up to: 4.1.1
-Stable tag: 1.4.6
+Tested up to: 4.3.1
+Stable tag: 1.4.7
 License: GPLv2 or later
 
 A drop-in replacement for Lightbox 2 and similar plugins, shedding the bulk of Prototype and Scriptaculous. Improved for mobile devices.
@@ -36,6 +36,12 @@ Any help is greatly appreciated. Thanks!
 
 *[//Ulf Benjaminsson](http://www.ulfben.com)*
 
+= 1.4.7 (2015-09-21) =
+* Support for WordPress' new translation system.
+* Updated translation for Portugese (Thanks: Pedro Mendonça)
+* Added images and CSS for Portugese (Thanks: Pedro Mendonça)
+
+
 = 1.4.6 (2015-03-20) =
 * "Download link" now correctly open a download dialogue instead of displaying the file
 * Title, caption and all control elements can now be turned on / off individually
@@ -45,6 +51,7 @@ Any help is greatly appreciated. Thanks!
 * Fixed animation speed setting being ignored
 * Dropped quirks support for Internet Explorer 8
 * Removed help-text setting 
+
 
 = 1.4.5 (2013-06-09) =
 * Fit to screen edge on low rez displays (<500px)
@@ -146,6 +153,14 @@ Lastly:
 Still have problems? Post a link and describe what issue you're having, and tell us what of these steps you've already tried.
 
 == Changelog ==
+
+= 1.4.7 (2015-09-21) =
+* Support for WordPress' new translation system.
+* Updated translation for Portugese (Thanks: Pedro Mendonça)
+* Added images and CSS for Portugese (Thanks: Pedro Mendonça)
+
+
+
 = 1.4.6 (2015-03-20) =
 * "Download link" now correctly open a download dialogue instead of displaying the file
 * Title, caption and all control elements can now be turned on / off individually
@@ -245,6 +260,9 @@ Still have problems? Post a link and describe what issue you're having, and tell
 * Release.
 
 == Upgrade Notice ==
+= 1.4.7 =
+New Portugese translation. Support for WordPress' new translation system.
+
 = 1.4.6 =
 Lots of bug fixes and performance improvements. New CSS styles!
 

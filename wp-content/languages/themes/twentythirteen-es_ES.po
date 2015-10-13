@@ -7,10 +7,12 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: GlotPress/1.0-alpha-1000\n"
+"X-Generator: GlotPress/1.0-alpha-1100\n"
 "Project-Id-Version: Twenty Thirteen\n"
 
+#. #-#-#-#-#  twentythirteen.pot (Twenty Thirteen 1.6)  #-#-#-#-#
 #. Author URI of the plugin/theme
+#: footer.php:19
 msgid "https://wordpress.org/"
 msgstr "https://wordpress.org/"
 
@@ -309,10 +311,6 @@ msgstr "Los comentarios están cerrados."
 #: content-none.php:18
 msgid "Ready to publish your first post? <a href=\"%1$s\">Get started here</a>."
 msgstr "¿Preparado para publicar tu primera entrada? <a href=\"%1$s\">Empieza aquí</a>."
-
-#: footer.php:19
-msgid "http://wordpress.org/"
-msgstr "http://es.wordpress.org/"
 
 #: footer.php:19
 msgid "Proudly powered by %s"

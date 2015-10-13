@@ -198,7 +198,7 @@ class BackWPup_Destination_Email extends BackWPup_Destinations {
 	 * @param $job_object
 	 * @return bool
 	 */
-	public function job_run_archive( &$job_object ) {
+	public function job_run_archive( BackWPup_Job $job_object ) {
 
 		$job_object->substeps_todo = 1;
 		$job_object->log( sprintf( __( '%d. Try to send backup with email&#160;&hellip;', 'backwpup' ), $job_object->steps_data[ $job_object->step_working ][ 'STEP_TRY' ] ), E_USER_NOTICE );
@@ -305,7 +305,7 @@ class BackWPup_Destination_Email extends BackWPup_Destinations {
 			mb_internal_encoding( $mbEncoding );
 		}
 
-		if ( isset( $result ) && ! $result ) {
+		if ( ! isset( $result ) || ! $result ) {
 			$job_object->log( __( 'Error while sending email!', 'backwpup' ), E_USER_ERROR );
 
 			return FALSE;
@@ -319,15 +319,15 @@ class BackWPup_Destination_Email extends BackWPup_Destinations {
 	}
 
 	/**
-	 * @param $job_object
+	 * @param $job_settings
 	 * @return bool
 	 */
-	public function can_run( $job_object ) {
+	public function can_run( array $job_settings ) {
 
-		if ( empty( $job_object->job[ 'emailaddress' ] ) )
+		if ( empty( $job_settings[ 'emailaddress' ] ) )
 			return FALSE;
 
-		if ( $job_object->job[ 'backuptype' ] != 'archive' )
+		if ( $job_settings[ 'backuptype' ] != 'archive' )
 			return FALSE;
 
 		return TRUE;
@@ -427,10 +427,11 @@ class BackWPup_Destination_Email extends BackWPup_Destinations {
 			mb_internal_encoding( $mbEncoding );
 		}
 
-		if ( ! isset( $result ) || ! $result )
+		if ( ! isset( $result ) || ! $result ) {
 			echo '<span id="emailsendtext" style="color:red;">' . __( 'Error while sending email!', 'backwpup' ) . '</span>';
-		else
+		} else {
 			echo '<span id="emailsendtext" style="color:green;">' . __( 'Email sent.', 'backwpup' ) . '</span>';
+		}
 		die();
 	}
 }

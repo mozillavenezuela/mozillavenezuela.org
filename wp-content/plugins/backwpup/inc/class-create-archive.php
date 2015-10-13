@@ -21,7 +21,7 @@ class BackWPup_Create_Archive {
 	/**
 	 * Open handel for files.
 	 */
-	private $filehandel = '';
+	private $filehandel = NULL;
 
 	/**
 	 * class handel for ZipArchive.
@@ -150,7 +150,7 @@ class BackWPup_Create_Archive {
 		}
 
 		//check file handle
-		if ( ! empty( $this->filehandel ) && ! is_resource( $this->filehandel ) ) {
+		if ( isset( $this->filehandel ) && ! $this->filehandel ) {
 			throw new BackWPup_Create_Archive_Exception( __( 'Cannot open archive file', 'backwpup' ) );
 		}
 
@@ -180,13 +180,9 @@ class BackWPup_Create_Archive {
 		//close ZipArchive Class
 		if ( is_object( $this->ziparchive ) ) {
 			if ( ! $this->ziparchive->close() ) {
+				$this->ziparchive_status();
+				trigger_error( __( 'ZIP archive cannot be closed correctly.', 'backwpup' ), E_USER_ERROR );
 				sleep( 1 );
-				if ( ! $this->ziparchive->close() ) {
-					sleep( 1 );
-					if ( ! $this->ziparchive->close() ) {
-						trigger_error( __( 'ZIP archive cannot be closed correctly.', 'backwpup' ), E_USER_ERROR );
-					}
-				}
 			}
 			$this->ziparchive = NULL;
 		}
@@ -252,11 +248,29 @@ class BackWPup_Create_Archive {
 			return TRUE;
 		}
 
-		if ( empty( $name_in_archive ) )
+		if ( empty( $name_in_archive ) ) {
 			$name_in_archive = $file_name;
+		}
 
 		//remove reserved chars
-		$name_in_archive = str_replace( array("?", "[", "]", "\\", "=", "<", ">", ":", ";", ",", "'", "\"", "&", "$", "#", "*", "(", ")", "|", "~", "`", "!", "{", "}", chr(0)) , '', $name_in_archive );
+		$name_in_archive = str_replace( array( "?", "<", ">", ":", "%","\"", "*", "|", chr(0) ) , '', $name_in_archive );
+
+		//convert chars in archives
+		if ( function_exists( 'iconv' ) ) {
+			$charsets = array( 'UTF-8', 'ASCII',
+				'ISO-8859-1', 'ISO-8859-2', 'ISO-8859-3', 'ISO-8859-4', 'ISO-8859-5',
+				'ISO-8859-6', 'ISO-8859-7', 'ISO-8859-8', 'ISO-8859-9', 'ISO-8859-10',
+				'ISO-8859-13', 'ISO-8859-14', 'ISO-8859-15', 'ISO-8859-16',
+				'Windows-1251', 'Windows-1252', 'Windows-1254'
+			);
+			foreach ( $charsets as $charset ) {
+				$test = @iconv( $charset, 'UTF-8', $name_in_archive );
+				if ( $test ) {
+					$name_in_archive = $test;
+					break;
+				}
+			}
+		}
 
 		switch ( $this->get_method() ) {
 			case 'gz':
@@ -297,7 +311,10 @@ class BackWPup_Create_Archive {
 				return $this->tar_file( $file_name, $name_in_archive );
 				break;
 			case 'ZipArchive':
-				$file_size = abs( (int) filesize( $file_name ) );
+				$file_size = filesize( $file_name );
+				if ( $file_size === FALSE ) {
+					return FALSE;
+				}
 				//check if entry already in archive and delete it if it not in full size
 				if ( $zip_file_stat = $this->ziparchive->statName( $name_in_archive ) ) {
 					if ( $zip_file_stat[ 'size' ] != $file_size ) {
@@ -312,13 +329,9 @@ class BackWPup_Create_Archive {
 				//close and reopen, all added files are open on fs
 				if ( $this->file_count > 20 ) { //35 works with PHP 5.2.4 on win
 					if ( ! $this->ziparchive->close() ) {
+						$this->ziparchive_status();
+						trigger_error(__( 'ZIP archive cannot be closed correctly', 'backwpup'	), E_USER_ERROR	);
 						sleep( 1 );
-						if ( ! $this->ziparchive->close() ) {
-							sleep( 1 );
-							if ( ! $this->ziparchive->close() ) {
-								trigger_error(__( 'ZipArchive can not closed correctly', 'backwpup'	), E_USER_ERROR	);
-							}
-						}
 					}
 					$this->ziparchive = NULL;
 					if ( ! $this->check_archive_filesize() ) {
@@ -640,12 +653,12 @@ class BackWPup_Create_Archive {
 	 */
 	private function check_archive_filesize( $file_to_add = '' ) {
 
-		$two_gb_in_bytes = 2147483647;
-
+		$file_to_add_size = 0;
 		if ( ! empty( $file_to_add ) ) {
-			$file_to_add_size = abs( (int) filesize( $file_to_add ) );
-		} else {
-			$file_to_add_size = 0;
+			$file_to_add_size = filesize( $file_to_add );
+			if ( $file_to_add_size === FALSE ) {
+				$file_to_add_size = 0;
+			}
 		}
 
 		if ( is_resource( $this->filehandel ) ) {
@@ -653,11 +666,14 @@ class BackWPup_Create_Archive {
 			$archive_size = $stats[ 'size' ];
 		} else {
 			$archive_size = filesize( $this->file );
+			if ( $archive_size === FALSE ) {
+				$archive_size = PHP_INT_MAX;
+			}
 		}
 
 		$archive_size = $archive_size + $file_to_add_size;
-		if ( $archive_size > $two_gb_in_bytes ) {
-			trigger_error(	sprintf( __( 'If %s will be added to your backup archive, the archive will be too large for many file systems (over 2GB). You might want to consider splitting the backup job in multiple jobs with less files each.', 'backwpup' ), $file_to_add ), E_USER_ERROR );
+		if ( $archive_size >= PHP_INT_MAX ) {
+			trigger_error( sprintf( __( 'If %s will be added to your backup archive, the archive will be too large for operations with this PHP Version. You might want to consider splitting the backup job in multiple jobs with less files each.', 'backwpup' ), $file_to_add ), E_USER_ERROR );
 
 			return FALSE;
 		}

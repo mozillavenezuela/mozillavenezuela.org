@@ -27,21 +27,6 @@ class BackWPup_Page_Editjob {
 	}
 
 	/**
-	 *
-	 */
-	public static function load() {
-
-		//add Help tab
-		BackWPup_Help::add_tab( array(
-									 'id'      => 'overview',
-									 'title'   => __( 'Overview','backwpup' ),
-									 'content' =>
-									 '<p>' . '</p>'
-								) );
-
-	}
-
-	/**
 	 * Save Form data
 	 */
 	public static function save_post_form($tab, $jobid) {
@@ -103,7 +88,16 @@ class BackWPup_Page_Editjob {
 					$name = sprintf( __( 'Job with ID %d', 'backwpup' ), $jobid );
 				}
 				BackWPup_Option::update( $jobid, 'name', $name );
-				BackWPup_Option::update( $jobid, 'mailaddresslog', sanitize_email( $_POST[ 'mailaddresslog' ] ) );
+
+				$emails = explode( ',', $_POST[ 'mailaddresslog' ] );
+				foreach( $emails as $key => $email ) {
+					$emails[ $key ] = sanitize_email( trim( $email ) );
+					if ( ! is_email( $emails[ $key ] ) ) {
+						unset( $emails[ $key ] );
+					}
+				}
+				$mailaddresslog = implode( ', ', $emails );
+				BackWPup_Option::update( $jobid, 'mailaddresslog', $mailaddresslog );
 
 				$_POST[ 'mailaddresssenderlog' ] = trim( $_POST[ 'mailaddresssenderlog' ] );
 				if ( empty($_POST[ 'mailaddresssenderlog' ] ) )
@@ -120,8 +114,9 @@ class BackWPup_Page_Editjob {
 				BackWPup_Option::update( $jobid, 'archivename', BackWPup_Job::sanitize_file_name( $_POST[ 'archivename' ] ) );
 				break;
 			case 'cron':
-				if ( $_POST[ 'activetype' ] == '' || $_POST[ 'activetype' ] == 'wpcron' || $_POST[ 'activetype' ] == 'link' )
+				if ( $_POST[ 'activetype' ] == '' || $_POST[ 'activetype' ] == 'wpcron' || $_POST[ 'activetype' ] == 'easycron' || $_POST[ 'activetype' ] == 'link' ) {
 					BackWPup_Option::update( $jobid, 'activetype', $_POST[ 'activetype' ] );
+				}
 
 				BackWPup_Option::update( $jobid, 'cronselect', $_POST[ 'cronselect' ] == 'advanced' ? 'advanced' : 'basic' );
 
@@ -174,6 +169,12 @@ class BackWPup_Page_Editjob {
 					$cron_next = BackWPup_Cron::cron_next( BackWPup_Option::get( $jobid, 'cron' ) );
 					wp_schedule_single_event( $cron_next, 'backwpup_cron', array( 'id' => $jobid ) );
 				}
+				$easy_cron_job_id = BackWPup_Option::get( $jobid, 'easycronjobid' );
+				if ( BackWPup_Option::get( $jobid, 'activetype' ) == 'easycron' ) {
+					BackWPup_EasyCron::update( $jobid );
+				} elseif ( ! empty( $easy_cron_job_id )  ) {
+					BackWPup_EasyCron::delete( $jobid );
+				}
 				break;
 			default:
 				if ( strstr( $tab, 'dest-' ) ) {
@@ -211,10 +212,8 @@ class BackWPup_Page_Editjob {
 				height: 7em;
 			}
 			#cron-min-box, #cron-hour-box, #cron-day-box, #cron-month-box, #cron-weekday-box {
-				border-color: gray;
-				border-style: solid;
-				border-width: 1px;
-				margin: 10px 0px 10px 10px;
+				border: 1px solid gray;
+				margin: 10px 0 10px 10px;
 				padding: 2px 2px;
 				width: 100px;
 				float: left;
@@ -384,6 +383,8 @@ class BackWPup_Page_Editjob {
 		?>
     <div class="wrap" id="backwpup-page">
 		<?php
+		echo '<h2><span id="backwpup-page-icon">&nbsp;</span>' . sprintf( __( '%1$s Job: %2$s', 'backwpup' ), BackWPup::get_plugin_data( 'name' ), '<span id="h2jobtitle">' . esc_html( BackWPup_Option::get( $jobid, 'name' ) ) . '</span>' ). '</h2>';
+
 		//default tabs
 		$tabs = array( 'job' => array( 'name' => __( 'General', 'backwpup' ), 'display' => TRUE ), 'cron' => array( 'name' => __( 'Schedule', 'backwpup' ), 'display' => TRUE ) );
 		//add jobtypes to tabs
@@ -406,15 +407,16 @@ class BackWPup_Page_Editjob {
 				$tabs[ $tabid ][ 'display' ] = FALSE;
 		}
 		//display tabs
-		echo '<h2 class="nav-tab-wrapper"><span id="backwpup-page-icon">&nbsp;</span>' . sprintf( __( '%s Job:', 'backwpup' ), BackWPup::get_plugin_data( 'name' ) ). '&nbsp;';
-		echo '<span id="h2jobtitle">' . esc_html( BackWPup_Option::get( $jobid, 'name' ) ) . '</span><br /><br />';
+		echo '<h2 class="nav-tab-wrapper">';
 		foreach ( $tabs as $id => $tab ) {
 			$addclass = '';
-			if ( $id == $_GET[ 'tab' ] )
+			if ( $id == $_GET[ 'tab' ] ) {
 				$addclass = ' nav-tab-active';
+			}
 			$display = '';
-			if ( ! $tab[ 'display' ] )
+			if ( ! $tab[ 'display' ] ) {
 				$display = ' style="display:none;"';
+			}
 			echo '<a href="' . wp_nonce_url( network_admin_url( 'admin.php' ) . '?page=backwpupeditjob&tab=' . $id . '&jobid=' . $jobid, 'edit-job' ) . '" class="nav-tab' . $addclass . '" id="tab-' . $id . '" data-nexttab="' . $id . '" ' . $display . '>' . $tab[ 'name' ] . '</a>';
 		}
 		echo '</h2>';
@@ -515,8 +517,9 @@ class BackWPup_Page_Editjob {
 									echo esc_attr__( '%s = Two digit representation of the second', 'backwpup' ) . '<br />';
 								?>" />
 							<?php
+							$current_time = current_time( 'timestamp' );
 							$datevars    = array( '%d', '%j', '%m', '%n', '%Y', '%y', '%a', '%A', '%B', '%g', '%G', '%h', '%H', '%i', '%s' );
-							$datevalues  = array( date_i18n( 'd' ), date_i18n( 'j' ), date_i18n( 'm' ), date_i18n( 'n' ), date_i18n( 'Y' ), date_i18n( 'y' ), date_i18n( 'a' ), date_i18n( 'A' ), date_i18n( 'B' ), date_i18n( 'g' ), date_i18n( 'G' ), date_i18n( 'h' ), date_i18n( 'H' ), date_i18n( 'i' ), date_i18n( 's' ) );
+							$datevalues  = array( date( 'd', $current_time ), date( 'j', $current_time ), date( 'm', $current_time ), date( 'n', $current_time ), date( 'Y', $current_time ), date( 'y', $current_time ), date( 'a', $current_time ), date( 'A', $current_time ), date( 'B', $current_time ), date( 'g', $current_time ), date( 'G', $current_time ), date( 'h', $current_time ), date( 'H', $current_time ), date( 'i', $current_time ), date( 's', $current_time ) );
 							$archivename = str_replace( $datevars, $datevalues, BackWPup_Job::sanitize_file_name( BackWPup_Option::get( $jobid, 'archivename' ) ) );
 							echo '<p>Preview: <code><span id="archivefilename">' . $archivename . '</span><span id="archiveformat">' . BackWPup_Option::get( $jobid, 'archiveformat' ) . '</span></code></p>';
 							?>
@@ -582,7 +585,7 @@ class BackWPup_Page_Editjob {
 						<td>
 							<input name="mailaddresslog" type="text" id="mailaddresslog"
 								   value="<?php echo BackWPup_Option::get( $jobid, 'mailaddresslog' );?>"
-								   class="regular-text help-tip" title="<?php esc_attr_e( 'Leave empty to not have log sent.', 'backwpup' ); ?>" />
+								   class="regular-text help-tip" title="<?php esc_attr_e( 'Leave empty to not have log sent. Or separate with , for more than one receiver.', 'backwpup' ); ?>" />
 						</td>
 					</tr>
 					<tr>
@@ -626,22 +629,39 @@ class BackWPup_Page_Editjob {
                                        type="radio"<?php checked( 'wpcron', BackWPup_Option::get( $jobid, 'activetype' ), TRUE ); ?>
                                        name="activetype" id="idactivetype-wpcron"
                                        value="wpcron" /> <?php _e( 'with WordPress cron', 'backwpup' ); ?></label><br/>
-								<?php
+	                            <?php
+	                            $disabled = '';
+	                            $easycron_api = get_site_option( 'backwpup_cfg_easycronapikey' );
+	                            if ( empty( $easycron_api ) ) {
+		                            $disabled = ' disabled="disabled"';
+	                            }
+	                            ?>
+	                            <label for="idactivetype-easycron"><input class="radio help-tip"
+			                            type="radio"<?php checked( 'easycron', BackWPup_Option::get( $jobid, 'activetype' ), TRUE ); ?>
+			                            name="activetype" id="idactivetype-easycron"<?php echo $disabled; ?>
+			                            value="easycron" title="<?php _e( 'Use EasyCron.com Cron jobs.' ); ?>" /> <?php _e( 'with <a href="https://www.easycron.com?ref=36673" class="help-tip" title="Affiliate Link!">EasyCron.com</a>', 'backwpup' ); ?>
+	                            <?php
+	                            if ( empty( $easycron_api ) ) {
+		                            echo ' <strong>' . sprintf( __( 'Setup <a href="https://www.easycron.com?ref=36673" class="help-tip" title="Affiliate Link!">Account</a> / <a href="%s">API Key</a> first.', 'backwpup' ), network_admin_url( 'admin.php' ) . '?page=backwpupsettings#backwpup-tab-apikey' ) . '</strong>';
+	                            }
+	                            ?>
+	                            </label><br/>
+	                            <?php
 								$url = BackWPup_Job::get_jobrun_url( 'runext', BackWPup_Option::get( $jobid, 'jobid' ) );
 								?>
                                 <label for="idactivetype-link"><input class="radio help-tip"
 									   type="radio"<?php checked( 'link', BackWPup_Option::get( $jobid, 'activetype' ), TRUE ); ?>
 									   name="activetype" id="idactivetype-link"
-									   value="link" title="<?php esc_attr_e( 'Copy the link for an external start. This option has to be activated to make the link work.', 'backwpup' )?>" /> <?php _e( 'with a link', 'backwpup' ); ?> <code><a href="<?php echo $url[ 'url' ];?>" target="_blank"><?php echo $url[ 'url' ];?></a></code></label>
+									   value="link" title="<?php esc_attr_e( 'Copy the link for an external start. This option has to be activated to make the link work.', 'backwpup' ); ?>" /> <?php _e( 'with a link', 'backwpup' ); ?> <code><a href="<?php echo $url[ 'url' ];?>" target="_blank"><?php echo $url[ 'url' ];?></a></code></label>
 								<br />
                             </fieldset>
                         </td>
                     </tr>
                     <tr>
 						<th scope="row"><?php _e( 'Start job with CLI', 'backwpup' ); ?></th>
-						<td class="help-tip" title="<?php esc_attr_e( 'Generate a server script file to let the job start with the server’s cron on command line interface. Alternatively use WP-CLI commands.', 'backwpup' ); ?>">
+						<td class="help-tip" title="<?php esc_attr_e( 'Use WP-CLI commands to let the job start with the server’s cron on command line interface.', 'backwpup' ); ?>">
 							<?php
-								echo str_replace( '\"','"', sprintf ( __( 'Use <a href="http://wp-cli.org/">WP-CLI</a> to run jobs from commandline or <a href="%s">get the start script</a>.', 'backwpup' ),  wp_nonce_url( network_admin_url( 'admin.php' ) . '?page=backwpupjobs&action=start_cli&jobid=' . $jobid, 'start_cli' ) ) );
+								 _e( 'Use <a href="http://wp-cli.org/">WP-CLI</a> to run jobs from commandline.', 'backwpup' );
 							?>
 						</td>
                     </tr>
@@ -709,7 +729,7 @@ class BackWPup_Page_Editjob {
                                 <tr>
                                     <td><label for="idcronbtype-mon"><?php echo '<input class="radio" type="radio"' . checked( TRUE, is_numeric( $mday[ 0 ] ), FALSE ) . ' name="cronbtype" id="idcronbtype-mon" value="mon" /> ' . __( 'monthly', 'backwpup' ); ?></label></td>
                                     <td><select name="moncronmday"><?php for ( $i = 1; $i <= 31; $i ++ ) {
-										echo '<option ' . selected( in_array( "$i", $mday, TRUE ), TRUE, FALSE ) . '  value="' . $i . '" />' . __( 'on', 'backwpup' ) . ' ' . $i . '.</option>';
+										echo '<option ' . selected( in_array( "$i", $mday, TRUE ), TRUE, FALSE ) . '  value="' . $i . '" />' . __( 'on', 'backwpup' ) . ' ' . $i . '</option>';
 									} ?></select></td>
                                     <td><select name="moncronhours"><?php for ( $i = 0; $i < 24; $i ++ ) {
 										echo '<option ' . selected( in_array( "$i", $hours, TRUE ), TRUE, FALSE ) . '  value="' . $i . '" />' . $i . '</option>';
@@ -857,9 +877,9 @@ class BackWPup_Page_Editjob {
 				}
 				echo '</div>';
 		}
-		echo '<br />';
+		echo '<p class="submit">';
 		submit_button( __( 'Save changes', 'backwpup' ), 'primary', 'save', FALSE, array( 'tabindex' => '2', 'accesskey' => 'p' ) );
-		echo '</form>';
+		echo '</p></form>';
 		?>
     </div>
 

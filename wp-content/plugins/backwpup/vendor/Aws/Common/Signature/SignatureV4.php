@@ -24,6 +24,7 @@ use Guzzle\Http\Message\RequestFactory;
 use Guzzle\Http\Message\RequestInterface;
 use Guzzle\Http\QueryString;
 use Guzzle\Http\Url;
+use Guzzle\Stream\Stream;
 
 /**
  * Signature Version 4
@@ -230,12 +231,11 @@ class SignatureV4 extends AbstractSignature implements EndpointSignatureInterfac
         }
 
         if ($request instanceof EntityEnclosingRequestInterface) {
-            return hash(
-                'sha256',
-                $request->getMethod() == 'POST' && count($request->getPostFields())
-                    ? (string) $request->getPostFields()
-                    : (string) $request->getBody()
-            );
+            if ($request->getMethod() == 'POST' && count($request->getPostFields())) {
+                return hash('sha256', (string) $request->getPostFields());
+            } elseif ($body = $request->getBody()) {
+                return Stream::getHash($request->getBody(), 'sha256');
+            }
         }
 
         return self::DEFAULT_PAYLOAD;
@@ -270,13 +270,20 @@ class SignatureV4 extends AbstractSignature implements EndpointSignatureInterfac
         RequestInterface $request,
         CredentialsInterface $credentials
     ) {
-        $sr = RequestFactory::getInstance()->cloneRequestWithMethod($request, 'GET');
-
-        // Move POST fields to the query if they are present
-        if ($request instanceof EntityEnclosingRequestInterface) {
+        // POST requests can be sent as GET requests instead by moving the
+        // POST fields into the query string.
+        if ($request instanceof EntityEnclosingRequestInterface
+            && $request->getMethod() === 'POST'
+            && strpos($request->getHeader('Content-Type'), 'application/x-www-form-urlencoded') === 0
+        ) {
+            $sr = RequestFactory::getInstance()
+                ->cloneRequestWithMethod($request, 'GET');
+            // Move POST fields to the query if they are present
             foreach ($request->getPostFields() as $name => $value) {
                 $sr->getQuery()->set($name, $value);
             }
+        } else {
+            $sr = clone $request;
         }
 
         // Make sure to handle temporary credentials
